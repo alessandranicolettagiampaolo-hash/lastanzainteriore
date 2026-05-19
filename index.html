@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Stanza Interiore</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght=300;400;500;600&family=Inter:wght=300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #f8f3ef, #efe4de);
+            overflow-x: hidden;
+            color: #715d64;
+            transition: .6s;
+        }
+
+        body.dark {
+            background: linear-gradient(to bottom, #1d1721, #2d2434);
+            color: #f1dce1;
+        }
+
+        .serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            scrollbar-width: none;
+        }
+
+        body.dark .glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card {
+            transition: .4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+        }
+
+        .music-btn.active,
+        .duration.active {
+            background: #c0909b;
+            color: white;
+        }
+
+        #intro {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom, #f8f3ef, #efe4de);
+            transition: 1s;
+        }
+
+        #intro.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.dark #intro {
+            background: linear-gradient(to bottom, #1d1721, #2d2434);
+        }
+    </style>
+</head>
+
+<body id="body">
+
+    <!-- AUDIO -->
+    <audio id="introAudio">
+        <source src="intro.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bgMusic" loop></audio>
+    <audio id="gong">
+        <source src="gong.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- INTRO -->
+    <div id="intro">
+        <div class="text-center px-8">
+            <img src="avatar.png" class="w-56 mx-auto mb-8 drop-shadow-2xl">
+            <h1 id="introName" class="serif text-[52px] sm:text-[72px] leading-[0.92] tracking-[-0.03em] text-[#b07d89] max-w-[500px] mx-auto">
+                La Stanza Interiore
+            </h1>
+            <p class="uppercase tracking-[0.42em] text-[11px] opacity-40 mt-8">IL TUO SPAZIO DI QUIETE</p>
+            <button id="enterBtn" class="bg-[#c0909b] text-white px-10 py-4 rounded-full shadow-2xl mt-10">ENTRA</button>
+        </div>
+    </div>
+
+    <!-- SFONDO -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-30 -top-20 -left-20"></div>
+        <div class="absolute w-96 h-96 bg-rose-100 rounded-full blur-3xl opacity-40 bottom-0 right-0"></div>
+    </div>
+
+    <!-- APP -->
+    <div class="relative z-10 pb-32">
+
+        <!-- HEADER -->
+        <header class="px-6 pt-8 pb-4">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex items-start gap-4 min-w-0">
+                    <img src="logo.png" class="w-14 h-14 rounded-full shadow-xl shrink-0 mt-1">
+                    <div>
+                        <h1 id="welcomeName" class="serif text-3xl sm:text-4xl md:text-[54px] leading-[0.92] tracking-[-0.03em] text-[#b07d89]">
+                            La Stanza Interiore
+                        </h1>
+                        <p class="uppercase tracking-[0.42em] text-[10px] opacity-40 mt-3">IL TUO SPAZIO DI QUIETE</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                    <button id="installBtn" class="glass px-5 py-3 rounded-full shadow-xl text-[14px]">Installa</button>
+                    <button id="themeBtn" class="glass w-12 h-12 rounded-full shadow-xl text-xl">☾</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- HERO -->
+        <section class="px-6 mt-6">
+            <div class="glass rounded-[42px] p-6 sm:p-8 shadow-2xl overflow-hidden">
+                <div class="grid md:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <p class="uppercase tracking-[0.35em] text-[10px] opacity-40 mb-4">Bentornata/o</p>
+                        <h2 class="serif text-5xl sm:text-6xl md:text-7xl leading-[0.92] tracking-[-0.03em] text-[#9a717d] mb-6">
+                            Respira.<br>Rallenta.<br>Torna a te.
+                        </h2>
+                        <p class="text-[16px] sm:text-[17px] leading-relaxed opacity-70 mb-8 max-w-md">
+                            Uno spazio di meditazione, presenza e ascolto dedicato al tuo tempo interiore.
+                        </p>
+                        <button onclick="scrollToTimer()" class="bg-[#c0909b] text-white px-8 py-4 rounded-full shadow-xl">
+                            Inizia la pratica
+                        </button>
+                    </div>
+                    <div class="flex justify-center">
+                        <img src="avatar.png" class="w-[280px] drop-shadow-2xl">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STANZE INTERIORI -->
+        <section class="px-6 mt-14">
+            <div class="glass rounded-[42px] p-6 shadow-2xl">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-40"></div>
+                    <h3 class="serif text-2xl sm:text-4xl text-[#9a717d] whitespace-nowrap">
+                        Le tue stanze interiori
+                    </h3>
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-40"></div>
+                </div>
+
+                <!-- CAROUSEL -->
+                <div class="relative">
+                    <div class="flex gap-5 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-4">
+
+                        <!-- STANZA 1: Lasciar andare -->
+                        <a href="lasciar-andare.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
+                            <img src="lasciar-andare.jpg" class="w-full h-full object-cover">
+                        </a>
+
+                        <!-- STANZA 2: Sonno Profondo -->
+                        <a href="sonno.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
+                            <img src="sonno.jpg" class="w-full h-full object-cover">
+                        </a>
+
+                        <!-- STANZA 3: Respiro -->
+                        <a href="respiro.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
+                            <img src="respiro.jpg" class="w-full h-full object-cover">
+                        </a>
+
+                        <!-- STANZA 4: Gratitudine -->
+                        <a href="gratitudine.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
+                            <img src="gratitudine.jpg" class="w-full h-full object-cover">
+                        </a>
+
+                        <!-- STANZA 5: Meteo Interiore -->
+                        <a href="meteo.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
+                            <img src="meteo.jpg" class="w-full h-full object-cover">
+                        </a>
+
+                    </div>
+
+                    <!-- INDICATORI CAROUSEL -->
+                    <div class="flex justify-center gap-2 mt-2">
+                        <span class="w-2 h-2 rounded-full bg-[#c0909b]"></span>
+                        <span class="w-2 h-2 rounded-full bg-[#c0909b]/30"></span>
+                        <span class="w-2 h-2 rounded-full bg-[#c0909b]/30"></span>
+                        <span class="w-2 h-2 rounded-full bg-[#c0909b]/30"></span>
+                        <span class="w-2 h-2 rounded-full bg-[#c0909b]/30"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TIMER -->
+        <section id="timer" class="px-6 mt-14 pb-20">
+            <div class="glass rounded-[42px] p-6 sm:p-8 shadow-2xl overflow-hidden">
+                <div class="flex justify-between items-center mb-10">
+                    <div>
+                        <p class="uppercase tracking-[0.35em] text-[10px] opacity-40 mb-3">TIMER LIBERO</p>
+                        <h3 class="serif text-4xl sm:text-5xl text-[#9b7280]">La tua pratica</h3>
+                    </div>
+                </div>
+
+                <!-- CERCHIO -->
+                <div class="flex justify-center mb-12">
+                    <div class="w-[240px] h-[240px] sm:w-[260px] sm:h-[260px] rounded-full border border-[#c8a7b0] flex flex-col items-center justify-center">
+                        <div id="time" class="serif text-6xl sm:text-7xl text-[#b07d89]">05:00</div>
+                        <p id="status" class="text-sm opacity-50 mt-4">Seleziona la durata</p>
+                    </div>
+                </div>
+
+                <!-- DURATE -->
+                <div class="flex justify-center gap-3 flex-wrap mb-12">
+                    <button class="duration active bg-[#c0909b] text-white px-6 py-3 sm:px-8 py-4 rounded-full text-sm sm:text-base" data-time="300">5 min</button>
+                    <button class="duration glass px-6 py-3 sm:px-8 py-4 rounded-full text-sm sm:text-base" data-time="600">10 min</button>
+                    <button class="duration glass px-6 py-3 sm:px-8 py-4 rounded-full text-sm sm:text-base" data-time="900">15 min</button>
+                    <button class="duration glass px-6 py-3 sm:px-8 py-4 rounded-full text-sm sm:text-base" data-time="1800">30 min</button>
+                </div>
+
+                <!-- MUSICHE -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
+                    <button class="music-btn active glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="none">🤫<br><br>Silenzio</button>
+                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="432hz.mp3">✨<br><br>432 Hz</button>
+                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="ethereal.mp3">🌌<br><br>Ethereal</button>
+                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="nature.mp3">🌿<br><br>Natura</button>
+                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="koshi.mp3">🎐<br><br>Koshi</button>
+                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="piano.mp3">🎹<br><br>Piano</button>
+                </div>
+
+                <!-- PLAYER -->
+                <div class="flex justify-center items-center gap-6 sm:gap-8">
+                    <button id="resetBtn" class="glass w-16 h-16 sm:w-20 h-20 rounded-full text-xl sm:text-2xl shadow-xl flex items-center justify-center">↺</button>
+                    <button id="playBtn" class="bg-[#c0909b] text-white w-24 h-24 sm:w-28 h-28 rounded-full text-3xl sm:text-4xl shadow-2xl flex items-center justify-center">▶</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const body = document.getElementById('body');
+        document.getElementById('themeBtn').onclick = () => { body.classList.toggle('dark'); };
+
+        let user = localStorage.getItem('utente');
+        if (!user) {
+            user = prompt('Come ti chiami?');
+            if (user) { localStorage.setItem('utente', user); }
+        }
+
+        if (user) {
+            document.getElementById('welcomeName').innerHTML = `La Stanza Interiore di ${user}`;
+            document.getElementById('introName').innerHTML = `La Stanza Interiore di ${user}`;
+        }
+
+        const intro = document.getElementById('intro');
+        const introAudio = document.getElementById('introAudio');
+
+        document.getElementById('enterBtn').onclick = () => {
+            intro.classList.add('hidden');
+            introAudio.play().catch(() => {});
+        };
+
+        function scrollToTimer() {
+            document.getElementById('timer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        let total = 300;
+        let current = 300;
+        let running = false;
+        let timer;
+        let selectedMusic = "none";
+
+        const time = document.getElementById('time');
+        const status = document.getElementById('status');
+        const bgMusic = document.getElementById('bgMusic');
+        const gong = document.getElementById('gong');
+
+        function updateTime() {
+            let m = Math.floor(current / 60).toString().padStart(2, '0');
+            let s = (current % 60).toString().padStart(2, '0');
+            time.innerHTML = `${m}:${s}`;
+        }
+        updateTime();
+
+        document.querySelectorAll('.duration').forEach(btn => {
+            btn.onclick = () => {
+                if (running) return;
+                document.querySelectorAll('.duration').forEach(b => {
+                    b.classList.remove('active');
+                    b.classList.add('glass');
+                });
+                btn.classList.add('active');
+                total = parseInt(btn.dataset.time);
+                current = total;
+                updateTime();
+            };
+        });
+
+        document.querySelectorAll('.music-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.music-btn').forEach(b => { b.classList.remove('active'); });
+                btn.classList.add('active');
+                selectedMusic = btn.dataset.src;
+
+                // CAMBIO IN TEMPO REALE SE IL TIMER STA CORRENDO
+                if (running) {
+                    if (selectedMusic === "none") {
+                        bgMusic.pause();
+                    } else {
+                        bgMusic.src = selectedMusic;
+                        bgMusic.loop = true;
+                        bgMusic.play().catch(() => {});
+                    }
+                }
+            };
+        });
+
+        document.getElementById('playBtn').onclick = () => {
+            if (running) {
+                clearInterval(timer);
+                running = false;
+                bgMusic.pause();
+                document.getElementById('playBtn').innerHTML = '▶';
+                return;
+            }
+
+            introAudio.pause();
+            if (selectedMusic !== "none") {
+                bgMusic.src = selectedMusic;
+                bgMusic.loop = true;
+                bgMusic.play().catch(() => {});
+            }
+
+            running = true;
+            document.getElementById('playBtn').innerHTML = '❚❚';
+
+            timer = setInterval(() => {
+                current--;
+                updateTime();
+                if (current <= 0) {
+                    clearInterval(timer);
+                    running = false;
+                    bgMusic.pause();
+                    document.getElementById('playBtn').innerHTML = '▶';
+                    status.innerHTML = 'Meditazione conclusa';
+                    if (selectedMusic === "none") { gong.play().catch(() => {}); }
+                }
+            }, 1000);
+        };
+
+        document.getElementById('resetBtn').onclick = () => {
+            clearInterval(timer);
+            running = false;
+            bgMusic.pause();
+            current = total;
+            updateTime();
+            document.getElementById('playBtn').innerHTML = '▶';
+            status.innerHTML = 'Seleziona la durata';
+        };
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        document.getElementById('installBtn').onclick = async () => {
+            if (deferredPrompt) { deferredPrompt.prompt(); }
+        };
+    </script>
+</body>
+
+</html>
