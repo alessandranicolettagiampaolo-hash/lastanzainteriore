@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stanza-interiore-v6';
+const CACHE_NAME = 'stanza-interiore-v7';
 
 const urlsToCache = [
   './',
@@ -32,7 +32,6 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Evita di bloccare file audio pesanti e file di testo delle sessioni nella cache del telefono
   if (url.pathname.endsWith('.mp3') || url.pathname.endsWith('.txt')) {
     return event.respondWith(fetch(event.request));
   }
