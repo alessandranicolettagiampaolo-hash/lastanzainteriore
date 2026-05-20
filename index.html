@@ -131,7 +131,7 @@
         <header class="px-4 pt-6 pb-4">
             <div class="flex items-center justify-between max-w-5xl mx-auto gap-4">
                 <div class="flex items-center gap-4">
-                    <img src="logo.png" class="w-24 h-24 max-h-24 shrink-0 object-contain">
+                    <img src="logo.png" style="width: 85px !important; height: 85px !important; max-height: 85px !important;" class="shrink-0 object-contain">
                     <div>
                         <h1 id="welcomeName" class="serif text-xl sm:text-2xl tracking-tight text-[#b07d89]">La Stanza Interiore</h1>
                         <p class="uppercase tracking-[0.2em] text-[8px] opacity-60 font-medium text-left">IL TUO SPAZIO DI QUIETE</p>
@@ -261,6 +261,15 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ARCHIVIO DEI PENSIERI -->
+            <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl mt-6">
+                <h4 class="serif text-xl text-[#9b7280] mb-4">I tuoi pensieri custoditi</h4>
+                <div id="diaryLogsContainer" class="space-y-4 max-h-[350px] overflow-y-auto hide-scrollbar">
+                    <!-- I pensieri verranno caricati qui dinamicamente -->
+                    <p id="noLogsMessage" class="text-sm opacity-60 italic font-light">Nessun pensiero salvato finora. Il tuo viaggio inizia qui.</p>
+                </div>
+            </div>
         </main>
 
         <!-- ================= TAB 4: PROFILO ================= -->
@@ -288,7 +297,7 @@
                     <div class="glass rounded-[28px] p-6 shadow-xl h-full flex flex-col">
                         <div class="mb-4">
                             <p class="uppercase tracking-[0.25em] text-[9px] opacity-50 mb-0.5">I TUOI PROGRESSI</p>
-                            <h4 class="serif text-xl text-[#9b7280]">Il tempo per te osteria</h4>
+                            <h4 class="serif text-xl text-[#9b7280]">Il tempo per te stesso</h4>
                         </div>
                         
                         <!-- Box Numerici Statistiche -->
@@ -358,6 +367,7 @@
                 activeNav.classList.add('text-[#c0909b]', 'dark:text-[#d4a3ae]');
             }
             
+            if (tabId === 'diario') { renderDiaryLogs(); }
             if (tabId === 'profilo') {
                 document.getElementById('profileNameInput').value = localStorage.getItem('utente') || '';
                 renderStats();
@@ -401,14 +411,33 @@
         };
 
         // --- APPARATO DIARIO ---
+        function renderDiaryLogs() {
+            const container = document.getElementById('diaryLogsContainer');
+            if (!container) return;
+            const logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
+            
+            if (logs.length === 0) {
+                container.innerHTML = '<p id="noLogsMessage" class="text-sm opacity-60 italic font-light">Nessun pensiero salvato finora. Il tuo viaggio inizia qui.</p>';
+                return;
+            }
+            
+            // Mostra i pensieri dal più recente al più vecchio
+            container.innerHTML = logs.slice().reverse().map(log => `
+                <div class="bg-white/40 dark:bg-white/5 border border-[#c8a7b0]/20 p-4 rounded-2xl shadow-sm text-left">
+                    <div class="text-[11px] uppercase tracking-wider text-[#b07d89] font-medium mb-1">${log.data}</div>
+                    <p class="text-sm opacity-90 font-light leading-relaxed whitespace-pre-wrap">${log.nota}</p>
+                </div>
+            `).join('');
+        }
+
         document.getElementById('saveDiaryBtn').onclick = () => {
             const text = document.getElementById('diaryText').value.trim();
             if (text) {
                 let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
-                logs.push({ data: new Date().toLocaleDateString('it-IT'), nota: text });
+                logs.push({ data: new Date().toLocaleDateString('it-IT') + ' - ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}), nota: text });
                 localStorage.setItem('diario_logs', JSON.stringify(logs));
                 document.getElementById('diaryText').value = '';
-                alert('Il tuo pensiero è stato custodito nel diario.');
+                renderDiaryLogs();
             }
         };
 
@@ -430,6 +459,7 @@
             time.innerHTML = `${m}:${s}`;
         }
         updateTime();
+        renderDiaryLogs();
 
         document.querySelectorAll('.duration-btn').forEach(btn => {
             btn.onclick = () => {
@@ -442,6 +472,7 @@
                 total = parseInt(btn.dataset.time);
                 current = total;
                 updateTime();
+        renderDiaryLogs();
             };
         });
 
@@ -486,6 +517,7 @@
             timer = setInterval(() => {
                 current--;
                 updateTime();
+        renderDiaryLogs();
                 if (current <= 0) {
                     clearInterval(timer);
                     running = false;
@@ -509,6 +541,7 @@
             bgMusic.pause();
             current = total;
             updateTime();
+        renderDiaryLogs();
             document.getElementById('playBtn').innerHTML = '▶';
             status.innerHTML = 'Pronto';
         };
