@@ -9,7 +9,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght=300;400;500;600&family=Inter:wght=300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome per le icone della barra di navigazione -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         body {
@@ -20,6 +22,7 @@
             overflow-x: hidden;
             color: #715d64;
             transition: .6s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.dark {
@@ -38,31 +41,43 @@
             border: 1px solid rgba(255, 255, 255, 0.25);
         }
 
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .hide-scrollbar {
-            scrollbar-width: none;
-        }
-
         body.dark .glass {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .card {
-            transition: .4s cubic-bezier(0.16, 1, 0.3, 1);
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { scrollbar-width: none; }
+
+        .card { transition: .4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .card:hover { transform: translateY(-6px); }
+
+        /* Stati attivi per i bottoni del Timer (Giorno) */
+        .music-btn.active, .duration-btn.active {
+            background: #c0909b !important;
+            color: white !important;
+            border-color: #c0909b !important;
+            box-shadow: 0 8px 20px rgba(192, 144, 155, 0.3);
         }
 
-        .card:hover {
-            transform: translateY(-6px);
+        /* Stati attivi per i bottoni del Timer (Notte) */
+        body.dark .music-btn.active, body.dark .duration-btn.active {
+            background: #d4a3ae !important;
+            color: #1d1721 !important;
+            border-color: #d4a3ae !important;
+            box-shadow: 0 0 15px rgba(212, 163, 174, 0.5);
         }
 
-        .music-btn.active,
-        .duration.active {
-            background: #c0909b;
-            color: white;
+        /* Animazione d'ingresso delle sezioni */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         #intro {
@@ -73,220 +88,331 @@
             align-items: center;
             justify-content: center;
             background: linear-gradient(to bottom, #f8f3ef, #efe4de);
-            transition: 1s;
+            transition: 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
-        #intro.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        body.dark #intro {
-            background: linear-gradient(to bottom, #1d1721, #2d2434);
-        }
+        #intro.hidden { opacity: 0; pointer-events: none; }
+        body.dark #intro { background: linear-gradient(to bottom, #1d1721, #2d2434); }
     </style>
 </head>
 
 <body id="body">
 
-    <!-- AUDIO -->
-    <audio id="introAudio">
-        <source src="intro.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="introAudio"><source src="intro.mp3" type="audio/mpeg"></audio>
     <audio id="bgMusic" loop></audio>
-    <audio id="gong">
-        <source src="gong.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="gong"><source src="gong.mp3" type="audio/mpeg"></audio>
 
-    <!-- INTRO -->
+    <!-- INTRO SCHERMO INTERO -->
     <div id="intro">
-        <div class="text-center px-8">
-            <img src="avatar.png" class="w-56 mx-auto mb-8 drop-shadow-2xl">
-            <h1 id="introName" class="serif text-[52px] sm:text-[72px] leading-[0.92] tracking-[-0.03em] text-[#b07d89] max-w-[500px] mx-auto">
-                La Stanza Interiore
-            </h1>
-            <p class="uppercase tracking-[0.42em] text-[11px] opacity-40 mt-8">IL TUO SPAZIO DI QUIETE</p>
-            <button id="enterBtn" class="bg-[#c0909b] text-white px-10 py-4 rounded-full shadow-2xl mt-10">ENTRA</button>
+        <div class="text-center px-6 w-full max-w-md mx-auto">
+            <img src="logo.png" class="w-44 h-auto mx-auto mb-6 drop-shadow-xl object-contain">
+            <h1 class="serif text-4xl sm:text-5xl leading-tight text-[#b07d89] mb-1">La Stanza Interiore</h1>
+            <p class="uppercase tracking-[0.25em] text-[11px] sm:text-[12px] font-medium opacity-70 mb-8">MEDITAZIONE & BENESSERE</p>
+            
+            <div class="glass rounded-[28px] p-6 shadow-xl mb-6 text-left">
+                <label id="nameLabel" for="userNameInput" class="block text-xs uppercase tracking-wider opacity-65 mb-3 font-medium">Come preferisci che ti chiami?</label>
+                <div class="flex gap-2">
+                    <input type="text" id="userNameInput" placeholder="Il tuo nome..." class="w-full px-4 py-3 rounded-xl border border-[#c8a7b0]/30 bg-white/50 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm">
+                </div>
+            </div>
+            <button id="enterBtn" class="w-full bg-[#c0909b] text-white py-4 rounded-xl shadow-lg text-sm uppercase tracking-widest font-medium hover:bg-[#b07d89] transition">Entra nella Stanza</button>
         </div>
     </div>
 
-    <!-- SFONDO -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <!-- SFONDO SFUMATO DI AMBIENTE -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div class="absolute w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-30 -top-20 -left-20"></div>
         <div class="absolute w-96 h-96 bg-rose-100 rounded-full blur-3xl opacity-40 bottom-0 right-0"></div>
     </div>
 
-    <!-- APP -->
-    <div class="relative z-10 pb-32">
-
-        <!-- HEADER -->
-        <header class="px-6 pt-8 pb-4">
-            <div class="flex items-start justify-between gap-4">
-                <div class="flex items-start gap-4 min-w-0">
-                    <img src="logo.png" class="w-14 h-14 rounded-full shadow-xl shrink-0 mt-1">
+    <!-- CONTENUTI DELL'APP -->
+    <div class="relative z-10 pb-36">
+        
+        <!-- HEADER COMUNE -->
+        <header class="px-4 pt-6 pb-4">
+            <div class="flex items-center justify-between max-w-5xl mx-auto gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="logo.png" class="w-10 h-auto max-h-10 shrink-0 object-contain">
                     <div>
-                        <h1 id="welcomeName" class="serif text-3xl sm:text-4xl md:text-[54px] leading-[0.92] tracking-[-0.03em] text-[#b07d89]">
-                            La Stanza Interiore
-                        </h1>
-                        <p class="uppercase tracking-[0.42em] text-[10px] opacity-40 mt-3">IL TUO SPAZIO DI QUIETE</p>
+                        <h1 id="welcomeName" class="serif text-xl sm:text-2xl tracking-tight text-[#b07d89]">La Stanza Interiore</h1>
+                        <p class="uppercase tracking-[0.2em] text-[8px] opacity-60 font-medium text-left">IL TUO SPAZIO DI QUIETE</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 shrink-0">
-                    <button id="installBtn" class="glass px-5 py-3 rounded-full shadow-xl text-[14px]">Installa</button>
-                    <button id="themeBtn" class="glass w-12 h-12 rounded-full shadow-xl text-xl">☾</button>
-                </div>
+                <button id="themeBtn" class="glass w-10 h-10 rounded-full shadow-md text-base flex items-center justify-center">☾</button>
             </div>
         </header>
 
-        <!-- HERO -->
-        <section class="px-6 mt-6">
-            <div class="glass rounded-[42px] p-6 sm:p-8 shadow-2xl overflow-hidden">
-                <div class="grid md:grid-cols-2 gap-10 items-center">
-                    <div>
-                        <p class="uppercase tracking-[0.35em] text-[10px] opacity-40 mb-4">Bentornata/o</p>
-                        <h2 class="serif text-5xl sm:text-6xl md:text-7xl leading-[0.92] tracking-[-0.03em] text-[#9a717d] mb-6">
-                            Respira.<br>Rallenta.<br>Torna a te.
+        <!-- ================= TAB 1: STANZE (HOME) ================= -->
+        <main id="tab-stanze" class="tab-content active px-4 mt-4 max-w-5xl mx-auto">
+            <!-- Hero Card -->
+            <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl overflow-hidden mb-10">
+                <div class="grid md:grid-cols-12 gap-8 items-center">
+                    <div class="md:col-span-5 flex justify-center">
+                        <img src="avatar.png" class="w-44 h-44 sm:w-52 sm:h-52 md:w-60 md:h-60 rounded-full object-cover shadow-xl border-4 border-white/40">
+                    </div>
+                    <div class="md:col-span-7 text-left">
+                        <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-3 font-semibold text-[#b07d89]">La tua guida</p>
+                        <h2 class="serif text-3xl sm:text-4xl md:text-5xl leading-[1.2] tracking-tight text-[#9a717d] mb-4">
+                            Ciao, sono Alessandra<br> 
+                            <span class="text-xl sm:text-2xl md:text-3xl opacity-90 block mt-3 font-sans font-light text-[#715d64] dark:text-[#f1dce1]">
+                                e sono qui per accompagnerarti nelle tue Stanze Interiori.
+                            </span>
                         </h2>
-                        <p class="text-[16px] sm:text-[17px] leading-relaxed opacity-70 mb-8 max-w-md">
-                            Uno spazio di meditazione, presenza e ascolto dedicato al tuo tempo interiore.
+                        <div class="h-1 w-20 bg-[#c0909b]/30 rounded-full mt-6"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carosello Stanze -->
+            <div class="glass rounded-[36px] p-5 sm:p-6 shadow-xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
+                    <h3 class="serif text-xl sm:text-2xl text-[#9a717d] text-center px-2">Le tue stanze interiori</h3>
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
+                </div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-2">
+                    <a href="lasciar-andare.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="lasciar-andare.jpg" class="w-full h-full object-cover">
+                    </a>
+                    <a href="sonno.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="sonno.jpg" class="w-full h-full object-cover">
+                    </a>
+                    <a href="respiro.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="respiro.jpg" class="w-full h-full object-cover">
+                    </a>
+                    <a href="gratitudine.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="gratitudine.jpg" class="w-full h-full object-cover">
+                    </a>
+                    <a href="meteo.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="meteo.jpg" class="w-full h-full object-cover">
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <!-- ================= TAB 2: PRATICHE (TIMER) ================= -->
+        <main id="tab-pratiche" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
+            <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl">
+                <div class="mb-6 text-center max-w-xl mx-auto">
+                    <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">TIMER LIBERO</p>
+                    <h3 class="serif text-2xl sm:text-3xl text-[#9b7280] mb-3">La tua pratica libera</h3>
+                    <p class="text-xs sm:text-sm opacity-80 leading-relaxed font-light">
+                        In questo spazio puoi dedicarti alla tua pratica libera scegliendo il silenzio o un sottofondo musicale.
+                    </p>
+                </div>
+
+                <!-- Display Timer -->
+                <div class="flex justify-center mb-8">
+                    <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-full border border-[#c8a7b0]/60 flex flex-col items-center justify-center bg-white/10 shadow-inner">
+                        <div id="time" class="serif text-4xl sm:text-5xl font-light text-[#b07d89]">05:00</div>
+                        <p id="status" class="text-[11px] uppercase tracking-wider opacity-60 mt-2 text-center px-4">Pronto</p>
+                    </div>
+                </div>
+
+                <!-- Selettore Tempi (5, 10, 15) -->
+                <div class="flex justify-center gap-3 flex-wrap mb-8">
+                    <button class="duration-btn active px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-time="300">5 min</button>
+                    <button class="duration-btn glass px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-time="600">10 min</button>
+                    <button class="duration-btn glass px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-time="900">15 min</button>
+                </div>
+
+                <!-- Sottofondi Musicali -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+                    <button class="music-btn active glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="none">🤫<br><span class="block mt-1 opacity-80">Silenzio</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="432hz.mp3">✨<br><span class="block mt-1 opacity-80">432 Hz</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="ethereal.mp3">🌌<br><span class="block mt-1 opacity-80">Ethereal</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="nature.mp3">🌿<br><span class="block mt-1 opacity-80">Natura</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="koshi.mp3">🎐<br><span class="block mt-1 opacity-80">Koshi</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="piano.mp3">🎹<br><span class="block mt-1 opacity-80">Piano</span></button>
+                </div>
+
+                <!-- Controlli Riproduzione -->
+                <div class="flex justify-center items-center gap-6">
+                    <button id="resetBtn" class="glass w-14 h-14 rounded-full text-lg shadow-md flex items-center justify-center active:scale-95 transition">↺</button>
+                    <button id="playBtn" class="bg-[#c0909b] text-white w-20 h-20 rounded-full text-2xl shadow-xl flex items-center justify-center active:scale-95 transition font-light">▶</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- ================= TAB 3: DIARIO ================= -->
+        <main id="tab-diario" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
+            <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl">
+                <div class="grid md:grid-cols-12 gap-8 items-center mb-8">
+                    <div class="md:col-span-7 text-left">
+                        <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL DIARIO DELL'ANIMA</p>
+                        <h3 class="serif text-3xl text-[#9b7280] mb-4">Ancorare l'esperienza</h3>
+                        <p class="text-sm opacity-90 leading-relaxed font-light mb-4">
+                            Dopo una meditazione, le sensazioni sono come nuvole: bellissime ma volatili. Il diario serve a <strong>fissare</strong> questo stato di grazia, trasformando un'emozione astratta in una consapevolezza concreta.
                         </p>
-                        <button onclick="scrollToTimer()" class="bg-[#c0909b] text-white px-8 py-4 rounded-full shadow-xl">
-                            Inizia la pratica
-                        </button>
+                        <p class="text-sm opacity-90 leading-relaxed font-light">
+                            Scrivere aiuta a decantare i pensieri residui e a creare un ponte prezioso tra il silenzio della tua Stanza Interiore e il rumore del mondo esterno.
+                        </p>
                     </div>
-                    <div class="flex justify-center">
-                        <img src="avatar.png" class="w-[280px] drop-shadow-2xl">
+                    <div class="md:col-span-5 flex justify-center">
+                        <div class="w-full h-48 rounded-2xl bg-white/20 border border-white/30 shadow-inner flex items-center justify-center text-5xl opacity-60">✍️</div>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- STANZE INTERIORI -->
-        <section class="px-6 mt-14">
-            <div class="glass rounded-[42px] p-6 shadow-2xl">
-                <div class="flex items-center gap-4 mb-8">
-                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-40"></div>
-                    <h3 class="serif text-2xl sm:text-4xl text-[#9a717d] whitespace-nowrap">
-                        Le tue stanze interiori
-                    </h3>
-                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-40"></div>
-                </div>
-
-                <!-- CAROUSEL -->
-                <div class="relative">
-                    <div class="flex gap-5 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-4">
-
-                        <!-- STANZA 1: Lasciar andare -->
-                        <a href="lasciar-andare.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
-                            <img src="lasciar-andare.jpg" class="w-full h-full object-cover">
-                        </a>
-
-                        <!-- STANZA 2: Sonno Profondo -->
-                        <a href="sonno.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
-                            <img src="sonno.jpg" class="w-full h-full object-cover">
-                        </a>
-
-                        <!-- STANZA 3: Respiro -->
-                        <a href="respiro.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
-                            <img src="respiro.jpg" class="w-full h-full object-cover">
-                        </a>
-
-                        <!-- STANZA 4: Gratitudine -->
-                        <a href="gratitudine.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
-                            <img src="gratitudine.jpg" class="w-full h-full object-cover">
-                        </a>
-
-                        <!-- STANZA 5: Meteo Interiore -->
-                        <a href="meteo.html" class="card min-w-[220px] max-w-[220px] h-[430px] rounded-[36px] shadow-xl snap-start relative overflow-hidden block border border-white/10">
-                            <img src="meteo.jpg" class="w-full h-full object-cover">
-                        </a>
-
-                    </div>
-
-                    <!-- INDICATORI CAROUSEL -->
-                    <div class="flex justify-center gap-2 mt-2">
-                        <span class="w-2 h-2 rounded-full bg-[#c0909b]"></span>
-                        <span class="w-2 h-2 rounded-full bg-[#c0909b]/30"></span>
-                        <span class="w-2 h-2 rounded-full bg-[#c0909b]/30"></span>
-                        <span class="w-2 h-2 rounded-full bg-[#c0909b]/30"></span>
-                        <span class="w-2 h-2 rounded-full bg-[#c0909b]/30"></span>
+                <!-- Area di Scrittura -->
+                <div class="border-t border-[#c8a7b0]/20 pt-6">
+                    <label class="block text-xs uppercase tracking-wider opacity-65 mb-3 font-medium">Cosa porti con te da questa pratica?</label>
+                    <textarea id="diaryText" rows="5" placeholder="Scrivi liberamente, senza giudizio..." class="w-full px-4 py-3 rounded-2xl border border-[#c8a7b0]/30 bg-white/40 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm mb-4 resize-none"></textarea>
+                    <div class="flex justify-end">
+                        <button id="saveDiaryBtn" class="bg-[#c0909b] text-white px-6 py-3 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition shadow-md">Fissa i pensieri</button>
                     </div>
                 </div>
             </div>
-        </section>
+        </main>
 
-        <!-- TIMER -->
-        <section id="timer" class="px-6 mt-14 pb-20">
-            <div class="glass rounded-[42px] p-6 sm:p-8 shadow-2xl overflow-hidden">
-                <div class="flex justify-between items-center mb-10">
-                    <div>
-                        <p class="uppercase tracking-[0.35em] text-[10px] opacity-40 mb-3">TIMER LIBERO</p>
-                        <h3 class="serif text-4xl sm:text-5xl text-[#9b7280]">La tua pratica</h3>
+        <!-- ================= TAB 4: PROFILO ================= -->
+        <main id="tab-profilo" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Colonna Impostazioni ed Extra -->
+                <div class="md:col-span-1 flex flex-col gap-6">
+                    <!-- Cambio Nome -->
+                    <div class="glass rounded-[28px] p-6 shadow-xl text-left">
+                        <h4 class="serif text-lg text-[#9b7280] mb-4">Il tuo nome</h4>
+                        <input type="text" id="profileNameInput" class="w-full px-4 py-3 rounded-xl border border-[#c8a7b0]/30 bg-white/50 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm mb-3">
+                        <button id="updateNameBtn" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition">Salva modifiche</button>
+                    </div>
+
+                    <!-- Installazione PWA -->
+                    <div class="glass rounded-[28px] p-6 shadow-xl text-center">
+                        <h4 class="serif text-lg text-[#9b7280] mb-2">Portami sul tuo telefono</h4>
+                        <p class="text-xs opacity-70 mb-4 font-light">Accedi alla Stanza Interiore con un tocco direttamente dalla tua home.</p>
+                        <button id="installBtn" class="w-full bg-white/40 border border-[#c8a7b0]/40 py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-white/60 transition">Installa applicazione</button>
                     </div>
                 </div>
 
-                <!-- CERCHIO -->
-                <div class="flex justify-center mb-12">
-                    <div class="w-[240px] h-[240px] sm:w-[260px] sm:h-[260px] rounded-full border border-[#c8a7b0] flex flex-col items-center justify-center">
-                        <div id="time" class="serif text-6xl sm:text-7xl text-[#b07d89]">05:00</div>
-                        <p id="status" class="text-sm opacity-50 mt-4">Seleziona la durata</p>
+                <!-- Colonna Statistiche -->
+                <div class="md:col-span-2">
+                    <div class="glass rounded-[28px] p-6 shadow-xl h-full flex flex-col">
+                        <div class="mb-4">
+                            <p class="uppercase tracking-[0.25em] text-[9px] opacity-50 mb-0.5">I TUOI PROGRESSI</p>
+                            <h4 class="serif text-xl text-[#9b7280]">Il tempo per te stessa</h4>
+                        </div>
+                        
+                        <!-- Box Numerici Statistiche -->
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-white/30 border border-white/20 p-4 rounded-xl text-center">
+                                <span class="block text-2xl font-light text-[#b07d89]" id="statTotalMinutes">0</span>
+                                <span class="text-[10px] uppercase opacity-60 tracking-wider">Minuti Totali</span>
+                            </div>
+                            <div class="bg-white/30 border border-white/20 p-4 rounded-xl text-center">
+                                <span class="block text-2xl font-light text-[#b07d89]" id="statSessions">0</span>
+                                <span class="text-[10px] uppercase opacity-60 tracking-wider">Sessioni Complete</span>
+                            </div>
+                        </div>
+
+                        <!-- Grafico Settimanale -->
+                        <p class="text-[11px] uppercase tracking-wider opacity-60 mb-2">Costanza Settimanale</p>
+                        <div class="flex-1 min-h-[150px] bg-white/20 rounded-xl p-2 border border-white/20 flex items-end">
+                            <svg class="w-full h-32" viewBox="0 0 100 30" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#c0909b; stop-opacity:0.4" />
+                                        <stop offset="100%" style="stop-color:#c0909b; stop-opacity:0" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 0 30 Q 20 18, 40 22 T 80 10 T 100 5 L 100 30 L 0 30 Z" fill="url(#grad)" />
+                                <path d="M 0 30 Q 20 18, 40 22 T 80 10 T 100 5" fill="none" stroke="#c0909b" stroke-width="1" />
+                            </svg>
+                        </div>
                     </div>
-                </div>
-
-                <!-- DURATE -->
-                <div class="flex justify-center gap-3 flex-wrap mb-12">
-                    <button class="duration active bg-[#c0909b] text-white px-6 py-3 sm:px-8 py-4 rounded-full text-sm sm:text-base" data-time="300">5 min</button>
-                    <button class="duration glass px-6 py-3 sm:px-8 py-4 rounded-full text-sm sm:text-base" data-time="600">10 min</button>
-                    <button class="duration glass px-6 py-3 sm:px-8 py-4 rounded-full text-sm sm:text-base" data-time="900">15 min</button>
-                    <button class="duration glass px-6 py-3 sm:px-8 py-4 rounded-full text-sm sm:text-base" data-time="1800">30 min</button>
-                </div>
-
-                <!-- MUSICHE -->
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
-                    <button class="music-btn active glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="none">🤫<br><br>Silenzio</button>
-                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="432hz.mp3">✨<br><br>432 Hz</button>
-                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="ethereal.mp3">🌌<br><br>Ethereal</button>
-                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="nature.mp3">🌿<br><br>Natura</button>
-                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="koshi.mp3">🎐<br><br>Koshi</button>
-                    <button class="music-btn glass rounded-[24px] p-4 sm:p-6 text-center text-sm sm:text-base" data-src="piano.mp3">🎹<br><br>Piano</button>
-                </div>
-
-                <!-- PLAYER -->
-                <div class="flex justify-center items-center gap-6 sm:gap-8">
-                    <button id="resetBtn" class="glass w-16 h-16 sm:w-20 h-20 rounded-full text-xl sm:text-2xl shadow-xl flex items-center justify-center">↺</button>
-                    <button id="playBtn" class="bg-[#c0909b] text-white w-24 h-24 sm:w-28 h-28 rounded-full text-3xl sm:text-4xl shadow-2xl flex items-center justify-center">▶</button>
                 </div>
             </div>
-        </section>
+        </main>
+
     </div>
 
+    <!-- ================= BARRA DI NAVIGAZIONE INFERIORE (CORRETTA) ================= -->
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md bg-white/70 dark:bg-[#2d2434]/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/30 dark:border-white/10 px-6 py-4 flex justify-between items-center">
+        <button onclick="switchTab('stanze')" id="nav-stanze" class="nav-icon text-[#c0909b] text-xl transition-all duration-300 transform active:scale-90 px-4">
+            <i class="fa-solid fa-house-chimney"></i>
+        </button>
+        <button onclick="switchTab('pratiche')" id="nav-pratiche" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-4">
+            <i class="fa-solid fa-hourglass-start"></i>
+        </button>
+        <button onclick="switchTab('diario')" id="nav-diario" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-4">
+            <i class="fa-solid fa-feather-pointed"></i>
+        </button>
+        <button onclick="switchTab('profilo')" id="nav-profilo" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-4">
+            <i class="fa-solid fa-circle-user"></i>
+        </button>
+    </nav>
+
+
     <script>
+        // --- FUNZIONE CAMBIO TAB (CORRETTA AL SINGOLARE) ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            const destinationTab = document.getElementById(`tab-${tabId}`);
+            if (destinationTab) destinationTab.classList.add('active');
+
+            document.querySelectorAll('.nav-icon').forEach(icon => {
+                icon.classList.remove('text-[#c0909b]', 'dark:text-[#d4a3ae]');
+                icon.classList.add('text-gray-400', 'dark:text-gray-500');
+            });
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.remove('text-gray-400', 'dark:text-gray-500');
+                activeNav.classList.add('text-[#c0909b]', 'dark:text-[#d4a3ae]');
+            }
+            
+            if (tabId === 'profilo') {
+                document.getElementById('profileNameInput').value = localStorage.getItem('utente') || '';
+                renderStats();
+            }
+        }
+
+        // --- TEMA SCURO ---
         const body = document.getElementById('body');
         document.getElementById('themeBtn').onclick = () => { body.classList.toggle('dark'); };
 
-        let user = localStorage.getItem('utente');
-        if (!user) {
-            user = prompt('Come ti chiami?');
-            if (user) { localStorage.setItem('utente', user); }
-        }
-
-        if (user) {
-            document.getElementById('welcomeName').innerHTML = `La Stanza Interiore di ${user}`;
-            document.getElementById('introName').innerHTML = `La Stanza Interiore di ${user}`;
-        }
-
+        // --- GESTIONE UTENTE ---
         const intro = document.getElementById('intro');
         const introAudio = document.getElementById('introAudio');
+        const userNameInput = document.getElementById('userNameInput');
+        const welcomeName = document.getElementById('welcomeName');
+
+        let storedUser = localStorage.getItem('utente');
+        if (storedUser) {
+            userNameInput.value = storedUser;
+            welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
+            intro.classList.add('hidden');
+        }
 
         document.getElementById('enterBtn').onclick = () => {
+            const currentName = userNameInput.value.trim();
+            if (currentName) {
+                localStorage.setItem('utente', currentName);
+                welcomeName.innerHTML = `La Stanza Interiore di ${currentName}`;
+            }
             intro.classList.add('hidden');
             introAudio.play().catch(() => {});
         };
 
-        function scrollToTimer() {
-            document.getElementById('timer').scrollIntoView({ behavior: 'smooth' });
-        }
+        document.getElementById('updateNameBtn').onclick = () => {
+            const updatedName = document.getElementById('profileNameInput').value.trim();
+            if (updatedName) {
+                localStorage.setItem('utente', updatedName);
+                welcomeName.innerHTML = `La Stanza Interiore di ${updatedName}`;
+                alert('Nome salvato!');
+            }
+        };
 
+        // --- APPARATO DIARIO ---
+        document.getElementById('saveDiaryBtn').onclick = () => {
+            const text = document.getElementById('diaryText').value.trim();
+            if (text) {
+                let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
+                logs.push({ data: new Date().toLocaleDateString('it-IT'), nota: text });
+                localStorage.setItem('diario_logs', JSON.stringify(logs));
+                document.getElementById('diaryText').value = '';
+                alert('Il tuo pensiero è stato custodito nel diario.');
+            }
+        };
+
+        // --- APPARATO TIMER ED AUDIO ---
         let total = 300;
         let current = 300;
         let running = false;
@@ -305,10 +431,10 @@
         }
         updateTime();
 
-        document.querySelectorAll('.duration').forEach(btn => {
+        document.querySelectorAll('.duration-btn').forEach(btn => {
             btn.onclick = () => {
                 if (running) return;
-                document.querySelectorAll('.duration').forEach(b => {
+                document.querySelectorAll('.duration-btn').forEach(b => {
                     b.classList.remove('active');
                     b.classList.add('glass');
                 });
@@ -325,7 +451,6 @@
                 btn.classList.add('active');
                 selectedMusic = btn.dataset.src;
 
-                // CAMBIO IN TEMPO REALE SE IL TIMER STA CORRENDO
                 if (running) {
                     if (selectedMusic === "none") {
                         bgMusic.pause();
@@ -356,6 +481,7 @@
 
             running = true;
             document.getElementById('playBtn').innerHTML = '❚❚';
+            status.innerHTML = 'In Sessione';
 
             timer = setInterval(() => {
                 current--;
@@ -365,7 +491,13 @@
                     running = false;
                     bgMusic.pause();
                     document.getElementById('playBtn').innerHTML = '▶';
-                    status.innerHTML = 'Meditazione conclusa';
+                    status.innerHTML = 'Conclusa';
+                    
+                    let totalMins = parseInt(localStorage.getItem('stats_minutes') || '0');
+                    let totalSessions = parseInt(localStorage.getItem('stats_sessions') || '0');
+                    localStorage.setItem('stats_minutes', totalMins + (total / 60));
+                    localStorage.setItem('stats_sessions', totalSessions + 1);
+
                     if (selectedMusic === "none") { gong.play().catch(() => {}); }
                 }
             }, 1000);
@@ -378,15 +510,21 @@
             current = total;
             updateTime();
             document.getElementById('playBtn').innerHTML = '▶';
-            status.innerHTML = 'Seleziona la durata';
+            status.innerHTML = 'Pronto';
         };
 
+        // --- STATISTICHE ---
+        function renderStats() {
+            document.getElementById('statTotalMinutes').innerText = localStorage.getItem('stats_minutes') || '0';
+            document.getElementById('statSessions').innerText = localStorage.getItem('stats_sessions') || '0';
+        }
+
+        // --- PWA PROMPT ---
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
         });
-
         document.getElementById('installBtn').onclick = async () => {
             if (deferredPrompt) { deferredPrompt.prompt(); }
         };
