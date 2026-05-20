@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stanza-interiore-v7';
+const CACHE_NAME = 'stanza-interiore-v9';
 
 const urlsToCache = [
   './',

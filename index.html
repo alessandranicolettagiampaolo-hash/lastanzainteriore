@@ -154,7 +154,7 @@
                         <h2 class="serif text-3xl sm:text-4xl md:text-5xl leading-[1.2] tracking-tight text-[#9a717d] mb-4">
                             Ciao, sono Alessandra<br> 
                             <span class="text-xl sm:text-2xl md:text-3xl opacity-90 block mt-3 font-sans font-light text-[#715d64] dark:text-[#f1dce1]">
-                                e sono qui per accompagnerarti nelle tue Stanze Interiori.
+                                e sono qui per accompagnarti nelle tue Stanze Interiori.
                             </span>
                         </h2>
                         <div class="h-1 w-20 bg-[#c0909b]/30 rounded-full mt-6"></div>
@@ -411,6 +411,15 @@
         };
 
         // --- APPARATO DIARIO ---
+        function deleteDiaryLog(originalIndex) {
+            if (confirm('Vuoi davvero eliminare questo pensiero?')) {
+                let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
+                logs.splice(originalIndex, 1);
+                localStorage.setItem('diario_logs', JSON.stringify(logs));
+                renderDiaryLogs();
+            }
+        }
+
         function renderDiaryLogs() {
             const container = document.getElementById('diaryLogsContainer');
             if (!container) return;
@@ -421,11 +430,19 @@
                 return;
             }
             
+            // Associano a ciascun log il suo indice originale prima di fare il reverse
+            const logsWithIndex = logs.map((log, index) => ({ ...log, originalIndex: index }));
+            
             // Mostra i pensieri dal più recente al più vecchio
-            container.innerHTML = logs.slice().reverse().map(log => `
-                <div class="bg-white/40 dark:bg-white/5 border border-[#c8a7b0]/20 p-4 rounded-2xl shadow-sm text-left">
-                    <div class="text-[11px] uppercase tracking-wider text-[#b07d89] font-medium mb-1">${log.data}</div>
-                    <p class="text-sm opacity-90 font-light leading-relaxed whitespace-pre-wrap">${log.nota}</p>
+            container.innerHTML = logsWithIndex.slice().reverse().map(log => `
+                <div class="bg-white/40 dark:bg-white/5 border border-[#c8a7b0]/20 p-4 rounded-2xl shadow-sm text-left relative group">
+                    <div class="flex justify-between items-start gap-4 mb-1">
+                        <div class="text-[11px] uppercase tracking-wider text-[#b07d89] font-medium">${log.data}</div>
+                        <button onclick="deleteDiaryLog(${log.originalIndex})" class="text-gray-400 hover:text-rose-500 text-xs transition p-1" title="Elimina pensiero">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm opacity-90 font-light leading-relaxed whitespace-pre-wrap pr-4">${log.nota}</p>
                 </div>
             `).join('');
         }
