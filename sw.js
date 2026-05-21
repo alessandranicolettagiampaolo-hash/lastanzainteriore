@@ -1,45 +1,17 @@
-const CACHE_NAME = 'stanza-interiore-v9';
-
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './logo.png'
-];
-
+// Service Worker passivo - Nessun salvataggio in cache offline
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-      .then(() => self.skipWaiting())
-  );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
-      return Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
+      return Promise.all(keys.map(key => caches.delete(key)));
     }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  if (url.pathname.endsWith('.mp3') || url.pathname.endsWith('.txt')) {
-    return event.respondWith(fetch(event.request));
-  }
-
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        return response || fetch(event.request);
-      })
-  );
+  // Lascia che ogni singola richiesta vada direttamente su internet in tempo reale
+  return event.respondWith(fetch(event.request));
 });
