@@ -5,6 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Stanza Interiore</title>
+    
+    <!-- Google tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-49EZT9DGYL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-49EZT9DGYL');
+    </script>
+
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,7 +165,7 @@
                         <h2 class="serif text-3xl sm:text-4xl md:text-5xl leading-[1.2] tracking-tight text-[#9a717d] mb-4">
                             Ciao, sono Alessandra<br> 
                             <span class="text-xl sm:text-2xl md:text-3xl opacity-90 block mt-3 font-sans font-light text-[#715d64] dark:text-[#f1dce1]">
-                                e sono qui per accompagnarti nelle tue Stanze Interiori.
+                                e sono qui per accompagnerarti nelle tue Stanze Interiori.
                             </span>
                         </h2>
                         <div class="h-1 w-20 bg-[#c0909b]/30 rounded-full mt-6"></div>
@@ -169,20 +180,21 @@
                     <h3 class="serif text-xl sm:text-2xl text-[#9a717d] text-center px-2">Le tue stanze interiori</h3>
                     <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
                 </div>
+                <!-- Aggiunta classe 'stanza-link' e attributo 'data-stanza' per tracciare i clic -->
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-2">
-                    <a href="lasciar-andare.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                    <a href="lasciar-andare.html" data-stanza="Lasciar Andare" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
                         <img src="lasciar-andare.jpg" class="w-full h-full object-cover">
                     </a>
-                    <a href="sonno.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                    <a href="sonno.html" data-stanza="Sonno" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
                         <img src="sonno.jpg" class="w-full h-full object-cover">
                     </a>
-                    <a href="respiro.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                    <a href="respiro.html" data-stanza="Respiro" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
                         <img src="respiro.jpg" class="w-full h-full object-cover">
                     </a>
-                    <a href="gratitudine.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                    <a href="gratitudine.html" data-stanza="Gratitudine" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
                         <img src="gratitudine.jpg" class="w-full h-full object-cover">
                     </a>
-                    <a href="meteo.html" class="card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                    <a href="meteo.html" data-stanza="Meteo Interiore" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
                         <img src="meteo.jpg" class="w-full h-full object-cover">
                     </a>
                 </div>
@@ -569,15 +581,47 @@
             document.getElementById('statSessions').innerText = localStorage.getItem('stats_sessions') || '0';
         }
 
-        // --- PWA PROMPT ---
+        // --- PWA PROMPT & GOOGLE ANALYTICS EVENT ---
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
         });
         document.getElementById('installBtn').onclick = async () => {
+            if (typeof gtag === 'function') {
+                gtag('event', 'click_installazione_pwa', {
+                    'event_category': 'Engagement',
+                    'event_label': 'Pulsante Installa Profilo'
+                });
+            }
             if (deferredPrompt) { deferredPrompt.prompt(); }
         };
+
+        // --- NUOVO: TRACCIAMENTO CLIC SULLE STANZE DI MEDITAZIONE ---
+        document.querySelectorAll('.stanza-link').forEach(link => {
+            link.onclick = function(e) {
+                // Se Google Analytics è attivo, tracciamo l'evento prima di cambiare pagina
+                if (typeof gtag === 'function') {
+                    e.preventDefault(); // Mettiamo in pausa momentanea il link per inviare i dati
+                    const nomeStanza = this.getAttribute('data-stanza');
+                    const urlDestinazione = this.getAttribute('href');
+
+                    gtag('event', 'apertura_stanza', {
+                        'event_category': 'Meditazione',
+                        'event_label': nomeStanza,
+                        'event_callback': function() {
+                            // Una volta inviato l'evento ad Analytics, andiamo alla pagina della stanza
+                            window.location.href = urlDestinazione;
+                        }
+                    });
+
+                    // Sicurezza: se Analytics ci mette troppo a rispondere, andiamo comunque alla pagina dopo 300ms
+                    setTimeout(function() {
+                        window.location.href = urlDestinazione;
+                    }, 300);
+                }
+            };
+        });
     </script>
 </body>
 
