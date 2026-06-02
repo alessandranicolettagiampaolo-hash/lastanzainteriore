@@ -302,6 +302,15 @@
                         <p class="text-xs opacity-70 mb-4 font-light">Accedi alla Stanza Interiore con un tocco direttamente dalla tua home.</p>
                         <button id="installBtn" class="w-full bg-white/40 border border-[#c8a7b0]/40 py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-white/60 transition">Installa applicazione</button>
                     </div>
+
+                    <!-- Link al Sito Internet Principale -->
+                    <div class="glass rounded-[28px] p-6 shadow-xl text-center">
+                        <h4 class="serif text-lg text-[#9b7280] mb-2">Visita il mio sito</h4>
+                        <p class="text-xs opacity-70 mb-4 font-light">Scopri le informazioni sulla tua Scuola di Meditazione in presenza</p>
+                        <a href="https://www.studiomindfulnessesofrologia.it" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
+                            Vai al Sito Web
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Colonna Statistiche -->
@@ -571,13 +580,6 @@
                     bgMusic.pause();
                     document.getElementById('playBtn').innerHTML = '▶';
                     status.innerHTML = 'Conclusa';
-                    
-                    let totalMins = parseInt(localStorage.getItem('stats_minutes') || '0');
-                    let totalSessions = parseInt(localStorage.getItem('stats_sessions') || '0');
-                    localStorage.setItem('stats_minutes', totalMins + (total / 60));
-                    localStorage.setItem('stats_sessions', totalSessions + 1);
-
-                    if (selectedMusic === "none") { gong.play().catch(() => {}); }
                 }
             }, 1000);
         };
@@ -588,29 +590,8 @@
             bgMusic.pause();
             current = total;
             updateTime();
-            status.innerHTML = 'Pronto';
             document.getElementById('playBtn').innerHTML = '▶';
-        };
-
-        // --- FUNZIONALITÀ TASTO INSTALLA (PWA) ---
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const installBtn = document.getElementById('installBtn');
-            if (installBtn) installBtn.style.display = 'block';
-        });
-
-        document.getElementById('installBtn').onclick = () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Utente ha accettato l\'installazione');
-                    }
-                    deferredPrompt = null;
-                });
-            }
+            status.innerHTML = 'Pronto';
         };
     </script>
 </body>
