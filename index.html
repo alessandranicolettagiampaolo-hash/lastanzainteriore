@@ -165,7 +165,7 @@
                         <h2 class="serif text-3xl sm:text-4xl md:text-5xl leading-[1.2] tracking-tight text-[#9a717d] mb-4">
                             Ciao, sono Alessandra<br> 
                             <span class="text-xl sm:text-2xl md:text-3xl opacity-90 block mt-3 font-sans font-light text-[#715d64] dark:text-[#f1dce1]">
-                                e sono qui per accompagnerarti nelle tue Stanze Interiori.
+                                e sono qui per accompagnarti nelle tue Stanze Interiori.
                             </span>
                         </h2>
                         <div class="h-1 w-20 bg-[#c0909b]/30 rounded-full mt-6"></div>
@@ -180,7 +180,7 @@
                     <h3 class="serif text-xl sm:text-2xl text-[#9a717d] text-center px-2">Le tue stanze interiori</h3>
                     <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
                 </div>
-                <!-- Aggiunta classe 'stanza-link' e attributo 'data-stanza' per tracciare i clic -->
+                
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-2">
                     <a href="lasciar-andare.html" data-stanza="Lasciar Andare" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
                         <img src="lasciar-andare.jpg" class="w-full h-full object-cover">
@@ -345,7 +345,7 @@
 
     </div>
 
-    <!-- ================= BARRA DI NAVIGAZIONE INFERIORE (CORRETTA) ================= -->
+    <!-- ================= BARRA DI NAVIGAZIONE INFERIORE ================= -->
     <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md bg-white/70 dark:bg-[#2d2434]/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/30 dark:border-white/10 px-6 py-4 flex justify-between items-center">
         <button onclick="switchTab('stanze')" id="nav-stanze" class="nav-icon text-[#c0909b] text-xl transition-all duration-300 transform active:scale-90 px-4">
             <i class="fa-solid fa-house-chimney"></i>
@@ -363,7 +363,7 @@
 
 
     <script>
-        // --- FUNZIONE CAMBIO TAB (CORRETTA AL SINGOLARE) ---
+        // --- FUNZIONE CAMBIO TAB ---
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             const destinationTab = document.getElementById(`tab-${tabId}`);
@@ -384,6 +384,27 @@
                 document.getElementById('profileNameInput').value = localStorage.getItem('utente') || '';
                 renderStats();
             }
+        }
+
+        // --- TRACCIAMENTO GOOGLE ANALYTICS PER LE STANZE ---
+        document.querySelectorAll('.stanza-link').forEach(link => {
+            link.onclick = function(e) {
+                const nomeStanza = this.getAttribute('data-stanza');
+                if (typeof gtag === 'function') {
+                    gtag('event', 'select_content', {
+                        'content_type': 'stanza_meditazione',
+                        'item_id': nomeStanza
+                    });
+                }
+            };
+        });
+
+        // --- RENDER STATISTICHE ---
+        function renderStats() {
+            const mins = localStorage.getItem('stats_minutes') || '0';
+            const sessions = localStorage.getItem('stats_sessions') || '0';
+            document.getElementById('statTotalMinutes').innerText = Math.round(parseFloat(mins));
+            document.getElementById('statSessions').innerText = sessions;
         }
 
         // --- TEMA SCURO ---
@@ -442,10 +463,8 @@
                 return;
             }
             
-            // Associano a ciascun log il suo indice originale prima di fare il reverse
             const logsWithIndex = logs.map((log, index) => ({ ...log, originalIndex: index }));
             
-            // Mostra i pensieri dal più recente al più vecchio
             container.innerHTML = logsWithIndex.slice().reverse().map(log => `
                 <div class="bg-white/40 dark:bg-white/5 border border-[#c8a7b0]/20 p-4 rounded-2xl shadow-sm text-left relative group">
                     <div class="flex justify-between items-start gap-4 mb-1">
@@ -501,7 +520,7 @@
                 total = parseInt(btn.dataset.time);
                 current = total;
                 updateTime();
-        renderDiaryLogs();
+                renderDiaryLogs();
             };
         });
 
@@ -546,7 +565,6 @@
             timer = setInterval(() => {
                 current--;
                 updateTime();
-        renderDiaryLogs();
                 if (current <= 0) {
                     clearInterval(timer);
                     running = false;
@@ -570,59 +588,30 @@
             bgMusic.pause();
             current = total;
             updateTime();
-        renderDiaryLogs();
-            document.getElementById('playBtn').innerHTML = '▶';
             status.innerHTML = 'Pronto';
+            document.getElementById('playBtn').innerHTML = '▶';
         };
 
-        // --- STATISTICHE ---
-        function renderStats() {
-            document.getElementById('statTotalMinutes').innerText = localStorage.getItem('stats_minutes') || '0';
-            document.getElementById('statSessions').innerText = localStorage.getItem('stats_sessions') || '0';
-        }
-
-        // --- PWA PROMPT & GOOGLE ANALYTICS EVENT ---
+        // --- FUNZIONALITÀ TASTO INSTALLA (PWA) ---
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+            const installBtn = document.getElementById('installBtn');
+            if (installBtn) installBtn.style.display = 'block';
         });
-        document.getElementById('installBtn').onclick = async () => {
-            if (typeof gtag === 'function') {
-                gtag('event', 'click_installazione_pwa', {
-                    'event_category': 'Engagement',
-                    'event_label': 'Pulsante Installa Profilo'
+
+        document.getElementById('installBtn').onclick = () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Utente ha accettato l\'installazione');
+                    }
+                    deferredPrompt = null;
                 });
             }
-            if (deferredPrompt) { deferredPrompt.prompt(); }
         };
-
-        // --- NUOVO: TRACCIAMENTO CLIC SULLE STANZE DI MEDITAZIONE ---
-        document.querySelectorAll('.stanza-link').forEach(link => {
-            link.onclick = function(e) {
-                // Se Google Analytics è attivo, tracciamo l'evento prima di cambiare pagina
-                if (typeof gtag === 'function') {
-                    e.preventDefault(); // Mettiamo in pausa momentanea il link per inviare i dati
-                    const nomeStanza = this.getAttribute('data-stanza');
-                    const urlDestinazione = this.getAttribute('href');
-
-                    gtag('event', 'apertura_stanza', {
-                        'event_category': 'Meditazione',
-                        'event_label': nomeStanza,
-                        'event_callback': function() {
-                            // Una volta inviato l'evento ad Analytics, andiamo alla pagina della stanza
-                            window.location.href = urlDestinazione;
-                        }
-                    });
-
-                    // Sicurezza: se Analytics ci mette troppo a rispondere, andiamo comunque alla pagina dopo 300ms
-                    setTimeout(function() {
-                        window.location.href = urlDestinazione;
-                    }, 300);
-                }
-            };
-        });
     </script>
 </body>
-
 </html>
