@@ -100,6 +100,8 @@
             justify-content: center;
             background: linear-gradient(to bottom, #f8f3ef, #efe4de);
             transition: 1s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 1;
+            pointer-events: auto;
         }
         #intro.hidden { opacity: 0; pointer-events: none; }
         body.dark #intro { background: linear-gradient(to bottom, #1d1721, #2d2434); }
@@ -112,7 +114,7 @@
     <audio id="bgMusic" loop></audio>
     <audio id="gong"><source src="gong.mp3" type="audio/mpeg"></audio>
 
-    <!-- INTRO SCHERMO INTERO -->
+    <!-- INTRO SCHERMO INTERO (Compare sempre all'avvio e al ritorno sulla Home) -->
     <div id="intro">
         <div class="text-center px-6 w-full max-w-md mx-auto">
             <img src="logo.png" class="w-44 h-auto mx-auto mb-6 drop-shadow-xl object-contain">
@@ -120,8 +122,9 @@
             <p class="uppercase tracking-[0.25em] text-[11px] sm:text-[12px] font-medium opacity-70 mb-8">MEDITAZIONE & BENESSERE</p>
             
             <div class="glass rounded-[28px] p-6 shadow-xl mb-6 text-left">
+                <!-- Il testo di questa etichetta cambierà dinamicamente se l'utente è già conosciuto -->
                 <label id="nameLabel" for="userNameInput" class="block text-xs uppercase tracking-wider opacity-65 mb-3 font-medium">Come preferisci che ti chiami?</label>
-                <div class="flex gap-2">
+                <div id="inputContainer" class="flex gap-2">
                     <input type="text" id="userNameInput" placeholder="Il tuo nome..." class="w-full px-4 py-3 rounded-xl border border-[#c8a7b0]/30 bg-white/50 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm">
                 </div>
             </div>
@@ -253,7 +256,7 @@
                         <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL DIARIO DELL'ANIMA</p>
                         <h3 class="serif text-3xl text-[#9b7280] mb-4">Ancorare l'esperienza</h3>
                         <p class="text-sm opacity-90 leading-relaxed font-light mb-4">
-                            Dopo una meditazione, le sensazioni sono come nuvole: bellissime ma volatili. Il diario serve a <strong>fissare</strong> questo stato di grazia, trasformando un'emozione astratta in una consapevolezza concreta.
+                            Dopo una meditazione, le sensazioni sono come nuvole: bellissime ma volatili. Il diario serve a <strong>fissare</strong> questo state di grazia, trasformando un'emozione astratta in una consapevolezza concreta.
                         </p>
                         <p class="text-sm opacity-90 leading-relaxed font-light">
                             Scrivere aiuta a decantare i pensieri residui e a creare un ponte prezioso tra il silenzio della tua Stanza Interiore e il rumore del mondo esterno.
@@ -278,7 +281,6 @@
             <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl mt-6">
                 <h4 class="serif text-xl text-[#9b7280] mb-4">I tuoi pensieri custoditi</h4>
                 <div id="diaryLogsContainer" class="space-y-4 max-h-[350px] overflow-y-auto hide-scrollbar">
-                    <!-- I pensieri verranno caricati qui dinamicamente -->
                     <p id="noLogsMessage" class="text-sm opacity-60 italic font-light">Nessun pensiero salvato finora. Il tuo viaggio inizia qui.</p>
                 </div>
             </div>
@@ -372,8 +374,72 @@
 
 
     <script>
-        // --- FUNZIONE CAMBIO TAB ---
+        const intro = document.getElementById('intro');
+        const introAudio = document.getElementById('introAudio');
+        const userNameInput = document.getElementById('userNameInput');
+        const nameLabel = document.getElementById('nameLabel');
+        const inputContainer = document.getElementById('inputContainer');
+        const welcomeName = document.getElementById('welcomeName');
+        const body = document.getElementById('body');
+
+        // --- APERTURA E PREPARAZIONE INTRO (Modificata per mostrare sempre la schermata all'avvio) ---
+        function checkAndShowIntro() {
+            let storedUser = localStorage.getItem('utente');
+            if (storedUser) {
+                // Se l'utente è registrato, nascondiamo l'input del nome e cambiamo il testo di benvenuto
+                nameLabel.innerHTML = `Bentornato nella tua Stanza Interiore, <span class="font-semibold text-[#b07d89]">${storedUser}</span>`;
+                inputContainer.style.display = 'none';
+                welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
+            } else {
+                // Altrimenti mostriamo il campo di testo standard
+                nameLabel.innerHTML = "Come preferisci che ti chiami?";
+                inputContainer.style.display = 'flex';
+                userNameInput.value = '';
+            }
+            // Forza la rimozione della classe hidden per mostrare la schermata
+            intro.classList.remove('hidden');
+        }
+
+        // Avvia il controllo della schermata subito all'apertura della pagina
+        checkAndShowIntro();
+
+        // --- CLICK SUL BOTTONE DI INGRESSO (Riproduce l'audio intro.mp3) ---
+        document.getElementById('enterBtn').onclick = () => {
+            let storedUser = localStorage.getItem('utente');
+            
+            // Se l'utente non esisteva, salva il nome preso dall'input
+            if (!storedUser) {
+                const currentName = userNameInput.value.trim();
+                if (currentName) {
+                    localStorage.setItem('utente', currentName);
+                    welcomeName.innerHTML = `La Stanza Interiore di ${currentName}`;
+                }
+            }
+            
+            // Nasconde la schermata iniziale con effetto dissolvenza
+            intro.classList.add('hidden');
+            
+            // Riproduce l'audio dell'intro da capo ad ogni ingresso riuscito
+            introAudio.currentTime = 0;
+            introAudio.play().catch((err) => { console.log("Riproduzione bloccata o fallita:", err); });
+        };
+
+        // --- FUNZIONE CAMBIO TAB (Se clicchi sull'icona Home nella barra, ricarica l'intro) ---
         function switchTab(tabId) {
+            if (tabId === 'stanze') {
+                // Interrompe la musica del timer se era attiva per non accavallare i suoni
+                bgMusic.pause();
+                document.getElementById('playBtn').innerHTML = '▶';
+                document.getElementById('status').innerHTML = 'Pronto';
+                clearInterval(timer);
+                running = false;
+                current = total;
+                updateTime();
+
+                // Mostra di nuovo la schermata per far ripartire l'intro audio
+                checkAndShowIntro();
+            }
+
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             const destinationTab = document.getElementById(`tab-${tabId}`);
             if (destinationTab) destinationTab.classList.add('active');
@@ -417,32 +483,9 @@
         }
 
         // --- TEMA SCURO ---
-        const body = document.getElementById('body');
         document.getElementById('themeBtn').onclick = () => { body.classList.toggle('dark'); };
 
-        // --- GESTIONE UTENTE ---
-        const intro = document.getElementById('intro');
-        const introAudio = document.getElementById('introAudio');
-        const userNameInput = document.getElementById('userNameInput');
-        const welcomeName = document.getElementById('welcomeName');
-
-        let storedUser = localStorage.getItem('utente');
-        if (storedUser) {
-            userNameInput.value = storedUser;
-            welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
-            intro.classList.add('hidden');
-        }
-
-        document.getElementById('enterBtn').onclick = () => {
-            const currentName = userNameInput.value.trim();
-            if (currentName) {
-                localStorage.setItem('utente', currentName);
-                welcomeName.innerHTML = `La Stanza Interiore di ${currentName}`;
-            }
-            intro.classList.add('hidden');
-            introAudio.play().catch(() => {});
-        };
-
+        // --- MODIFICA PROFILO ---
         document.getElementById('updateNameBtn').onclick = () => {
             const updatedName = document.getElementById('profileNameInput').value.trim();
             if (updatedName) {
