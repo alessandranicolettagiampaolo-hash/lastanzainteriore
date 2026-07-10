@@ -5,15 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stanza del Cambiamento - La Stanza Interiore</title>
-    
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-49EZT9DGYL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-49EZT9DGYL');
-    </script>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +19,9 @@
             background: linear-gradient(to bottom, #f8f3ef, #efe4de);
             color: #715d64;
             min-height: 100vh;
-            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .serif {
@@ -42,129 +35,195 @@
             border: 1px solid rgba(255, 255, 255, 0.25);
         }
 
-        /* Animazione della barra di progresso dell'audio */
-        #progress {
-            transition: width 0.1s linear;
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"]:focus {
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: rgba(113, 93, 100, 0.15);
+            height: 6px;
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-moz-range-track {
+            background: rgba(113, 93, 100, 0.15);
+            height: 6px;
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px;
+            background-color: #c0909b;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            background-color: #c0909b;
+            border: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
         }
     </style>
 </head>
 
-<body>
+<body class="p-6">
 
-    <audio id="stanzaAudio">
-        <source src="cambiamento.mp3" type="audio/mpeg">
-    </audio>
-
+    <!-- SFONDO SFUMATO IN SOTTOFONDO -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="absolute w-96 h-96 bg-rose-100 rounded-full blur-3xl opacity-40 top-1/4 -left-20"></div>
-        <div class="absolute w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-30 bottom-10 right-0"></div>
+        <div class="absolute w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-20 -top-20 -left-20"></div>
+        <div class="absolute w-96 h-96 bg-rose-100 rounded-full blur-3xl opacity-30 bottom-0 right-0"></div>
     </div>
 
-    <div class="relative z-10 max-w-xl mx-auto px-4 py-8 flex flex-col min-h-vh justify-between">
+    <!-- HEADER CON TASTO TORNA DIETRO -->
+    <header class="relative z-10 max-w-md w-full mx-auto flex items-center justify-start">
+        <a href="index.html" class="glass px-5 py-2.5 rounded-full text-xs uppercase tracking-wider font-medium shadow-sm transition active:scale-95 flex items-center gap-2">
+            <i class="fa-solid fa-chevron-left"></i> Torna alla Home
+        </a>
+    </header>
+
+    <!-- CONTAINER CENTRALE -->
+    <main class="relative z-10 max-w-md w-full mx-auto glass rounded-[40px] p-8 text-center shadow-2xl my-auto border border-white/40">
+        <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-2 font-semibold">EVOLUZIONE E FLUIDITÀ</p>
+        <h1 class="serif text-4xl text-[#9b7280] mb-6">Stanza del Cambiamento</h1>
         
-        <header class="flex items-center justify-between mb-8">
-            <a href="index.html" class="glass w-10 h-10 rounded-full flex items-center justify-center text-sm shadow-md hover:scale-105 transition">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
-            <span class="uppercase tracking-[0.2em] text-[10px] opacity-60 font-medium">Stanza Interiore</span>
-            <div class="w-10"></div> </header>
-
-        <main class="flex-1 flex flex-col items-center justify-center text-center my-auto">
-            
-            <div class="w-64 h-64 sm:w-72 sm:h-72 rounded-[36px] overflow-hidden shadow-2xl mb-8 border-4 border-white/40">
-                <img src="cambiamento.jpg" alt="Stanza del Cambiamento" class="w-full h-full object-cover">
-            </div>
-
-            <p class="uppercase tracking-[0.25em] text-[11px] font-medium opacity-50 mb-2">Meditazione Guidata</p>
-            <h1 class="serif text-4xl sm:text-5xl text-[#9a717d] mb-4 tracking-tight">Cambiamento</h1>
-            
-            <p class="text-sm sm:text-base opacity-80 font-light leading-relaxed max-w-sm mb-10">
-                Fluiamo insieme verso il nuovo. Lascia andare le vecchie resistenze e accogli lo spazio della trasformazione con fiducia e apertura.
-            </p>
-
-            <div class="glass w-full rounded-3xl p-6 shadow-xl mb-12">
-                
-                <div id="progressContainer" class="w-full h-1.5 bg-white/40 rounded-full cursor-pointer mb-4 overflow-hidden">
-                    <div id="progress" class="h-full bg-[#c0909b] w-0 rounded-full"></div>
-                </div>
-                
-                <div class="flex justify-between text-[11px] opacity-60 font-medium mb-6">
-                    <span id="currentTime">00:00</span>
-                    <span id="durationTime">00:00</span>
-                </div>
-
-                <div class="flex justify-center">
-                    <button id="playPauseBtn" class="bg-[#c0909b] text-white w-20 h-20 rounded-full text-2xl shadow-xl flex items-center justify-center active:scale-95 transition-transform font-light">
-                        <i class="fa-solid fa-play ml-1" id="playIcon"></i>
-                    </button>
+        <!-- CONSIGLIO DELLA GUIDA -->
+        <div class="bg-white/30 border border-white/20 rounded-2xl p-4 mb-6 shadow-sm text-left">
+            <div class="flex items-center gap-4">
+                <img src="avatar.png" alt="Alessandra" class="w-14 h-14 rounded-full object-cover shadow-md border border-white/50 shrink-0">
+                <div>
+                    <p class="uppercase tracking-[0.2em] text-[8px] opacity-60 mb-0.5 font-semibold text-[#b07d89]">Il consiglio di Alessandra</p>
+                    <p class="text-xs font-light leading-relaxed italic opacity-90">
+                        "Tutto scorre, tutto si trasforma. Accogli l'incertezza non come un ostacolo, ma come uno spazio aperto a infinite nuove possibilità. Respira nel flusso del tuo divenire."
+                    </p>
                 </div>
             </div>
+        </div>
 
-        </main>
+        <!-- IMMAGINE DI COPERTINA DELLA STANZA TONDA -->
+        <div class="w-44 h-44 mx-auto rounded-full overflow-hidden border-4 border-white/50 shadow-xl mb-8 relative">
+            <img src="cambiamento.jpg" class="w-full h-full object-cover">
+        </div>
 
-        <footer class="text-center opacity-40 text-[10px] tracking-wider uppercase py-4">
-            Il tuo spazio di evoluzione protetto
-        </footer>
-    </div>
+        <!-- BLOCCO PLAYER CON TIMELINE E TIMER -->
+        <div class="flex flex-col items-center justify-center bg-white/20 rounded-3xl p-6 border border-white/20 shadow-inner mb-4">
+            
+            <!-- CONTROLLO TIMELINE -->
+            <div class="w-full px-2 mb-2">
+                <input type="range" id="progressBar" min="0" max="100" value="0" class="w-full accent-[#c0909b]">
+            </div>
+
+            <!-- CRONOMETRI INFERIORI -->
+            <div class="w-full flex justify-between px-2 text-xs opacity-60 mb-6 font-mono font-light">
+                <span id="currentTime">00:00</span>
+                <span id="trackDuration">--:--</span>
+            </div>
+            
+            <!-- PULSANTE DI RIPRODUZIONE -->
+            <button id="playAudioBtn" class="bg-[#c0909b] text-white w-20 h-20 rounded-full text-2xl shadow-xl flex items-center justify-center active:scale-95 transition font-light pl-1">
+                <i id="playIcon" class="fa-solid fa-play text-xl"></i>
+            </button>
+            
+            <p id="audioStatus" class="text-[10px] uppercase tracking-widest opacity-60 mt-4">Ascolta la tua guida</p>
+        </div>
+
+        <!-- FILE AUDIO INVISIBILE -->
+        <audio id="meditationAudio" src="cambiamento.mp3"></audio>
+    </main>
+
+    <div class="h-10 relative z-10"></div>
 
     <script>
-        const audio = document.getElementById('stanzaAudio');
-        const playPauseBtn = document.getElementById('playPauseBtn');
+        const audio = document.getElementById('meditationAudio');
+        const playBtn = document.getElementById('playAudioBtn');
         const playIcon = document.getElementById('playIcon');
-        const progress = document.getElementById('progress');
-        const progressContainer = document.getElementById('progressContainer');
-        const currentTimeEl = document.getElementById('currentTime');
-        const durationTimeEl = document.getElementById('durationTime');
+        const status = document.getElementById('audioStatus');
+        const trackDuration = document.getElementById('trackDuration');
+        const currentTimeDisplay = document.getElementById('currentTime');
+        const progressBar = document.getElementById('progressBar');
 
-        // Gestione Play / Pause
-        playPauseBtn.onclick = () => {
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "00:00";
+            let m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            let s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return m + ":" + s;
+        }
+
+        audio.onloadedmetadata = () => {
+            trackDuration.innerHTML = formatTime(audio.duration);
+            progressBar.max = Math.floor(audio.duration);
+        };
+
+        if (audio.readyState >= 1) {
+            trackDuration.innerHTML = formatTime(audio.duration);
+            progressBar.max = Math.floor(audio.duration);
+        }
+
+        playBtn.onclick = () => {
             if (audio.paused) {
-                audio.play();
-                playIcon.classList.remove('fa-play', 'ml-1');
-                playIcon.classList.add('fa-pause');
+                audio.play().catch(e => {
+                    console.log("Riproduzione bloccata o file mancante:", e);
+                    alert("Assicurati di aver inserito il file 'cambiamento.mp3' nella stessa cartella dell'app!");
+                });
+                playIcon.className = 'fa-solid fa-pause text-xl';
+                playBtn.classList.remove('pl-1');
+                status.innerHTML = 'In sessione...';
             } else {
                 audio.pause();
-                playIcon.classList.remove('fa-pause');
-                playIcon.classList.add('fa-play', 'ml-1');
+                playIcon.className = 'fa-solid fa-play text-xl';
+                playBtn.classList.add('pl-1');
+                status.innerHTML = 'In pausa';
             }
         };
 
-        // Aggiornamento della barra e dei minutaggi
-        audio.addEventListener('timeupdate', () => {
-            const percentage = (audio.currentTime / audio.duration) * 100;
-            progress.style.width = `${percentage}%`;
-            
-            // Formatta il tempo corrente
-            currentTimeEl.innerText = formatTime(audio.currentTime);
-        });
-
-        // Mostra la durata totale appena la traccia è caricata
-        audio.addEventListener('loadedmetadata', () => {
-            durationTimeEl.innerText = formatTime(audio.duration);
-        });
-
-        // Permetti di cliccare sulla barra per mandare avanti/indietro l'audio
-        progressContainer.onclick = (e) => {
-            const width = progressContainer.clientWidth;
-            const clickX = e.offsetX;
-            const duration = audio.duration;
-            audio.currentTime = (clickX / width) * duration;
+        audio.ontimeupdate = () => {
+            if (!progressBar.classList.contains('seeking')) {
+                progressBar.value = Math.floor(audio.currentTime);
+            }
+            currentTimeDisplay.innerHTML = formatTime(audio.currentTime);
         };
 
-        // Quando l'audio finisce, resetta il pulsante grafico
-        audio.addEventListener('ended', () => {
-            playIcon.classList.remove('fa-pause');
-            playIcon.classList.add('fa-play', 'ml-1');
-            progress.style.width = '0%';
-        });
+        progressBar.oninput = () => {
+            progressBar.classList.add('seeking');
+            currentTimeDisplay.innerHTML = formatTime(progressBar.value);
+        };
 
-        // Funzione di supporto per formattare i secondi in MM:SS
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return "00:00";
-            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
-            return `${mins}:${secs}`;
-        }
+        progressBar.onchange = () => {
+            audio.currentTime = progressBar.value;
+            progressBar.classList.remove('seeking');
+        };
+
+        audio.onended = () => {
+            playIcon.className = 'fa-solid fa-play text-xl';
+            playBtn.classList.add('pl-1');
+            status.innerHTML = 'Pratica conclusa';
+            progressBar.value = 0;
+            currentTimeDisplay.innerHTML = "00:00";
+        };
     </script>
 </body>
+
 </html>
