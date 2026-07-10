@@ -243,7 +243,7 @@
                         <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL DIARIO DELL'ANIMA</p>
                         <h3 class="serif text-3xl text-[#9b7280] mb-4">Ancorare l'esperienza</h3>
                         <p class="text-sm opacity-90 leading-relaxed font-light mb-4">
-                            Dopo una meditazione, le sensazioni sono come nuvole: bellissime ma volatili. Il diario serve a <strong>fissare</strong> questo stato di grazia, trasformando un'emozione astratta in una consapevolezza concreta.
+                            Dopo una meditazione, le sensazioni sono come nuvole: bellissime ma volatili. Il diario serve a <strong>fissare</strong> questo state di grazia, trasformando un'emozione astratta in una consapevolezza concreta.
                         </p>
                         <p class="text-sm opacity-90 leading-relaxed font-light">
                             Scrivere aiuta a decantare i pensieri residui e a creare un ponte prezioso tra il silenzio della tua Stanza Interiore e il rumore del mondo esterno.
@@ -350,15 +350,40 @@
 
 
     <script>
-        const intro = document.getElementById('intro');
-        const introAudio = document.getElementById('introAudio');
-        const userNameInput = document.getElementById('userNameInput');
-        const nameLabel = document.getElementById('nameLabel');
-        const inputContainer = document.getElementById('inputContainer');
-        const welcomeName = document.getElementById('welcomeName');
-        const body = document.getElementById('body');
+        // --- DICHIARAZIONE VARIABILI GLOBALI ---
+        let intro, introAudio, userNameInput, nameLabel, inputContainer, welcomeName, body;
+        let total = 300;
+        let current = 300;
+        let running = false;
+        let timer;
+        let selectedMusic = "none";
+        let time, status, bgMusic, gong;
 
-        // --- APERTURA E PREPARAZIONE INTRO (Solo per l'avvio iniziale dell'app) ---
+        // --- ATTENDI IL CARICAMENTO COMPLETO DELLA PAGINA (Risolve la schermata bianca) ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Inizializzazione elementi DOM[cite: 4]
+            intro = document.getElementById('intro');
+            introAudio = document.getElementById('introAudio');
+            userNameInput = document.getElementById('userNameInput');
+            nameLabel = document.getElementById('nameLabel');
+            inputContainer = document.getElementById('inputContainer');
+            welcomeName = document.getElementById('welcomeName');
+            body = document.getElementById('body');
+            time = document.getElementById('time');
+            status = document.getElementById('status');
+            bgMusic = document.getElementById('bgMusic');
+            gong = document.getElementById('gong');
+
+            // Configurazione Eventi dei Bottoni
+            setupEventListeners();
+
+            // Avvia la schermata iniziale in modo sicuro[cite: 4]
+            checkAndShowIntro();
+            updateTime();
+            renderDiaryLogs();
+        });
+
+        // --- APERTURA E PREPARAZIONE INTRO ---
         function checkAndShowIntro() {
             let storedUser = localStorage.getItem('utente');
             if (storedUser) {
@@ -373,41 +398,167 @@
             intro.classList.remove('hidden');
         }
 
-        // Avvia la schermata iniziale di benvenuto e aspetta il primo tocco
-        checkAndShowIntro();
-
-        // --- CLICK SUL BOTTONE DI INGRESSO (Primo avvio) ---
-        document.getElementById('enterBtn').onclick = () => {
-            let storedUser = localStorage.getItem('utente');
-            
-            if (!storedUser) {
-                const currentName = userNameInput.value.trim();
-                if (currentName) {
-                    localStorage.setItem('utente', currentName);
-                    welcomeName.innerHTML = `La Stanza Interiore di ${currentName}`;
+        // --- CONFIGURAZIONE EVENTI ---
+        function setupEventListeners() {
+            // Tasto Entra[cite: 4]
+            document.getElementById('enterBtn').onclick = () => {
+                let storedUser = localStorage.getItem('utente');
+                if (!storedUser) {
+                    const currentName = userNameInput.value.trim();
+                    if (currentName) {
+                        localStorage.setItem('utente', currentName);
+                        welcomeName.innerHTML = `La Stanza Interiore di ${currentName}`;
+                    }
                 }
-            }
-            
-            intro.classList.add('hidden');
-            introAudio.currentTime = 0;
-            introAudio.play().catch((err) => { console.log("Riproduzione audio bloccata:", err); });
-        };
+                intro.classList.add('hidden');
+                introAudio.currentTime = 0;
+                introAudio.play().catch((err) => { console.log("Riproduzione audio bloccata:", err); });
+            };
 
-        // --- FUNZIONE CAMBIO TAB (Modificata per far ripartire l'audio tornando alla home) ---
-        function switchTab(tabId) {
-            // Se l'utente clicca sulla Home (stanze), puliamo i suoni del timer e facciamo ripartire l'intro
-            if (tabId === 'stanze') {
+            // Tracciamento Google Analytics[cite: 4]
+            document.querySelectorAll('.stanza-link').forEach(link => {
+                link.onclick = function(e) {
+                    const nomeStanza = this.getAttribute('data-stanza');
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'select_content', {
+                            'content_type': 'stanza_meditazione',
+                            'item_id': nomeStanza
+                        });
+                    }
+                };
+            });
+
+            // Tema Scuro[cite: 4]
+            document.getElementById('themeBtn').onclick = () => { body.classList.toggle('dark'); };
+
+            // Modifica Nome Profilo[cite: 4]
+            document.getElementById('updateNameBtn').onclick = () => {
+                const updatedName = document.getElementById('profileNameInput').value.trim();
+                if (updatedName) {
+                    localStorage.setItem('utente', updatedName);
+                    welcomeName.innerHTML = `La Stanza Interiore di ${updatedName}`;
+                    alert('Nome salvato!');
+                }
+            };
+
+            // Salvataggio Diario[cite: 4]
+            document.getElementById('saveDiaryBtn').onclick = () => {
+                const text = document.getElementById('diaryText').value.trim();
+                if (text) {
+                    let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
+                    logs.push({ 
+                        data: new Date().toLocaleDateString('it-IT') + ' - ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}), 
+                        nota: text 
+                    });
+                    localStorage.setItem('diario_logs', JSON.stringify(logs));
+                    document.getElementById('diaryText').value = '';
+                    renderDiaryLogs();
+                }
+            };
+
+            // Bottoni Durata Timer[cite: 4]
+            document.querySelectorAll('.duration-btn').forEach(btn => {
+                btn.onclick = () => {
+                    if (running) return;
+                    document.querySelectorAll('.duration-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.add('glass');
+                    });
+                    btn.classList.add('active');
+                    total = parseInt(btn.dataset.time);
+                    current = total;
+                    updateTime();
+                };
+            });
+
+            // Bottoni Musica Timer[cite: 4]
+            document.querySelectorAll('.music-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.music-btn').forEach(b => { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    selectedMusic = btn.dataset.src;
+
+                    if (running) {
+                        if (selectedMusic === "none") {
+                            bgMusic.pause();
+                        } else {
+                            bgMusic.src = selectedMusic;
+                            bgMusic.loop = true;
+                            bgMusic.play().catch(() => {});
+                        }
+                    }
+                };
+            });
+
+            // Tasto Play/Pausa[cite: 4]
+            document.getElementById('playBtn').onclick = () => {
+                if (running) {
+                    clearInterval(timer);
+                    running = false;
+                    bgMusic.pause();
+                    document.getElementById('playBtn').innerHTML = '▶';
+                    return;
+                }
+
+                introAudio.pause();
+                if (selectedMusic !== "none") {
+                    bgMusic.src = selectedMusic;
+                    bgMusic.loop = true;
+                    bgMusic.play().catch(() => {});
+                }
+
+                running = true;
+                document.getElementById('playBtn').innerHTML = '❚❚';
+                status.innerHTML = 'In Sessione';
+
+                timer = setInterval(() => {
+                    current--;
+                    updateTime();
+                    if (current <= 0) {
+                        clearInterval(timer);
+                        running = false;
+                        bgMusic.pause();
+                        if(gong) gong.play().catch(() => {});
+                        document.getElementById('playBtn').innerHTML = '▶';
+                        status.innerHTML = 'Conclusa';
+                        
+                        // Aggiorna statistiche automatiche al termine della sessione[cite: 4]
+                        let mins = parseFloat(localStorage.getItem('stats_minutes') || '0');
+                        let sessions = parseInt(localStorage.getItem('stats_sessions') || '0');
+                        localStorage.setItem('stats_minutes', (mins + (total / 60)).toString());
+                        localStorage.setItem('stats_sessions', (sessions + 1).toString());
+                    }
+                }, 1000);
+            };
+
+            // Tasto Reset[cite: 4]
+            document.getElementById('resetBtn').onclick = () => {
+                clearInterval(timer);
+                running = false;
                 bgMusic.pause();
+                current = total;
+                updateTime();
                 document.getElementById('playBtn').innerHTML = '▶';
-                document.getElementById('status').innerHTML = 'Pronto';
+                status.innerHTML = 'Pronto';
+            };
+        }
+
+        // --- CAMBIO TAB ---
+        function switchTab(tabId) {
+            if (tabId === 'stanze') {
+                if(bgMusic) bgMusic.pause();
+                const playBtn = document.getElementById('playBtn');
+                if(playBtn) playBtn.innerHTML = '▶';
+                if(status) status.innerHTML = 'Pronto';
                 clearInterval(timer);
                 running = false;
                 current = total;
                 updateTime();
 
-                // Fa ripartire l'audio dell'intro da zero in modo pulito ed immediato
-                introAudio.currentTime = 0;
-                introAudio.play().catch((err) => { console.log("L'audio non può partire in automatico:", err); });
+                if(introAudio) {
+                    introAudio.currentTime = 0;
+                    introAudio.play().catch((err) => { console.log("L'audio non può partire in automatico:", err); });
+                }
             }
 
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -426,46 +577,31 @@
             
             if (tabId === 'diario') { renderDiaryLogs(); }
             if (tabId === 'profilo') {
-                document.getElementById('profileNameInput').value = localStorage.getItem('utente') || '';
+                const pInput = document.getElementById('profileNameInput');
+                if(pInput) pInput.value = localStorage.getItem('utente') || '';
                 renderStats();
             }
         }
 
-        // --- TRACCIAMENTO GOOGLE ANALYTICS PER LE STANZE ---
-        document.querySelectorAll('.stanza-link').forEach(link => {
-            link.onclick = function(e) {
-                const nomeStanza = this.getAttribute('data-stanza');
-                if (typeof gtag === 'function') {
-                    gtag('event', 'select_content', {
-                        'content_type': 'stanza_meditazione',
-                        'item_id': nomeStanza
-                    });
-                }
-            };
-        });
+        // --- AGGIORNAMENTO TIMER GRAFICO ---
+        function updateTime() {
+            if(!time) return;
+            let m = Math.floor(current / 60).toString().padStart(2, '0');
+            let s = (current % 60).toString().padStart(2, '0');
+            time.innerHTML = `${m}:${s}`;
+        }
 
         // --- RENDER STATISTICHE ---
         function renderStats() {
             const mins = localStorage.getItem('stats_minutes') || '0';
             const sessions = localStorage.getItem('stats_sessions') || '0';
-            document.getElementById('statTotalMinutes').innerText = Math.round(parseFloat(mins));
-            document.getElementById('statSessions').innerText = sessions;
+            const tMins = document.getElementById('statTotalMinutes');
+            const tSess = document.getElementById('statSessions');
+            if(tMins) tMins.innerText = Math.round(parseFloat(mins));
+            if(tSess) tSess.innerText = sessions;
         }
 
-        // --- TEMA SCURO ---
-        document.getElementById('themeBtn').onclick = () => { body.classList.toggle('dark'); };
-
-        // --- MODIFICA PROFILO ---
-        document.getElementById('updateNameBtn').onclick = () => {
-            const updatedName = document.getElementById('profileNameInput').value.trim();
-            if (updatedName) {
-                localStorage.setItem('utente', updatedName);
-                welcomeName.innerHTML = `La Stanza Interiore di ${updatedName}`;
-                alert('Nome saved!');
-            }
-        };
-
-        // --- APPARATO DIARIO ---
+        // --- DIARIO: ELIMINAZIONE LOG ---
         function deleteDiaryLog(originalIndex) {
             if (confirm('Vuoi davvero eliminare questo pensiero?')) {
                 let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
@@ -475,6 +611,7 @@
             }
         }
 
+        // --- DIARIO: RENDER LOGS ---
         function renderDiaryLogs() {
             const container = document.getElementById('diaryLogsContainer');
             if (!container) return;
@@ -499,113 +636,6 @@
                 </div>
             `).join('');
         }
-
-        document.getElementById('saveDiaryBtn').onclick = () => {
-            const text = document.getElementById('diaryText').value.trim();
-            if (text) {
-                let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
-                logs.push({ data: new Date().toLocaleDateString('it-IT') + ' - ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}), nota: text });
-                localStorage.setItem('diario_logs', JSON.stringify(logs));
-                document.getElementById('diaryText').value = '';
-                renderDiaryLogs();
-            }
-        };
-
-        // --- APPARATO TIMER ED AUDIO ---
-        let total = 300;
-        let current = 300;
-        let running = false;
-        let timer;
-        let selectedMusic = "none";
-
-        const time = document.getElementById('time');
-        const status = document.getElementById('status');
-        const bgMusic = document.getElementById('bgMusic');
-        const gong = document.getElementById('gong');
-
-        function updateTime() {
-            let m = Math.floor(current / 60).toString().padStart(2, '0');
-            let s = (current % 60).toString().padStart(2, '0');
-            time.innerHTML = `${m}:${s}`;
-        }
-        updateTime();
-        renderDiaryLogs();
-
-        document.querySelectorAll('.duration-btn').forEach(btn => {
-            btn.onclick = () => {
-                if (running) return;
-                document.querySelectorAll('.duration-btn').forEach(b => {
-                    b.classList.remove('active');
-                    b.classList.add('glass');
-                });
-                btn.classList.add('active');
-                total = parseInt(btn.dataset.time);
-                current = total;
-                updateTime();
-                renderDiaryLogs();
-            };
-        });
-
-        document.querySelectorAll('.music-btn').forEach(btn => {
-            btn.onclick = () => {
-                document.querySelectorAll('.music-btn').forEach(b => { b.classList.remove('active'); });
-                btn.classList.add('active');
-                selectedMusic = btn.dataset.src;
-
-                if (running) {
-                    if (selectedMusic === "none") {
-                        bgMusic.pause();
-                    } else {
-                        bgMusic.src = selectedMusic;
-                        bgMusic.loop = true;
-                        bgMusic.play().catch(() => {});
-                    }
-                }
-            };
-        });
-
-        document.getElementById('playBtn').onclick = () => {
-            if (running) {
-                clearInterval(timer);
-                running = false;
-                bgMusic.pause();
-                document.getElementById('playBtn').innerHTML = '▶';
-                return;
-            }
-
-            introAudio.pause();
-            if (selectedMusic !== "none") {
-                bgMusic.src = selectedMusic;
-                bgMusic.loop = true;
-                bgMusic.play().catch(() => {});
-            }
-
-            running = true;
-            document.getElementById('playBtn').innerHTML = '❚❚';
-            status.innerHTML = 'In Sessione';
-
-            timer = setInterval(() => {
-                current--;
-                updateTime();
-                if (current <= 0) {
-                    clearInterval(timer);
-                    running = false;
-                    bgMusic.pause();
-                    document.getElementById('playBtn').innerHTML = '▶';
-                    status.innerHTML = 'Conclusa';
-                }
-            }, 1000);
-        };
-
-        document.getElementById('resetBtn').onclick = () => {
-            clearInterval(timer);
-            running = false;
-            bgMusic.pause();
-            current = total;
-            updateTime();
-            document.getElementById('playBtn').innerHTML = '▶';
-            status.innerHTML = 'Pronto';
-        };
     </script>
 </body>
 </html>
