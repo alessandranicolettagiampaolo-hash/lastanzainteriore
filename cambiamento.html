@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stanza del Cambiamento - La Stanza Interiore</title>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-49EZT9DGYL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-49EZT9DGYL');
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #f8f3ef, #efe4de);
+            color: #715d64;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        /* Animazione della barra di progresso dell'audio */
+        #progress {
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+
+<body>
+
+    <audio id="stanzaAudio">
+        <source src="cambiamento.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute w-96 h-96 bg-rose-100 rounded-full blur-3xl opacity-40 top-1/4 -left-20"></div>
+        <div class="absolute w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-30 bottom-10 right-0"></div>
+    </div>
+
+    <div class="relative z-10 max-w-xl mx-auto px-4 py-8 flex flex-col min-h-vh justify-between">
+        
+        <header class="flex items-center justify-between mb-8">
+            <a href="index.html" class="glass w-10 h-10 rounded-full flex items-center justify-center text-sm shadow-md hover:scale-105 transition">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <span class="uppercase tracking-[0.2em] text-[10px] opacity-60 font-medium">Stanza Interiore</span>
+            <div class="w-10"></div> </header>
+
+        <main class="flex-1 flex flex-col items-center justify-center text-center my-auto">
+            
+            <div class="w-64 h-64 sm:w-72 sm:h-72 rounded-[36px] overflow-hidden shadow-2xl mb-8 border-4 border-white/40">
+                <img src="cambiamento.jpg" alt="Stanza del Cambiamento" class="w-full h-full object-cover">
+            </div>
+
+            <p class="uppercase tracking-[0.25em] text-[11px] font-medium opacity-50 mb-2">Meditazione Guidata</p>
+            <h1 class="serif text-4xl sm:text-5xl text-[#9a717d] mb-4 tracking-tight">Cambiamento</h1>
+            
+            <p class="text-sm sm:text-base opacity-80 font-light leading-relaxed max-w-sm mb-10">
+                Fluiamo insieme verso il nuovo. Lascia andare le vecchie resistenze e accogli lo spazio della trasformazione con fiducia e apertura.
+            </p>
+
+            <div class="glass w-full rounded-3xl p-6 shadow-xl mb-12">
+                
+                <div id="progressContainer" class="w-full h-1.5 bg-white/40 rounded-full cursor-pointer mb-4 overflow-hidden">
+                    <div id="progress" class="h-full bg-[#c0909b] w-0 rounded-full"></div>
+                </div>
+                
+                <div class="flex justify-between text-[11px] opacity-60 font-medium mb-6">
+                    <span id="currentTime">00:00</span>
+                    <span id="durationTime">00:00</span>
+                </div>
+
+                <div class="flex justify-center">
+                    <button id="playPauseBtn" class="bg-[#c0909b] text-white w-20 h-20 rounded-full text-2xl shadow-xl flex items-center justify-center active:scale-95 transition-transform font-light">
+                        <i class="fa-solid fa-play ml-1" id="playIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="text-center opacity-40 text-[10px] tracking-wider uppercase py-4">
+            Il tuo spazio di evoluzione protetto
+        </footer>
+    </div>
+
+    <script>
+        const audio = document.getElementById('stanzaAudio');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playIcon = document.getElementById('playIcon');
+        const progress = document.getElementById('progress');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationTimeEl = document.getElementById('durationTime');
+
+        // Gestione Play / Pause
+        playPauseBtn.onclick = () => {
+            if (audio.paused) {
+                audio.play();
+                playIcon.classList.remove('fa-play', 'ml-1');
+                playIcon.classList.add('fa-pause');
+            } else {
+                audio.pause();
+                playIcon.classList.remove('fa-pause');
+                playIcon.classList.add('fa-play', 'ml-1');
+            }
+        };
+
+        // Aggiornamento della barra e dei minutaggi
+        audio.addEventListener('timeupdate', () => {
+            const percentage = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = `${percentage}%`;
+            
+            // Formatta il tempo corrente
+            currentTimeEl.innerText = formatTime(audio.currentTime);
+        });
+
+        // Mostra la durata totale appena la traccia è caricata
+        audio.addEventListener('loadedmetadata', () => {
+            durationTimeEl.innerText = formatTime(audio.duration);
+        });
+
+        // Permetti di cliccare sulla barra per mandare avanti/indietro l'audio
+        progressContainer.onclick = (e) => {
+            const width = progressContainer.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        };
+
+        // Quando l'audio finisce, resetta il pulsante grafico
+        audio.addEventListener('ended', () => {
+            playIcon.classList.remove('fa-pause');
+            playIcon.classList.add('fa-play', 'ml-1');
+            progress.style.width = '0%';
+        });
+
+        // Funzione di supporto per formattare i secondi in MM:SS
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "00:00";
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+    </script>
+</body>
+</html>
