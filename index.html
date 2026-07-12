@@ -100,6 +100,51 @@
         }
         #intro.hidden { opacity: 0; pointer-events: none; }
         body.dark #intro { background: linear-gradient(to bottom, #1d1721, #2d2434); }
+
+        /* STILE DELLA BOLLA DI SAPONE TRASPARENTE */
+        .soap-bubble {
+            position: relative;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(244, 197, 209, 0.2) 70%, rgba(186, 220, 245, 0.25) 100%);
+            box-shadow: 
+                inset 0 10px 20px rgba(255,255,255,0.4),
+                inset 0 -10px 20px rgba(113, 93, 100, 0.05),
+                inset -5px 0 15px rgba(186, 220, 245, 0.3),
+                inset 5px 0 15px rgba(244, 197, 209, 0.3),
+                0 10px 25px rgba(113, 93, 100, 0.04);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark .soap-bubble {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(212, 163, 174, 0.15) 80%, rgba(138, 180, 219, 0.15) 100%);
+            box-shadow: 
+                inset 0 8px 15px rgba(255,255,255,0.2),
+                inset -5px 0 12px rgba(138, 180, 219, 0.2),
+                inset 5px 0 12px rgba(212, 163, 174, 0.2),
+                0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .soap-bubble::after {
+            content: '';
+            position: absolute;
+            top: 12%;
+            left: 15%;
+            width: 25%;
+            height: 15%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.65);
+            transform: rotate(-30px);
+            filter: blur(1px);
+        }
+
+        /* Animazione respirazione controllata (4s espansione/in, 4s contrazione/out) */
+        .bubble-breathing {
+            animation: breatheAnimation 8s ease-in-out infinite;
+        }
+
+        @keyframes breatheAnimation {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+        }
     </style>
 </head>
 
@@ -108,6 +153,7 @@
     <audio id="introAudio" preload="auto" loop><source src="intro.mp3" type="audio/mpeg"></audio>
     <audio id="bgMusic" loop></audio>
     <audio id="gong"><source src="gong.mp3" type="audio/mpeg"></audio>
+    <audio id="bubbleMusic" preload="auto" loop><source src="bolla.mp3" type="audio/mpeg"></audio>
 
     <div id="intro">
         <div class="text-center px-6 w-full max-w-md mx-auto">
@@ -148,6 +194,7 @@
             </div>
         </header>
 
+        <!-- TAB STANZE -->
         <main id="tab-stanze" class="tab-content active px-4 mt-4 max-w-5xl mx-auto">
             <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl overflow-hidden mb-10">
                 <div class="grid md:grid-cols-12 gap-8 items-center">
@@ -197,6 +244,33 @@
             </div>
         </main>
 
+        <!-- TAB ALLENAMENTO RESPIRO AGGIORNATA CON CORREZIONE SINCRONIZZAZIONE E NUOVA DESCRIZIONE -->
+        <main id="tab-respiro-allenamento" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
+            <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl text-center min-h-[520px] flex flex-col justify-between items-center relative overflow-hidden">
+                <div class="max-w-xl mx-auto">
+                    <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL RESPIRO CONSAPEVOLE</p>
+                    <h3 class="serif text-2xl sm:text-3xl text-[#9b7280] mb-3">L'Essenza del Respiro</h3>
+                    <p id="breathInstruction" class="text-xs sm:text-sm opacity-85 font-light leading-relaxed px-2">
+                        In questo spazio puoi coltivare la purezza e l'essenza del tuo respiro. 3 minuti da dedicarti intensamente per fare ritorno a te stesso: sincronizza il ritmo del tuo respiro inspirando per 4 secondi mentre la bolla si espande, ed espirando per 4 secondi mentre la bolla si riduce.
+                    </p>
+                </div>
+
+                <!-- LA BOLLA NELLA SUA TAB DEDICATA -->
+                <div class="my-6 flex justify-center items-center h-64 w-full">
+                    <div id="fullScreenBreathBubble" class="soap-bubble w-48 h-48 sm:w-56 sm:h-56 rounded-full flex flex-col items-center justify-center border border-white/30 transition-all duration-1000">
+                        <div id="breathCountdown" class="serif text-3xl font-light text-[#b07d89]">03:00</div>
+                        <p id="breathPhase" class="text-[11px] uppercase tracking-widest opacity-60 mt-2 font-medium">Pronto</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 z-10">
+                    <button id="muteBubbleMusicBtn" class="glass w-12 h-12 rounded-full text-sm shadow-md flex items-center justify-center text-[#715d64] dark:text-[#f1dce1]" title="Silenzia sottofondo">🔊</button>
+                    <button id="startBreathBtn" class="bg-[#c0909b] text-white px-8 py-3.5 rounded-full text-xs uppercase tracking-widest font-medium shadow-xl hover:bg-[#b07d89] transition active:scale-95">Inizia Sessione</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB PRATICHE (TIMER LIBERO) -->
         <main id="tab-pratiche" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
             <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl">
                 <div class="mb-6 text-center max-w-xl mx-auto">
@@ -207,8 +281,8 @@
                     </p>
                 </div>
 
-                <div class="flex justify-center mb-8">
-                    <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-full border border-[#c8a7b0]/60 flex flex-col items-center justify-center bg-white/10 shadow-inner">
+                <div class="flex justify-center mb-8 h-60 items-center">
+                    <div id="breathBubble" class="soap-bubble w-48 h-48 sm:w-52 sm:h-52 rounded-full flex flex-col items-center justify-center border border-white/30">
                         <div id="time" class="serif text-4xl sm:text-5xl font-light text-[#b07d89]">05:00</div>
                         <p id="status" class="text-[11px] uppercase tracking-wider opacity-60 mt-2 text-center px-4">Pronto</p>
                     </div>
@@ -236,6 +310,7 @@
             </div>
         </main>
 
+        <!-- TAB DIARIO -->
         <main id="tab-diario" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
             <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl">
                 <div class="grid md:grid-cols-12 gap-8 items-center mb-8">
@@ -243,7 +318,7 @@
                         <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL DIARIO DELL'ANIMA</p>
                         <h3 class="serif text-3xl text-[#9b7280] mb-4">Ancorare l'esperienza</h3>
                         <p class="text-sm opacity-90 leading-relaxed font-light mb-4">
-                            Dopo una meditazione, le sensazioni sono come nuvole: bellissime ma volatili. Il diario serve a <strong>fissare</strong> questo state di grazia, trasformando un'emozione astratta in una consapevolezza concreta.
+                            Dopo una meditazione, le sensazioni sono come nuvole: bellissime ma volatili. Il diario serve a <strong>fissare</strong> questo stato di grazia, transformando un'emozione astratta in una consapevolezza concreta.
                         </p>
                         <p class="text-sm opacity-90 leading-relaxed font-light">
                             Scrivere aiuta a decantare i pensieri residui e a creare un ponte prezioso tra il silenzio della tua Stanza Interiore e il rumore del mondo esterno.
@@ -271,6 +346,7 @@
             </div>
         </main>
 
+        <!-- TAB PROFILO -->
         <main id="tab-profilo" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
             <div class="grid md:grid-cols-3 gap-6">
                 <div class="md:col-span-1 flex flex-col gap-6">
@@ -333,17 +409,21 @@
 
     </div>
 
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md bg-white/70 dark:bg-[#2d2434]/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/30 dark:border-white/10 px-6 py-4 flex justify-between items-center">
-        <button onclick="switchTab('stanze')" id="nav-stanze" class="nav-icon text-[#c0909b] text-xl transition-all duration-300 transform active:scale-90 px-4">
+    <!-- NAV BAR -->
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-white/70 dark:bg-[#2d2434]/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/30 dark:border-white/10 px-4 py-4 flex justify-between items-center">
+        <button onclick="switchTab('stanze')" id="nav-stanze" class="nav-icon text-[#c0909b] text-xl transition-all duration-300 transform active:scale-90 px-3">
             <i class="fa-solid fa-house-chimney"></i>
         </button>
-        <button onclick="switchTab('pratiche')" id="nav-pratiche" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-4">
+        <button onclick="switchTab('respiro-allenamento')" id="nav-respiro-allenamento" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-3" title="Allenamento Respiro">
+            <i class="fa-solid fa-wind"></i>
+        </button>
+        <button onclick="switchTab('pratiche')" id="nav-pratiche" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-3">
             <i class="fa-solid fa-hourglass-start"></i>
         </button>
-        <button onclick="switchTab('diario')" id="nav-diario" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-4">
+        <button onclick="switchTab('diario')" id="nav-diario" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-3">
             <i class="fa-solid fa-feather-pointed"></i>
         </button>
-        <button onclick="switchTab('profilo')" id="nav-profilo" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-4">
+        <button onclick="switchTab('profilo')" id="nav-profilo" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-3">
             <i class="fa-solid fa-circle-user"></i>
         </button>
     </nav>
@@ -355,7 +435,14 @@
         let running = false;
         let timer;
         let selectedMusic = "none";
-        let time, status, bgMusic, gong, muteIntroBtn;
+        let time, status, bgMusic, gong, muteIntroBtn, breathBubble;
+
+        // Variabili per l'allenamento del respiro
+        let breathBubbleTimer;
+        let breathTimeLeft = 180; 
+        let breathRunning = false;
+        let breathCycleTimer = null; // Timer millisecondi per il testo
+        let bubbleMusic, startBreathBtn, breathCountdown, breathPhase, fullScreenBreathBubble, muteBubbleMusicBtn;
 
         window.addEventListener('DOMContentLoaded', () => {
             intro = document.getElementById('intro');
@@ -370,6 +457,14 @@
             bgMusic = document.getElementById('bgMusic');
             gong = document.getElementById('gong');
             muteIntroBtn = document.getElementById('muteIntroBtn');
+            breathBubble = document.getElementById('breathBubble');
+
+            bubbleMusic = document.getElementById('bubbleMusic');
+            startBreathBtn = document.getElementById('startBreathBtn');
+            breathCountdown = document.getElementById('breathCountdown');
+            breathPhase = document.getElementById('breathPhase');
+            fullScreenBreathBubble = document.getElementById('fullScreenBreathBubble');
+            muteBubbleMusicBtn = document.getElementById('muteBubbleMusicBtn');
 
             setupEventListeners();
             checkAndShowIntro();
@@ -389,6 +484,25 @@
                 userNameInput.value = '';
             }
             intro.classList.remove('hidden');
+        }
+
+        // Funzione per gestire il testo INSPIRA / ESPIRA in perfetto sincrono con gli 8 secondi totali dell'animazione CSS
+        function startBreathTextSync() {
+            if (breathCycleTimer) clearInterval(breathCycleTimer);
+            
+            let startTime = Date.now();
+            
+            function updateText() {
+                let elapsed = (Date.now() - startTime) % 8000; // Ciclo continuo di 8000ms (8 secondi)
+                if (elapsed < 4000) {
+                    breathPhase.innerHTML = "Inspira";
+                } else {
+                    breathPhase.innerHTML = "Espira";
+                }
+            }
+            
+            updateText();
+            breathCycleTimer = setInterval(updateText, 100); // Controlla la precisione ogni 100ms
         }
 
         function setupEventListeners() {
@@ -412,7 +526,6 @@
                 }
             };
 
-            // GESTIONE DEL TASTO MUTO/STOP PER L'INTRO
             muteIntroBtn.onclick = () => {
                 if (introAudio.muted) {
                     introAudio.muted = false;
@@ -421,6 +534,67 @@
                     introAudio.muted = true;
                     muteIntroBtn.innerHTML = "🔇";
                 }
+            };
+
+            muteBubbleMusicBtn.onclick = () => {
+                if (bubbleMusic.muted) {
+                    bubbleMusic.muted = false;
+                    muteBubbleMusicBtn.innerHTML = "🔊";
+                } else {
+                    bubbleMusic.muted = true;
+                    muteBubbleMusicBtn.innerHTML = "🔇";
+                }
+            };
+
+            // LOGICA CORRETTA PER L'ALLENAMENTO DEL RESPIRO
+            startBreathBtn.onclick = () => {
+                if (breathRunning) {
+                    clearInterval(breathBubbleTimer);
+                    if (breathCycleTimer) clearInterval(breathCycleTimer);
+                    breathRunning = false;
+                    bubbleMusic.pause();
+                    startBreathBtn.innerHTML = "Riprendi";
+                    fullScreenBreathBubble.classList.remove('bubble-breathing');
+                    breathPhase.innerHTML = "In Pausa";
+                    return;
+                }
+
+                if (introAudio) introAudio.pause();
+
+                breathRunning = true;
+                startBreathBtn.innerHTML = "Pausa";
+                fullScreenBreathBubble.classList.add('bubble-breathing');
+                
+                // Avvia subito il motore di sincronizzazione millimetrica del testo
+                startBreathTextSync();
+                
+                bubbleMusic.play().catch(() => {});
+
+                breathBubbleTimer = setInterval(() => {
+                    breathTimeLeft--;
+                    
+                    let bm = Math.floor(breathTimeLeft / 60).toString().padStart(2, '0');
+                    let bs = (breathTimeLeft % 60).toString().padStart(2, '0');
+                    breathCountdown.innerHTML = `${bm}:${bs}`;
+
+                    if (breathTimeLeft <= 0) {
+                        clearInterval(breathBubbleTimer);
+                        if (breathCycleTimer) clearInterval(breathCycleTimer);
+                        breathRunning = false;
+                        bubbleMusic.pause();
+                        fullScreenBreathBubble.classList.remove('bubble-breathing');
+                        if (gong) gong.play().catch(() => {});
+                        startBreathBtn.innerHTML = "Inizia Sessione";
+                        breathPhase.innerHTML = "Completato";
+                        breathTimeLeft = 180;
+                        breathCountdown.innerHTML = "03:00";
+                        
+                        let mins = parseFloat(localStorage.getItem('stats_minutes') || '0');
+                        let sessions = parseInt(localStorage.getItem('stats_sessions') || '0');
+                        localStorage.setItem('stats_minutes', (mins + 3).toString());
+                        localStorage.setItem('stats_sessions', (sessions + 1).toString());
+                    }
+                }, 1000);
             };
 
             document.querySelectorAll('.stanza-link').forEach(link => {
@@ -498,10 +672,10 @@
                     running = false;
                     bgMusic.pause();
                     document.getElementById('playBtn').innerHTML = '▶';
+                    if (breathBubble) breathBubble.classList.remove('bubble-breathing');
                     return;
                 }
 
-                // FERMA L'INTRO SOLO QUANDO L'UTENTE AVVIA LA MEDITAZIONE LIBERA
                 if (introAudio) introAudio.pause();
                 
                 if (selectedMusic !== "none") {
@@ -513,6 +687,7 @@
                 running = true;
                 document.getElementById('playBtn').innerHTML = '❚❚';
                 status.innerHTML = 'In Sessione';
+                if (breathBubble) breathBubble.classList.add('bubble-breathing');
 
                 timer = setInterval(() => {
                     current--;
@@ -521,6 +696,7 @@
                         clearInterval(timer);
                         running = false;
                         bgMusic.pause();
+                        if (breathBubble) breathBubble.classList.remove('bubble-breathing');
                         if(gong) gong.play().catch(() => {});
                         document.getElementById('playBtn').innerHTML = '▶';
                         status.innerHTML = 'Conclusa';
@@ -537,6 +713,7 @@
                 clearInterval(timer);
                 running = false;
                 bgMusic.pause();
+                if (breathBubble) breathBubble.classList.remove('bubble-breathing');
                 current = total;
                 updateTime();
                 document.getElementById('playBtn').innerHTML = '▶';
@@ -544,8 +721,19 @@
             };
         }
 
-        // CAMBIO TAB CONTINUO SENZA INTERROMPERE L'AUDIO DI SOTTOFONDO
         function switchTab(tabId) {
+            if (tabId !== 'respiro-allenamento' && breathRunning) {
+                clearInterval(breathBubbleTimer);
+                if (breathCycleTimer) clearInterval(breathCycleTimer);
+                breathRunning = false;
+                bubbleMusic.pause();
+                startBreathBtn.innerHTML = "Inizia Sessione";
+                fullScreenBreathBubble.classList.remove('bubble-breathing');
+                breathPhase.innerHTML = "Pronto";
+                breathTimeLeft = 180;
+                breathCountdown.innerHTML = "03:00";
+            }
+
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             const destinationTab = document.getElementById(`tab-${tabId}`);
             if (destinationTab) destinationTab.classList.add('active');
