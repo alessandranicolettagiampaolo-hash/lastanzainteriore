@@ -61,7 +61,6 @@
         .card { transition: .4s cubic-bezier(0.16, 1, 0.3, 1); }
         .card:hover { transform: translateY(-6px); }
 
-        /* Stati attivi per i bottoni del Timer (Giorno) */
         .music-btn.active, .duration-btn.active {
             background: #c0909b !important;
             color: white !important;
@@ -69,7 +68,6 @@
             box-shadow: 0 8px 20px rgba(192, 144, 155, 0.3);
         }
 
-        /* Stati attivi per i bottoni del Timer (Notte) */
         body.dark .music-btn.active, body.dark .duration-btn.active {
             background: #d4a3ae !important;
             color: #1d1721 !important;
@@ -77,7 +75,6 @@
             box-shadow: 0 0 15px rgba(212, 163, 174, 0.5);
         }
 
-        /* Animazione d'ingresso delle sezioni */
         .tab-content {
             display: none;
             animation: fadeIn 0.5s ease forwards;
@@ -108,7 +105,7 @@
 
 <body id="body">
 
-    <audio id="introAudio"><source src="intro.mp3" type="audio/mpeg"></audio>
+    <audio id="introAudio" preload="auto" loop><source src="intro.mp3" type="audio/mpeg"></audio>
     <audio id="bgMusic" loop></audio>
     <audio id="gong"><source src="gong.mp3" type="audio/mpeg"></audio>
 
@@ -144,7 +141,10 @@
                         <p class="uppercase tracking-[0.2em] text-[8px] opacity-60 font-medium text-left">IL TUO SPAZIO DI QUIETE</p>
                     </div>
                 </div>
-                <button id="themeBtn" class="glass w-10 h-10 rounded-full shadow-md text-base flex items-center justify-center">☾</button>
+                <div class="flex items-center gap-2">
+                    <button id="muteIntroBtn" class="glass w-10 h-10 rounded-full shadow-md text-base flex items-center justify-center text-[#715d64] dark:text-[#f1dce1]" title="Disattiva musica di sottofondo">🔊</button>
+                    <button id="themeBtn" class="glass w-10 h-10 rounded-full shadow-md text-base flex items-center justify-center text-[#715d64] dark:text-[#f1dce1]">☾</button>
+                </div>
             </div>
         </header>
 
@@ -152,7 +152,7 @@
             <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl overflow-hidden mb-10">
                 <div class="grid md:grid-cols-12 gap-8 items-center">
                     <div class="md:col-span-5 flex justify-center">
-                        <img src="avatar.png" class="w-44 h-44 sm:w-52 sm:h-52 md:w-60 md:h-60 rounded-full object-cover shadow-xl border-4 border-white/40">
+                        <img src="avatar.png" class="w-56 h-56 sm:w-64 sm:h-64 rounded-full object-cover shadow-xl border-4 border-white/40">
                     </div>
                     <div class="md:col-span-7 text-left">
                         <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-3 font-semibold text-[#b07d89]">La tua guida</p>
@@ -175,23 +175,23 @@
                 </div>
                 
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-2">
+                    <a href="cambiamento.html" data-stanza="Cambiamento" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="cambiamento.jpg" class="w-full h-full object-cover object-top">
+                    </a>
                     <a href="lasciar-andare.html" data-stanza="Lasciar Andare" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="lasciar-andare.jpg" class="w-full h-full object-cover">
+                        <img src="lasciar-andare.jpg" class="w-full h-full object-cover object-top">
                     </a>
                     <a href="sonno.html" data-stanza="Sonno" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="sonno.jpg" class="w-full h-full object-cover">
+                        <img src="sonno.jpg" class="w-full h-full object-cover object-top">
                     </a>
                     <a href="respiro.html" data-stanza="Respiro" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="respiro.jpg" class="w-full h-full object-cover">
+                        <img src="respiro.jpg" class="w-full h-full object-cover object-top">
                     </a>
                     <a href="gratitudine.html" data-stanza="Gratitudine" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="gratitudine.jpg" class="w-full h-full object-cover">
+                        <img src="gratitudine.jpg" class="w-full h-full object-cover object-top">
                     </a>
                     <a href="meteo.html" data-stanza="Meteo Interiore" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="meteo.jpg" class="w-full h-full object-cover">
-                    </a>
-                    <a href="cambiamento.html" data-stanza="Cambiamento" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="cambiamento.jpg" class="w-full h-full object-cover">
+                        <img src="meteo.jpg" class="w-full h-full object-cover object-top">
                     </a>
                 </div>
             </div>
@@ -348,20 +348,16 @@
         </button>
     </nav>
 
-
     <script>
-        // --- DICHIARAZIONE VARIABILI GLOBALI ---
         let intro, introAudio, userNameInput, nameLabel, inputContainer, welcomeName, body;
         let total = 300;
         let current = 300;
         let running = false;
         let timer;
         let selectedMusic = "none";
-        let time, status, bgMusic, gong;
+        let time, status, bgMusic, gong, muteIntroBtn;
 
-        // --- ATTENDI IL CARICAMENTO COMPLETO DELLA PAGINA (Risolve la schermata bianca) ---
         window.addEventListener('DOMContentLoaded', () => {
-            // Inizializzazione elementi DOM[cite: 4]
             intro = document.getElementById('intro');
             introAudio = document.getElementById('introAudio');
             userNameInput = document.getElementById('userNameInput');
@@ -373,17 +369,14 @@
             status = document.getElementById('status');
             bgMusic = document.getElementById('bgMusic');
             gong = document.getElementById('gong');
+            muteIntroBtn = document.getElementById('muteIntroBtn');
 
-            // Configurazione Eventi dei Bottoni
             setupEventListeners();
-
-            // Avvia la schermata iniziale in modo sicuro[cite: 4]
             checkAndShowIntro();
             updateTime();
             renderDiaryLogs();
         });
 
-        // --- APERTURA E PREPARAZIONE INTRO ---
         function checkAndShowIntro() {
             let storedUser = localStorage.getItem('utente');
             if (storedUser) {
@@ -398,9 +391,7 @@
             intro.classList.remove('hidden');
         }
 
-        // --- CONFIGURAZIONE EVENTI ---
         function setupEventListeners() {
-            // Tasto Entra[cite: 4]
             document.getElementById('enterBtn').onclick = () => {
                 let storedUser = localStorage.getItem('utente');
                 if (!storedUser) {
@@ -411,11 +402,27 @@
                     }
                 }
                 intro.classList.add('hidden');
-                introAudio.currentTime = 0;
-                introAudio.play().catch((err) => { console.log("Riproduzione audio bloccata:", err); });
+                
+                if (introAudio) {
+                    introAudio.currentTime = 0;
+                    let playPromise = introAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch((err) => { console.log("Permessi audio:", err); });
+                    }
+                }
             };
 
-            // Tracciamento Google Analytics[cite: 4]
+            // GESTIONE DEL TASTO MUTO/STOP PER L'INTRO
+            muteIntroBtn.onclick = () => {
+                if (introAudio.muted) {
+                    introAudio.muted = false;
+                    muteIntroBtn.innerHTML = "🔊";
+                } else {
+                    introAudio.muted = true;
+                    muteIntroBtn.innerHTML = "🔇";
+                }
+            };
+
             document.querySelectorAll('.stanza-link').forEach(link => {
                 link.onclick = function(e) {
                     const nomeStanza = this.getAttribute('data-stanza');
@@ -428,10 +435,8 @@
                 };
             });
 
-            // Tema Scuro[cite: 4]
             document.getElementById('themeBtn').onclick = () => { body.classList.toggle('dark'); };
 
-            // Modifica Nome Profilo[cite: 4]
             document.getElementById('updateNameBtn').onclick = () => {
                 const updatedName = document.getElementById('profileNameInput').value.trim();
                 if (updatedName) {
@@ -441,7 +446,6 @@
                 }
             };
 
-            // Salvataggio Diario[cite: 4]
             document.getElementById('saveDiaryBtn').onclick = () => {
                 const text = document.getElementById('diaryText').value.trim();
                 if (text) {
@@ -456,7 +460,6 @@
                 }
             };
 
-            // Bottoni Durata Timer[cite: 4]
             document.querySelectorAll('.duration-btn').forEach(btn => {
                 btn.onclick = () => {
                     if (running) return;
@@ -471,7 +474,6 @@
                 };
             });
 
-            // Bottoni Musica Timer[cite: 4]
             document.querySelectorAll('.music-btn').forEach(btn => {
                 btn.onclick = () => {
                     document.querySelectorAll('.music-btn').forEach(b => { b.classList.remove('active'); });
@@ -490,7 +492,6 @@
                 };
             });
 
-            // Tasto Play/Pausa[cite: 4]
             document.getElementById('playBtn').onclick = () => {
                 if (running) {
                     clearInterval(timer);
@@ -500,7 +501,9 @@
                     return;
                 }
 
-                introAudio.pause();
+                // FERMA L'INTRO SOLO QUANDO L'UTENTE AVVIA LA MEDITAZIONE LIBERA
+                if (introAudio) introAudio.pause();
+                
                 if (selectedMusic !== "none") {
                     bgMusic.src = selectedMusic;
                     bgMusic.loop = true;
@@ -522,7 +525,6 @@
                         document.getElementById('playBtn').innerHTML = '▶';
                         status.innerHTML = 'Conclusa';
                         
-                        // Aggiorna statistiche automatiche al termine della sessione[cite: 4]
                         let mins = parseFloat(localStorage.getItem('stats_minutes') || '0');
                         let sessions = parseInt(localStorage.getItem('stats_sessions') || '0');
                         localStorage.setItem('stats_minutes', (mins + (total / 60)).toString());
@@ -531,7 +533,6 @@
                 }, 1000);
             };
 
-            // Tasto Reset[cite: 4]
             document.getElementById('resetBtn').onclick = () => {
                 clearInterval(timer);
                 running = false;
@@ -543,24 +544,8 @@
             };
         }
 
-        // --- CAMBIO TAB ---
+        // CAMBIO TAB CONTINUO SENZA INTERROMPERE L'AUDIO DI SOTTOFONDO
         function switchTab(tabId) {
-            if (tabId === 'stanze') {
-                if(bgMusic) bgMusic.pause();
-                const playBtn = document.getElementById('playBtn');
-                if(playBtn) playBtn.innerHTML = '▶';
-                if(status) status.innerHTML = 'Pronto';
-                clearInterval(timer);
-                running = false;
-                current = total;
-                updateTime();
-
-                if(introAudio) {
-                    introAudio.currentTime = 0;
-                    introAudio.play().catch((err) => { console.log("L'audio non può partire in automatico:", err); });
-                }
-            }
-
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             const destinationTab = document.getElementById(`tab-${tabId}`);
             if (destinationTab) destinationTab.classList.add('active');
@@ -583,7 +568,6 @@
             }
         }
 
-        // --- AGGIORNAMENTO TIMER GRAFICO ---
         function updateTime() {
             if(!time) return;
             let m = Math.floor(current / 60).toString().padStart(2, '0');
@@ -591,7 +575,6 @@
             time.innerHTML = `${m}:${s}`;
         }
 
-        // --- RENDER STATISTICHE ---
         function renderStats() {
             const mins = localStorage.getItem('stats_minutes') || '0';
             const sessions = localStorage.getItem('stats_sessions') || '0';
@@ -601,7 +584,6 @@
             if(tSess) tSess.innerText = sessions;
         }
 
-        // --- DIARIO: ELIMINAZIONE LOG ---
         function deleteDiaryLog(originalIndex) {
             if (confirm('Vuoi davvero eliminare questo pensiero?')) {
                 let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
@@ -611,7 +593,6 @@
             }
         }
 
-        // --- DIARIO: RENDER LOGS ---
         function renderDiaryLogs() {
             const container = document.getElementById('diaryLogsContainer');
             if (!container) return;
