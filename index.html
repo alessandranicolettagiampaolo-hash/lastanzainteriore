@@ -444,6 +444,9 @@
         let breathCycleTimer = null; // Timer millisecondi per il testo
         let bubbleMusic, startBreathBtn, breathCountdown, breathPhase, fullScreenBreathBubble, muteBubbleMusicBtn;
 
+        // Variabile globale per gestire l'evento di installazione PWA
+        let deferredPrompt;
+
         window.addEventListener('DOMContentLoaded', () => {
             intro = document.getElementById('intro');
             introAudio = document.getElementById('introAudio');
@@ -470,6 +473,12 @@
             checkAndShowIntro();
             updateTime();
             renderDiaryLogs();
+        });
+
+        // Intercetta l'evento di installazione del browser
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
         });
 
         function checkAndShowIntro() {
@@ -506,6 +515,21 @@
         }
 
         function setupEventListeners() {
+            // Gestione del pulsante d'installazione PWA
+            const installBtn = document.getElementById('installBtn');
+            if (installBtn) {
+                installBtn.onclick = async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`Scelta dell'utente: ${outcome}`);
+                        deferredPrompt = null;
+                    } else {
+                        alert("L'applicazione è già installata o il tuo browser non supporta l'installazione diretta. Se usi iPhone, usa il tasto 'Condividi' in basso su Safari e poi seleziona 'Aggiungi alla schermata Home'.");
+                    }
+                };
+            }
+
             document.getElementById('enterBtn').onclick = () => {
                 let storedUser = localStorage.getItem('utente');
                 if (!storedUser) {
