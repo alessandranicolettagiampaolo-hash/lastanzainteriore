@@ -153,7 +153,7 @@
     <audio id="gong"><source src="gong.mp3" type="audio/mpeg"></audio>
     <audio id="bubbleMusic" preload="auto" loop><source src="bolla.mp3" type="audio/mpeg"></audio>
 
-    <!-- INTRO SCHERMATA BENVENUTO -->
+    <!-- SCHERMATA BENVENUTO -->
     <div id="intro">
         <div class="text-center px-6 w-full max-w-md mx-auto">
             <img src="logo.png" class="w-44 h-auto mx-auto mb-6 drop-shadow-xl object-contain">
@@ -216,7 +216,7 @@
                 </div>
             </div>
 
-            <!-- CAROSELLO STANZE INTERIORI (MEDITAZIONI GUIDATE) -->
+            <!-- CAROSELLO STANZE INTERIORI -->
             <div class="glass rounded-[36px] p-5 sm:p-6 shadow-xl mb-10">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
@@ -249,7 +249,7 @@
                 </div>
             </div>
 
-            <!-- SEZIONE GUIDA PRATICA -->
+            <!-- SEZIONE GUIDA PRATICA (RESPIRAZIONE YOGICA) -->
             <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
@@ -444,7 +444,7 @@
     </div>
 
     <!-- NAV BAR BOTTOM -->
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md bg-white/70 dark:bg-[#2d2434]/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/30 dark:border-white/10 px-4 py-4 flex justify-between items-center">
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-white/70 dark:bg-[#2d2434]/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/30 dark:border-white/10 px-4 py-4 flex justify-between items-center">
         <button onclick="switchTab('stanze')" id="nav-stanze" class="nav-icon text-[#c0909b] text-xl transition-all duration-300 transform active:scale-90 px-3">
             <i class="fa-solid fa-house-chimney"></i>
         </button>
@@ -507,40 +507,65 @@
             renderDiaryLogs();
         });
 
+        // Gestisce il rientro alla pagina (anche con il tasto 'Indietro' da mobile)
+        window.addEventListener('pageshow', (event) => {
+            let hasEnteredSession = sessionStorage.getItem('hasEntered');
+            if (hasEnteredSession === 'true') {
+                if (intro) intro.classList.add('hidden');
+                playIntroAudio();
+            }
+        });
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
         });
 
+        function playIntroAudio() {
+            if (introAudio && !introAudio.muted) {
+                introAudio.currentTime = 0;
+                let playPromise = introAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch((err) => { 
+                        console.log("Audio in attesa di interazione dell'utente."); 
+                    });
+                }
+            }
+        }
+
         function checkAndShowIntro() {
             let storedUser = localStorage.getItem('utente');
-            let introSuperata = localStorage.getItem('intro_superata');
+            let hasEnteredSession = sessionStorage.getItem('hasEntered');
 
-            // Se l'intro è già stata superata, nascondila sempre e mostra direttamente la home
-            if (introSuperata === 'true') {
-                intro.classList.add('hidden');
-                if (storedUser) {
+            // 1. Se l'utente sta navigando (es. tornato da una stanza)
+            if (hasEnteredSession === 'true') {
+                if (intro) intro.classList.add('hidden');
+                if (storedUser && welcomeName) {
                     welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
                 }
+                playIntroAudio();
                 return;
             }
 
-            // Primo accesso assoluto
+            // 2. Se è un nuovo avvio dell'app ma l'utente si era già registrato in passato
             if (storedUser) {
-                nameLabel.innerHTML = `Bentornato nella tua Stanza Interiore, <span class="font-semibold text-[#b07d89]">${storedUser}</span>`;
-                inputContainer.style.display = 'none';
                 welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
+                nameLabel.innerHTML = `Bentornato/a, <strong>${storedUser}</strong>!`;
+                inputContainer.style.display = 'none';
+                intro.classList.remove('hidden');
             } else {
+                // 3. Primo accesso assoluto
                 nameLabel.innerHTML = "Come preferisci che ti chiami?";
                 inputContainer.style.display = 'flex';
                 userNameInput.value = '';
+                intro.classList.remove('hidden');
             }
-            intro.classList.remove('hidden');
         }
 
         function startBreathTextSync() {
             if (breathCycleTimer) clearInterval(breathCycleTimer);
             let startTime = Date.now();
+            
             function updateText() {
                 let elapsed = (Date.now() - startTime) % 8000;
                 if (elapsed < 4000) {
@@ -549,6 +574,7 @@
                     breathPhase.innerHTML = "Espira";
                 }
             }
+            
             updateText();
             breathCycleTimer = setInterval(updateText, 100);
         }
@@ -560,7 +586,6 @@
                     if (deferredPrompt) {
                         deferredPrompt.prompt();
                         const { outcome } = await deferredPrompt.userChoice;
-                        console.log(`Scelta dell'utente: ${outcome}`);
                         deferredPrompt = null;
                     } else {
                         alert("L'applicazione è già installata o il tuo browser non supporta l'installazione diretta. Se usi iPhone, usa il tasto 'Condividi' in basso su Safari e poi seleziona 'Aggiungi alla schermata Home'.");
@@ -576,27 +601,23 @@
                         localStorage.setItem('utente', currentName);
                         welcomeName.innerHTML = `La Stanza Interiore di ${currentName}`;
                     }
+                } else {
+                    welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
                 }
-                
-                // Segna l'intro come superata in modo permanente per le prossime navigazioni
-                localStorage.setItem('intro_superata', 'true');
+
+                sessionStorage.setItem('hasEntered', 'true');
                 intro.classList.add('hidden');
-                
-                if (introAudio) {
-                    introAudio.currentTime = 0;
-                    let playPromise = introAudio.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch((err) => { console.log("Permessi audio:", err); });
-                    }
-                }
+                playIntroAudio();
             };
 
             muteIntroBtn.onclick = () => {
                 if (introAudio.muted) {
                     introAudio.muted = false;
                     muteIntroBtn.innerHTML = "🔊";
+                    playIntroAudio();
                 } else {
                     introAudio.muted = true;
+                    introAudio.pause();
                     muteIntroBtn.innerHTML = "🔇";
                 }
             };
@@ -659,6 +680,8 @@
 
             document.querySelectorAll('.stanza-link').forEach(link => {
                 link.onclick = function(e) {
+                    // Salva lo stato prima di navigare alla stanza
+                    sessionStorage.setItem('hasEntered', 'true');
                     const nomeStanza = this.getAttribute('data-stanza');
                     if (typeof gtag === 'function') {
                         gtag('event', 'select_content', {
@@ -854,7 +877,7 @@
             const logsWithIndex = logs.map((log, index) => ({ ...log, originalIndex: index }));
             
             container.innerHTML = logsWithIndex.slice().reverse().map(log => `
-                <div class="bg-white/40 dark:bg-white/5 border border-[#c8a8b0]/20 p-4 rounded-2xl shadow-sm text-left relative group">
+                <div class="bg-white/40 dark:bg-white/5 border border-[#c8a7b0]/20 p-4 rounded-2xl shadow-sm text-left relative group">
                     <div class="flex justify-between items-start gap-4 mb-1">
                         <div class="text-[11px] uppercase tracking-wider text-[#b07d89] font-medium">${log.data}</div>
                         <button onclick="deleteDiaryLog(${log.originalIndex})" class="text-gray-400 hover:text-rose-500 text-xs transition p-1" title="Elimina pensiero">

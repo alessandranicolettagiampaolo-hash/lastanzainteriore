@@ -5,6 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meteo Interiore - La Stanza Interiore</title>
+    
+    <!-- Google Tag Manager -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-49EZT9DGYL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-49EZT9DGYL');
+    </script>
+
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +33,13 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            transition: .6s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body.dark {
+            background: linear-gradient(to bottom, #1d1721, #2d2434);
+            color: #f1dce1;
         }
 
         .serif {
@@ -33,6 +51,11 @@
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        body.dark .glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         input[type="range"] {
@@ -52,10 +75,18 @@
             border-radius: 3px;
         }
 
+        body.dark input[type="range"]::-webkit-slider-runnable-track {
+            background: rgba(241, 220, 225, 0.15);
+        }
+
         input[type="range"]::-moz-range-track {
             background: rgba(113, 93, 100, 0.15);
- height: 6px;
+            height: 6px;
             border-radius: 3px;
+        }
+
+        body.dark input[type="range"]::-moz-range-track {
+            background: rgba(241, 220, 225, 0.15);
         }
 
         input[type="range"]::-webkit-slider-thumb {
@@ -92,31 +123,38 @@
 
 <body class="p-6">
 
+    <!-- Controllo preventivo per il tema scuro -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+        }
+    </script>
+
     <!-- SFONDO SFUMATO IN SOTTOFONDO -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="absolute w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-20 -top-20 -left-20"></div>
-        <div class="absolute w-96 h-96 bg-rose-100 rounded-full blur-3xl opacity-30 bottom-0 right-0"></div>
+        <div class="absolute w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-20 -top-20 -left-20 dark:bg-pink-900/20"></div>
+        <div class="absolute w-96 h-96 bg-rose-100 rounded-full blur-3xl opacity-30 bottom-0 right-0 dark:bg-rose-900/20"></div>
     </div>
 
     <!-- HEADER CON TASTO TORNA DIETRO -->
     <header class="relative z-10 max-w-md w-full mx-auto flex items-center justify-start">
-        <a href="index.html" class="glass px-5 py-2.5 rounded-full text-xs uppercase tracking-wider font-medium shadow-sm transition active:scale-95 flex items-center gap-2">
+        <a href="index.html" class="glass px-5 py-2.5 rounded-full text-xs uppercase tracking-wider font-medium shadow-sm transition hover:-translate-x-1 active:scale-95 flex items-center gap-2 text-[#715d64] dark:text-[#f1dce1]">
             <i class="fa-solid fa-chevron-left"></i> Torna alla Home
         </a>
     </header>
 
     <!-- CONTAINER CENTRALE -->
-    <main class="relative z-10 max-w-md w-full mx-auto glass rounded-[40px] p-8 text-center shadow-2xl my-auto border border-white/40">
-        <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-2 font-semibold">ACCOGLIERE OGNI STATO D'ANIMO</p>
-        <h1 class="serif text-4xl text-[#9b7280] mb-6">Meteo Interiore</h1>
+    <main class="relative z-10 max-w-md w-full mx-auto glass rounded-[40px] p-8 text-center shadow-2xl my-auto border border-white/40 dark:border-white/10">
+        <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-2 font-semibold text-[#715d64] dark:text-[#f1dce1]">ACCOGLIERE OGNI STATO D'ANIMO</p>
+        <h1 class="serif text-4xl text-[#9b7280] dark:text-[#d4a3ae] mb-6">Meteo Interiore</h1>
         
-        <!-- NUOVO LAYOUT: INTRODUZIONE DELLA GUIDA -->
-        <div class="bg-white/30 border border-white/20 rounded-2xl p-4 mb-6 shadow-sm text-left">
+        <!-- INTRODUZIONE DELLA GUIDA -->
+        <div class="bg-white/30 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-2xl p-4 mb-6 shadow-sm text-left">
             <div class="flex items-center gap-4">
-                <img src="avatar.png" alt="Alessandra" class="w-14 h-14 rounded-full object-cover shadow-md border border-white/50 shrink-0">
+                <img src="avatar.png" alt="Alessandra" class="w-14 h-14 rounded-full object-cover shadow-md border border-white/50 dark:border-white/20 shrink-0">
                 <div>
-                    <p class="uppercase tracking-[0.2em] text-[8px] opacity-60 mb-0.5 font-semibold text-[#b07d89]">Il consiglio di Alessandra</p>
-                    <p class="text-xs font-light leading-relaxed italic opacity-90">
+                    <p class="uppercase tracking-[0.2em] text-[8px] opacity-60 mb-0.5 font-semibold text-[#b07d89] dark:text-[#d4a3ae]">Il consiglio di Alessandra</p>
+                    <p class="text-xs font-light leading-relaxed italic opacity-90 text-[#715d64] dark:text-[#f1dce1]">
                         "Che ci sia il sole, il vento o la pioggia nel tuo spazio interiore, prova a osservarlo senza giudizio. Ogni cielo, prima o poi, è destinato a cambiare liberamente."
                     </p>
                 </div>
@@ -124,12 +162,12 @@
         </div>
 
         <!-- IMMAGINE DI COPERTINA DELLA STANZA TONDA -->
-        <div class="w-44 h-44 mx-auto rounded-full overflow-hidden border-4 border-white/50 shadow-xl mb-8 relative">
+        <div class="w-44 h-44 mx-auto rounded-full overflow-hidden border-4 border-white/50 dark:border-white/10 shadow-xl mb-8 relative">
             <img src="meteo.jpg" class="w-full h-full object-cover">
         </div>
 
         <!-- BLOCCO PLAYER CON TIMELINE E TIMER -->
-        <div class="flex flex-col items-center justify-center bg-white/20 rounded-3xl p-6 border border-white/20 shadow-inner mb-4">
+        <div class="flex flex-col items-center justify-center bg-white/20 dark:bg-white/5 rounded-3xl p-6 border border-white/20 dark:border-white/10 shadow-inner mb-4">
             
             <!-- CONTROLLO TIMELINE -->
             <div class="w-full px-2 mb-2">
@@ -137,21 +175,21 @@
             </div>
 
             <!-- CRONOMETRI INFERIORI -->
-            <div class="w-full flex justify-between px-2 text-xs opacity-60 mb-6 font-mono font-light">
+            <div class="w-full flex justify-between px-2 text-xs opacity-60 mb-6 font-mono font-light text-[#715d64] dark:text-[#f1dce1]">
                 <span id="currentTime">00:00</span>
                 <span id="trackDuration">--:--</span>
             </div>
             
             <!-- PULSANTE DI RIPRODUZIONE -->
-            <button id="playAudioBtn" class="bg-[#c0909b] text-white w-20 h-20 rounded-full text-2xl shadow-xl flex items-center justify-center active:scale-95 transition font-light pl-1">
+            <button id="playAudioBtn" class="bg-[#c0909b] text-white w-20 h-20 rounded-full text-2xl shadow-xl flex items-center justify-center active:scale-95 transition font-light pl-1 hover:bg-[#b07d89]">
                 <i id="playIcon" class="fa-solid fa-play text-xl"></i>
             </button>
             
-            <p id="audioStatus" class="text-[10px] uppercase tracking-widest opacity-60 mt-4">Ascolta la tua guida</p>
+            <p id="audioStatus" class="text-[10px] uppercase tracking-widest opacity-60 mt-4 text-[#715d64] dark:text-[#f1dce1]">Ascolta la tua guida</p>
         </div>
 
         <!-- FILE AUDIO INVISIBILE -->
-        <audio id="meditationAudio" src="meteo.mp3"></audio>
+        <audio id="meditationAudio" src="meteo.mp3" preload="metadata"></audio>
     </main>
 
     <div class="h-10 relative z-10"></div>
@@ -165,32 +203,40 @@
         const currentTimeDisplay = document.getElementById('currentTime');
         const progressBar = document.getElementById('progressBar');
 
+        let isDragging = false;
+
         function formatTime(seconds) {
-            if (isNaN(seconds)) return "00:00";
+            if (isNaN(seconds) || seconds === Infinity) return "00:00";
             let m = Math.floor(seconds / 60).toString().padStart(2, '0');
             let s = Math.floor(seconds % 60).toString().padStart(2, '0');
             return m + ":" + s;
         }
 
-        audio.onloadedmetadata = () => {
-            trackDuration.innerHTML = formatTime(audio.duration);
-            progressBar.max = Math.floor(audio.duration);
+        const setDuration = () => {
+            if (audio.duration && !isNaN(audio.duration) && audio.duration !== Infinity) {
+                trackDuration.innerHTML = formatTime(audio.duration);
+                progressBar.max = Math.floor(audio.duration);
+            }
         };
 
+        audio.addEventListener('loadedmetadata', setDuration);
+        audio.addEventListener('durationchange', setDuration);
+
         if (audio.readyState >= 1) {
-            trackDuration.innerHTML = formatTime(audio.duration);
-            progressBar.max = Math.floor(audio.duration);
+            setDuration();
         }
 
         playBtn.onclick = () => {
             if (audio.paused) {
-                audio.play().catch(e => {
+                audio.play().then(() => {
+                    playIcon.className = 'fa-solid fa-pause text-xl';
+                    playBtn.classList.remove('pl-1');
+                    status.innerHTML = 'In sessione...';
+                    setDuration();
+                }).catch(e => {
                     console.log("Riproduzione bloccata o file mancante:", e);
                     alert("Assicurati di aver inserito il file 'meteo.mp3' nella stessa cartella dell'app!");
                 });
-                playIcon.className = 'fa-solid fa-pause text-xl';
-                playBtn.classList.remove('pl-1');
-                status.innerHTML = 'In sessione...';
             } else {
                 audio.pause();
                 playIcon.className = 'fa-solid fa-play text-xl';
@@ -200,21 +246,21 @@
         };
 
         audio.ontimeupdate = () => {
-            if (!progressBar.classList.contains('seeking')) {
+            if (!isDragging) {
                 progressBar.value = Math.floor(audio.currentTime);
+                currentTimeDisplay.innerHTML = formatTime(audio.currentTime);
             }
-            currentTimeDisplay.innerHTML = formatTime(audio.currentTime);
         };
 
-        progressBar.oninput = () => {
-            progressBar.classList.add('seeking');
+        progressBar.addEventListener('input', () => {
+            isDragging = true;
             currentTimeDisplay.innerHTML = formatTime(progressBar.value);
-        };
+        });
 
-        progressBar.onchange = () => {
+        progressBar.addEventListener('change', () => {
             audio.currentTime = progressBar.value;
-            progressBar.classList.remove('seeking');
-        };
+            isDragging = false;
+        });
 
         audio.onended = () => {
             playIcon.className = 'fa-solid fa-play text-xl';
