@@ -399,7 +399,7 @@
                     <div class="glass rounded-[28px] p-6 shadow-xl text-center">
                         <h4 class="serif text-lg text-[#9b7280] mb-2">Visita il mio sito</h4>
                         <p class="text-xs opacity-70 mb-4 font-light">Scopri le informazioni sulla tua Scuola di Meditazione in presenza</p>
-                        <a href="https://www.studiomindfulnessesofrologia.it" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
+                        <a id="scuolaLink" href="https://www.studiomindfulnessesofrologia.it" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
                             Vai al Sito Web
                         </a>
                     </div>
@@ -409,7 +409,7 @@
                         <div class="mb-4 flex justify-center">
                             <img src="Copertina.jpg" alt="Copertina La Via del Loto in tuta da corsa" class="w-36 h-auto rounded-xl shadow-md border border-white/30 object-cover">
                         </div>
-                        <a href="https://www.amazon.it/dp/B0G2YW1WXH" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
+                        <a id="libroLink" href="https://www.amazon.it/dp/B0G2YW1WXH" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
                             Scopri di più su Amazon
                         </a>
                     </div>
@@ -589,6 +589,7 @@
             const installBtn = document.getElementById('installBtn');
             if (installBtn) {
                 installBtn.onclick = async () => {
+                    gtag('event', 'click_installa');
                     if (deferredPrompt) {
                         deferredPrompt.prompt();
                         const { outcome } = await deferredPrompt.userChoice;
@@ -596,6 +597,20 @@
                     } else {
                         alert("L'applicazione è già installata o il tuo browser non supporta l'installazione diretta. Se usi iPhone, usa il tasto 'Condividi' in basso su Safari e poi seleziona 'Aggiungi alla schermata Home'.");
                     }
+                };
+            }
+
+            const scuolaLink = document.getElementById('scuolaLink');
+            if (scuolaLink) {
+                scuolaLink.onclick = () => {
+                    gtag('event', 'click_scuola');
+                };
+            }
+
+            const libroLink = document.getElementById('libroLink');
+            if (libroLink) {
+                libroLink.onclick = () => {
+                    gtag('event', 'click_libro');
                 };
             }
 
@@ -653,6 +668,7 @@
                 if (introAudio) introAudio.pause();
 
                 breathRunning = true;
+                gtag('event', 'allenamento_respiro_avviato');
                 startBreathBtn.innerHTML = "Pausa";
                 fullScreenBreathBubble.classList.add('bubble-breathing');
                 startBreathTextSync();
@@ -671,6 +687,7 @@
                         bubbleMusic.pause();
                         fullScreenBreathBubble.classList.remove('bubble-breathing');
                         if (gong) gong.play().catch(() => {});
+                        gtag('event', 'allenamento_respiro_completato');
                         startBreathBtn.innerHTML = "Inizia Sessione";
                         breathPhase.innerHTML = "Completato";
                         breathTimeLeft = 180;
@@ -717,6 +734,7 @@
                         nota: text 
                     });
                     localStorage.setItem('diario_logs', JSON.stringify(logs));
+                    gtag('event', 'diario_salvato');
                     document.getElementById('diaryText').value = '';
                     renderDiaryLogs();
                 }
@@ -773,6 +791,7 @@
                 }
 
                 running = true;
+                gtag('event', 'meditazione_avviata');
                 document.getElementById('playBtn').innerHTML = '❚❚';
                 status.innerHTML = 'In Sessione';
                 if (breathBubble) breathBubble.classList.add('bubble-breathing');
@@ -786,6 +805,10 @@
                         bgMusic.pause();
                         if (breathBubble) breathBubble.classList.remove('bubble-breathing');
                         if(gong) gong.play().catch(() => {});
+                        gtag('event', 'meditazione_completata', {
+                            'durata_secondi': total,
+                            'durata_minuti': total / 60
+                        });
                         document.getElementById('playBtn').innerHTML = '▶';
                         status.innerHTML = 'Conclusa';
                         
