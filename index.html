@@ -403,6 +403,16 @@
                             Vai al Sito Web
                         </a>
                     </div>
+
+                    <div class="glass rounded-[28px] p-6 shadow-xl text-center">
+                        <h4 class="serif text-lg text-[#9b7280] mb-3">Il mio libro</h4>
+                        <div class="mb-4 flex justify-center">
+                            <img src="Copertina.jpg" alt="Copertina La Via del Loto in tuta da corsa" class="w-36 h-auto rounded-xl shadow-md border border-white/30 object-cover">
+                        </div>
+                        <a href="https://www.amazon.it/dp/B0G2YW1WXH" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
+                            Scopri di più su Amazon
+                        </a>
+                    </div>
                 </div>
 
                 <div class="md:col-span-2">
@@ -507,7 +517,6 @@
             renderDiaryLogs();
         });
 
-        // Gestisce il rientro alla pagina (anche con il tasto 'Indietro' da mobile)
         window.addEventListener('pageshow', (event) => {
             let hasEnteredSession = sessionStorage.getItem('hasEntered');
             if (hasEnteredSession === 'true') {
@@ -537,7 +546,6 @@
             let storedUser = localStorage.getItem('utente');
             let hasEnteredSession = sessionStorage.getItem('hasEntered');
 
-            // 1. Se l'utente sta navigando (es. tornato da una stanza)
             if (hasEnteredSession === 'true') {
                 if (intro) intro.classList.add('hidden');
                 if (storedUser && welcomeName) {
@@ -547,14 +555,12 @@
                 return;
             }
 
-            // 2. Se è un nuovo avvio dell'app ma l'utente si era già registrato in passato
             if (storedUser) {
                 welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
                 nameLabel.innerHTML = `Bentornato/a, <strong>${storedUser}</strong>!`;
                 inputContainer.style.display = 'none';
                 intro.classList.remove('hidden');
             } else {
-                // 3. Primo accesso assoluto
                 nameLabel.innerHTML = "Come preferisci che ti chiami?";
                 inputContainer.style.display = 'flex';
                 userNameInput.value = '';
@@ -680,7 +686,6 @@
 
             document.querySelectorAll('.stanza-link').forEach(link => {
                 link.onclick = function(e) {
-                    // Salva lo stato prima di navigare alla stanza
                     sessionStorage.setItem('hasEntered', 'true');
                     const nomeStanza = this.getAttribute('data-stanza');
                     if (typeof gtag === 'function') {
