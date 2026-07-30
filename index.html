@@ -148,6 +148,31 @@
 
 <body id="body">
 
+    <!-- BANNER: APRI NEL BROWSER (per chi arriva da Instagram/Facebook in-app) -->
+    <div id="inAppBanner" class="hidden fixed inset-x-0 top-0 z-[9999] p-4">
+        <div class="glass max-w-md mx-auto rounded-2xl shadow-xl p-4 flex items-start gap-3 border border-white/40">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[#b07d89] text-lg mt-0.5"></i>
+            <div class="text-left">
+                <p class="text-sm font-medium mb-1">Per installare l'app sulla tua Home</p>
+                <p class="text-xs opacity-80 leading-relaxed">Tocca <strong>⋮</strong> o l'icona di condivisione in alto e scegli <strong>"Apri nel Browser"</strong> (Safari o Chrome). Da lì potrai aggiungere l'app alla schermata Home.</p>
+            </div>
+            <button id="closeInAppBanner" class="text-lg opacity-50 hover:opacity-100 transition ml-auto shrink-0">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isInApp = /FBAN|FBAV|Instagram|Line\//i.test(ua);
+            if (isInApp) {
+                document.addEventListener('DOMContentLoaded', () => {
+                    const banner = document.getElementById('inAppBanner');
+                    if (banner) banner.classList.remove('hidden');
+                });
+            }
+        })();
+    </script>
+
     <audio id="introAudio" preload="auto" loop><source src="intro.mp3" type="audio/mpeg"></audio>
     <audio id="bgMusic" loop></audio>
     <audio id="gong"><source src="gong.mp3" type="audio/mpeg"></audio>
@@ -528,6 +553,19 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+        });
+
+        // Ferma l'audio se l'app viene chiusa/minimizzata SENZA una meditazione attiva.
+        // Se invece una sessione (respiro/timer) è in corso, l'audio continua anche a schermo spento.
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                const sessioneAttiva = running || breathRunning;
+                if (!sessioneAttiva) {
+                    if (introAudio) introAudio.pause();
+                    if (bgMusic) bgMusic.pause();
+                    if (bubbleMusic) bubbleMusic.pause();
+                }
+            }
         });
 
         function playIntroAudio() {
@@ -915,6 +953,13 @@
                     <p class="text-sm opacity-90 font-light leading-relaxed whitespace-pre-wrap pr-4">${log.nota}</p>
                 </div>
             `).join('');
+        }
+
+        const closeBannerBtn = document.getElementById('closeInAppBanner');
+        if (closeBannerBtn) {
+            closeBannerBtn.onclick = () => {
+                document.getElementById('inAppBanner').classList.add('hidden');
+            };
         }
     </script>
 </body>
