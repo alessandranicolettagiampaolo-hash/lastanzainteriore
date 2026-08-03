@@ -250,6 +250,9 @@
                 </div>
                 
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-2">
+                    <a href="accettazione.html" data-stanza="Accettazione" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="accettazione.jpg" class="w-full h-full object-cover object-top">
+                    </a>
                     <a href="stress.html" data-stanza="Periodo di Stress" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
                         <img src="stress.jpg" class="w-full h-full object-cover object-top">
                     </a>
@@ -555,8 +558,6 @@
             deferredPrompt = e;
         });
 
-        // Ferma l'audio se l'app viene chiusa/minimizzata SENZA una meditazione attiva.
-        // Se invece una sessione (respiro/timer) è in corso, l'audio continua anche a schermo spento.
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 const sessioneAttiva = running || breathRunning;
