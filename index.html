@@ -666,7 +666,18 @@
       { bg: '#eef0dc', fg: '#5f6636' },  // salvia
       { bg: '#f3e6ee', fg: '#7c4d6a' },  // malva
     ];
+    // Colori fissi come nel calendario della scuola (si riconoscono dal nome della lezione)
+    const COLORI_LEZIONI = [
+      { k: ['nidra'],                     bg: '#d0c6e4', fg: '#56467e' },  // Yoga Nidra: lavanda
+      { k: ['slow flow', 'yoga'],         bg: '#d2e1cb', fg: '#46643c' },  // Slow Flow Yoga: verde salvia
+      { k: ['sofrologia'],                bg: '#f6ceb6', fg: '#8c4a2c' },  // Sofrologia: salmone delicato
+      { k: ['meditazione'],               bg: '#b7d3d8', fg: '#325861' },  // Meditazione: azzurro polvere
+      { k: ['mbsr', 'crescere consapevoli'], bg: '#cfe8e0', fg: '#2f6656' }, // MBSR / Crescere Consapevoli: verde acqua
+    ];
     function colorFor(title) {
+      const t = (title || '').toLowerCase();
+      const fisso = COLORI_LEZIONI.find(c => c.k.some(k => t.includes(k)));
+      if (fisso) return fisso;
       let h = 0;
       for (const ch of (title || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
       return PALETTE[h % PALETTE.length];
@@ -1660,7 +1671,7 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
           <div class="chips" id="nlDays">${GIORNI.map(([v, n]) => `<button type="button" class="chip ${String(base.getDay()) === v ? 'on' : ''}" data-dow="${v}">${n}</button>`).join('')}</div>
           <div id="nlSlots" style="margin-top:10px"></div>
           <label class="mini" for="nlPosti">Posti</label>
-          <input class="inp" id="nlPosti" type="number" min="1" max="500" value="8" inputmode="numeric" placeholder="illimitati">
+          <input class="inp" id="nlPosti" type="number" min="1" max="500" value="10" inputmode="numeric" placeholder="illimitati">
           <div class="two" style="margin-top:12px">
             <div><label class="mini" for="nlFrom">Dal</label><input class="inp" id="nlFrom" type="date" required value="${dayKey(base)}" min="${oggiISO()}"></div>
             <div><label class="mini" for="nlTo">Al</label><input class="inp" id="nlTo" type="date" required min="${oggiISO()}"></div>
