@@ -279,6 +279,10 @@
     .round-btn.add { background: var(--verde); border-color: var(--verde); color: #fff; font-size: 22px; }
     .round-btn.add.on { transform: rotate(45deg); }
     .round-btn.del { color: #9c4a5b; }
+    .attesa-badge { display: inline-flex; align-items: center; gap: 2px; background: #fff3dc; color: #a2701c; border: 1px solid #f0d9a8; border-radius: 10px; padding: 1px 6px 1px 4px; font: 600 11px/1.3 'Inter', sans-serif; vertical-align: middle; white-space: nowrap; }
+    .mlez.con-attesa { position: relative; overflow: visible; }
+    .mlez.con-attesa::after { content: ''; position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #e0a940; border: 1.5px solid #fff; }
+    .round-btn.add.confirm { width: auto; border-radius: 17px; padding: 0 12px; font-size: 12.5px; font-weight: 600; }
     .round-btn.del.confirm { width: auto; border-radius: 17px; padding: 0 12px; font-size: 12.5px; font-weight: 600; background: #c9707f; border-color: #c9707f; color: #fff; }
 
     .slot { display: grid; grid-template-columns: 44px minmax(0,1fr) minmax(0,1fr); gap: 8px; align-items: center; margin-bottom: 6px; }
@@ -1057,7 +1061,7 @@
       } else if (s.passata) {
         h += `<p class="info">Questa lezione si è già svolta.</p>`;
       } else if (s.inAttesa) {
-        h += `<p class="info">Sei in lista d'attesa, in posizione <b>${l.posizione_attesa}</b>. Se si libera un posto entro ${ORE_CANCELLAZIONE} ore dall'inizio verrai iscritto/a automaticamente${l.consuma_lezione ? ' e ti verrà scalata una lezione' : ''}.</p>`;
+        h += `<p class="info">Sei in lista d'attesa, in posizione <b>${l.posizione_attesa}</b>. Se si libera un posto fino a ${ORE_CANCELLAZIONE} ore prima dell'inizio verrai iscritto/a automaticamente${l.consuma_lezione ? ' e ti verrà scalata una lezione' : ''}.</p>`;
         h += `<button class="btn btn-soft" data-act="leave">Esci dalla lista d'attesa</button>`;
       } else if (s.piena) {
         h += `<p class="info">I posti sono esauriti. Iscriviti alla lista d'attesa: se qualcuno cancella, entri tu automaticamente.</p>`;
@@ -1416,6 +1420,13 @@
       return l.annullata ? 'Annullata' : l.posti_totali == null ? `${n} iscr.` : `${n}/${l.posti_totali}`;
     }
 
+    // Simbolo clessidra per le lezioni con allievi in lista d'attesa
+    const icoClessidra = (sz) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h12M6 22h12M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/></svg>`;
+    function badgeAttesa(lid, sz = 12) {
+      const n = A.waitlist.filter(w => w.lesson_id === lid).length;
+      return n ? `<span class="attesa-badge" title="${n} in lista d'attesa">${icoClessidra(sz)}${n}</span>` : '';
+    }
+
     function aRenderWeek(from) {
       const oggi = oggiISO();
       const giorni = [...Array(7)].map((_, i) => { const d = new Date(from); d.setDate(d.getDate() + i); return d; });
@@ -1428,7 +1439,7 @@
           ${les.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="wlez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}">
             <span class="wl-ora">${fmtOra.format(new Date(l.data_ora_inizio))}</span>
             <span class="wl-tit">${esc(l.titolo)}</span>
-            <span class="wl-posti">${postiTxt(l)}</span></button>`; }).join('') || '<div class="wvuoto"></div>'}
+            <span class="wl-posti">${postiTxt(l)} ${badgeAttesa(l.id, 11)}</span></button>`; }).join('') || '<div class="wvuoto"></div>'}
         </div>`;
       }).join('');
       $('aDayList').innerHTML = `<div class="scroller"><div class="wgrid">${col}</div></div>` +
@@ -1445,7 +1456,7 @@
         const vis = les.slice(0, 3);
         celle += `<div class="mcell ${x.getMonth() !== mese ? 'fuori' : ''} ${k === oggi ? 'today' : ''}" data-goto="${k}">
           <span class="mnum">${x.getDate()}</span>
-          ${vis.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="mlez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}"><b>${fmtOra.format(new Date(l.data_ora_inizio))}</b><span> ${esc(l.titolo)}</span></button>`; }).join('')}
+          ${vis.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="mlez ${l.annullata ? 'annullata' : ''} ${A.waitlist.some(w => w.lesson_id === l.id) ? 'con-attesa' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}"><b>${fmtOra.format(new Date(l.data_ora_inizio))}</b><span> ${esc(l.titolo)}</span></button>`; }).join('')}
           ${les.length > 3 ? `<span class="mpiu">+${les.length - 3}</span>` : ''}
         </div>`;
       }
@@ -1492,7 +1503,7 @@
         return `<button class="alez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="border-left-color:${c.fg}">
           <div class="alez-top">
             <span class="alez-ora">${fmtOra.format(inizio)}–${fmtOra.format(fine)}</span>
-            <span class="pill">${l.annullata ? 'Annullata' : l.posti_totali == null ? `${iscritti.length} iscritti` : `${iscritti.length}/${l.posti_totali}`}</span>
+            <span style="display:flex;gap:6px;align-items:center">${badgeAttesa(l.id, 13)}<span class="pill">${l.annullata ? 'Annullata' : l.posti_totali == null ? `${iscritti.length} iscritti` : `${iscritti.length}/${l.posti_totali}`}</span></span>
           </div>
           <div class="alez-tit">${esc(l.titolo)}${l.consuma_lezione ? '' : ' <span class="row-sub">· gratuita</span>'}</div>
           <div class="row-sub">${l.annullata ? '' : (nomi || 'Nessun iscritto')}${attesa ? ` · ${attesa} in attesa` : ''}</div>
@@ -1517,16 +1528,18 @@
         ${l.annullata ? '<p class="info" style="margin-top:14px"><b>Questa lezione è annullata.</b></p>' : `
         <div class="iscr-head">
           <p class="lab" style="margin:0">Iscritti (${iscritti.length}${l.posti_totali != null ? ` su ${l.posti_totali}` : ''})</p>
-          ${liberi === 0 ? '' : '<button type="button" class="round-btn add" id="enrollToggle" aria-label="Aggiungi un allievo">+</button>'}
+<button type="button" class="round-btn add" id="enrollToggle" aria-label="Aggiungi un allievo">+</button>
         </div>
         <div id="enrollBox" class="box hidden" style="margin:10px 0 12px">
+${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">La lezione è al completo: se iscrivi qualcuno, aggiungo un posto.</p>' : ''}
           <input class="inp" id="enrollSearch" type="search" placeholder="Cerca per nome o nickname" autocomplete="off">
           <div id="enrollResults"></div>
         </div>
         ${iscritti.length ? iscritti.map(b => `<div class="person"><span>${persona(b.user_id)}</span>
             <button class="round-btn del" data-aact="remove" data-bid="${b.id}" data-past="${inizio <= new Date() ? 1 : 0}" aria-label="Togli dalla lezione">×</button></div>`).join('')
           : '<p class="muted">Ancora nessun iscritto.</p>'}
-        ${attesa.length ? `<p class="lab" style="margin-top:16px">Lista d’attesa</p>` + attesa.map((w, i) => `<div class="person"><span>${i + 1}. ${persona(w.user_id)}</span></div>`).join('') : ''}`}
+        ${attesa.length ? `<p class="lab" style="margin-top:16px">Lista d’attesa</p>` + attesa.map((w, i) => `<div class="person"><span>${i + 1}. ${persona(w.user_id)}</span>
+            <button class="round-btn add" data-aact="enroll" data-uid="${w.user_id}" data-full="${liberi !== null && liberi <= 0 ? 1 : 0}" aria-label="Iscrivi alla lezione">+</button></div>`).join('') : ''}`}
         <div class="azioni" style="margin-top:16px">
           ${l.annullata ? '' : `<button class="btn btn-primary" data-aact="editLesson" data-lid="${lid}">Modifica lezione</button>
           <button class="btn btn-soft" data-aact="cancelLesson" data-lid="${lid}">Annulla questa lezione</button>`}
@@ -1548,7 +1561,7 @@
         $('enrollResults').innerHTML = res.map(p => {
           const s = saldoDi(p.id);
           return `<div class="person"><span>${esc(nomeCompleto(p))}${p.nickname ? ` <span class="nick">${esc(p.nickname)}</span>` : ''} <span class="row-sub">· ${s.tot} lez.</span></span>
-            <button class="round-btn add" data-aact="enroll" data-uid="${p.id}" aria-label="Iscrivi">+</button></div>`;
+            <button class="round-btn add" data-aact="enroll" data-uid="${p.id}" data-full="${liberi !== null && liberi <= 0 ? 1 : 0}" aria-label="Iscrivi">+</button></div>`;
         }).join('') || (q.length >= 2 ? '<p class="muted">Nessun allievo trovato.</p>' : '');
       });
     }
@@ -1849,11 +1862,11 @@
         return;
       }
       // conferma per le azioni delicate
-      if (['remove', 'cancelLesson', 'stato'].includes(act) && !b.dataset.confirm) {
+      if ((['remove', 'cancelLesson', 'stato'].includes(act) || (act === 'enroll' && b.dataset.full === '1')) && !b.dataset.confirm) {
         b.dataset.confirm = '1';
         b.dataset.orig = b.textContent;
-        b.textContent = act === 'remove' ? 'Togli?' : act === 'cancelLesson' ? 'Sì, annulla e restituisci le lezioni' : 'Confermi?';
-        if (act === 'remove') b.classList.add('confirm');
+        b.textContent = act === 'remove' ? 'Togli?' : act === 'enroll' ? '+1 posto?' : act === 'cancelLesson' ? 'Sì, annulla e restituisci le lezioni' : 'Confermi?';
+        if (act === 'remove' || act === 'enroll') b.classList.add('confirm');
         else if (!b.classList.contains('mini-btn')) b.className = 'btn btn-primary';
         return;
       }
@@ -1875,7 +1888,7 @@
           return mostraLink(r.data.link, A.byId[b.dataset.uid]?.nome || '', false);
         }
         if (act === 'remove') { res = await sb.rpc('cancel_booking', { p_booking_id: b.dataset.bid }); reopen = () => aOpenLesson($('sheet').dataset.lid); }
-        if (act === 'enroll') { res = await sb.rpc('book_lesson', { p_lesson_id: $('sheet').dataset.lid, p_user_id: b.dataset.uid }); reopen = () => aOpenLesson($('sheet').dataset.lid); }
+        if (act === 'enroll') { res = await sb.rpc('admin_force_enroll', { p_lesson_id: $('sheet').dataset.lid, p_user_id: b.dataset.uid }); reopen = () => aOpenLesson($('sheet').dataset.lid); }
         if (act === 'cancelLesson') { res = await sb.rpc('admin_cancel_lesson', { p_lesson_id: b.dataset.lid }); reopen = () => aOpenLesson(b.dataset.lid); }
       } finally { busy = false; b.disabled = false; }
 
