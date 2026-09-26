@@ -21,13 +21,19 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Gestisce solo richieste con protocollo HTTP/HTTPS (ignora estensioni browser o schemi speciali)
+  // Gestisce solo richieste HTTP/HTTPS
   if (!event.request.url.startsWith('http')) return;
 
   // Invia ogni singola richiesta direttamente alla rete in tempo reale
   event.respondWith(
     fetch(event.request).catch(error => {
       console.warn('[SW] Connessione di rete non disponibile per:', event.request.url, error);
+      // Restituisce una risposta vuota o un errore elegante invece di far fallire la Promise
+      return new Response('Rete non disponibile', {
+        status: 503,
+        statusText: 'Service Unavailable',
+        headers: new Headers({ 'Content-Type': 'text/plain; charset=utf-8' })
+      });
     })
   );
 });

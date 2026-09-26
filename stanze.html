@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Stanza Interiore</title>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-49EZT9DGYL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-49EZT9DGYL');
+    </script>
+
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #f8f3ef, #efe4de);
+            overflow-x: hidden;
+            color: #715d64;
+            transition: .6s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body.dark {
+            background: linear-gradient(to bottom, #1d1721, #2d2434);
+            color: #f1dce1;
+        }
+
+        .serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        body.dark .glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { scrollbar-width: none; }
+
+        .card { transition: .4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .card:hover { transform: translateY(-6px); }
+
+        .music-btn.active, .duration-btn.active {
+            background: #c0909b !important;
+            color: white !important;
+            border-color: #c0909b !important;
+            box-shadow: 0 8px 20px rgba(192, 144, 155, 0.3);
+        }
+
+        body.dark .music-btn.active, body.dark .duration-btn.active {
+            background: #d4a3ae !important;
+            color: #1d1721 !important;
+            border-color: #d4a3ae !important;
+            box-shadow: 0 0 15px rgba(212, 163, 174, 0.5);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #intro {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom, #f8f3ef, #efe4de);
+            transition: 1s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #intro.hidden { opacity: 0; pointer-events: none; }
+        body.dark #intro { background: linear-gradient(to bottom, #1d1721, #2d2434); }
+
+        .soap-bubble {
+            position: relative;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(244, 197, 209, 0.2) 70%, rgba(186, 220, 245, 0.25) 100%);
+            box-shadow: 
+                inset 0 10px 20px rgba(255,255,255,0.4),
+                inset 0 -10px 20px rgba(113, 93, 100, 0.05),
+                inset -5px 0 15px rgba(186, 220, 245, 0.3),
+                inset 5px 0 15px rgba(244, 197, 209, 0.3),
+                0 10px 25px rgba(113, 93, 100, 0.04);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark .soap-bubble {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(212, 163, 174, 0.15) 80%, rgba(138, 180, 219, 0.15) 100%);
+            box-shadow: 
+                inset 0 8px 15px rgba(255,255,255,0.2),
+                inset -5px 0 12px rgba(138, 180, 219, 0.2),
+                inset 5px 0 12px rgba(212, 163, 174, 0.2),
+                0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .soap-bubble::after {
+            content: '';
+            position: absolute;
+            top: 12%;
+            left: 15%;
+            width: 25%;
+            height: 15%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.65);
+            transform: rotate(-30px);
+            filter: blur(1px);
+        }
+
+        .bubble-breathing {
+            animation: breatheAnimation 8s ease-in-out infinite;
+        }
+
+        @keyframes breatheAnimation {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+        }
+    </style>
+</head>
+
+<body id="body">
+
+    <!-- BANNER: APRI NEL BROWSER (per chi arriva da Instagram/Facebook in-app) -->
+    <div id="inAppBanner" class="hidden fixed inset-x-0 top-0 z-[9999] p-4">
+        <div class="glass max-w-md mx-auto rounded-2xl shadow-xl p-4 flex items-start gap-3 border border-white/40">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[#b07d89] text-lg mt-0.5"></i>
+            <div class="text-left">
+                <p class="text-sm font-medium mb-1">Per installare l'app sulla tua Home</p>
+                <p class="text-xs opacity-80 leading-relaxed">Tocca <strong>⋮</strong> o l'icona di condivisione in alto e scegli <strong>"Apri nel Browser"</strong> (Safari o Chrome). Da lì potrai aggiungere l'app alla schermata Home.</p>
+            </div>
+            <button id="closeInAppBanner" class="text-lg opacity-50 hover:opacity-100 transition ml-auto shrink-0">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isInApp = /FBAN|FBAV|Instagram|Line\//i.test(ua);
+            if (isInApp) {
+                document.addEventListener('DOMContentLoaded', () => {
+                    const banner = document.getElementById('inAppBanner');
+                    if (banner) banner.classList.remove('hidden');
+                });
+            }
+        })();
+    </script>
+
+    <audio id="introAudio" preload="auto" loop><source src="intro.mp3" type="audio/mpeg"></audio>
+    <audio id="bgMusic" loop></audio>
+    <audio id="gong"><source src="gong.mp3" type="audio/mpeg"></audio>
+    <audio id="bubbleMusic" preload="auto" loop><source src="bolla.mp3" type="audio/mpeg"></audio>
+
+    <!-- SCHERMATA BENVENUTO -->
+    <div id="intro">
+        <div class="text-center px-6 w-full max-w-md mx-auto">
+            <img src="logo.png" class="w-44 h-auto mx-auto mb-6 drop-shadow-xl object-contain">
+            <h1 class="serif text-4xl sm:text-5xl leading-tight text-[#b07d89] mb-1">La Stanza Interiore</h1>
+            <p class="uppercase tracking-[0.25em] text-[11px] sm:text-[12px] font-medium opacity-70 mb-8">MEDITAZIONE & BENESSERE</p>
+            
+            <div class="glass rounded-[28px] p-6 shadow-xl mb-6 text-left">
+                <label id="nameLabel" for="userNameInput" class="block text-xs uppercase tracking-wider opacity-65 mb-3 font-medium">Come preferisci che ti chiami?</label>
+                <div id="inputContainer" class="flex gap-2">
+                    <input type="text" id="userNameInput" placeholder="Il tuo nome..." class="w-full px-4 py-3 rounded-xl border border-[#c8a7b0]/30 bg-white/50 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm">
+                </div>
+            </div>
+            <button id="enterBtn" class="w-full bg-[#c0909b] text-white py-4 rounded-xl shadow-lg text-sm uppercase tracking-widest font-medium hover:bg-[#b07d89] transition">Entra nella Stanza</button>
+        </div>
+    </div>
+
+    <!-- SFONDO SFUMATO -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-30 -top-20 -left-20"></div>
+        <div class="absolute w-96 h-96 bg-rose-100 rounded-full blur-3xl opacity-40 bottom-0 right-0"></div>
+    </div>
+
+    <div class="relative z-10 pb-36">
+        
+        <!-- HEADER -->
+        <header class="px-4 pt-6 pb-4">
+            <div class="flex items-center justify-between max-w-5xl mx-auto gap-4">
+                <div class="flex items-center gap-4">
+                    <img src="logo.png" style="width: 85px !important; height: 85px !important; max-height: 85px !important;" class="shrink-0 object-contain">
+                    <div>
+                        <h1 id="welcomeName" class="serif text-xl sm:text-2xl tracking-tight text-[#b07d89]">La Stanza Interiore</h1>
+                        <p class="uppercase tracking-[0.2em] text-[8px] opacity-60 font-medium text-left">IL TUO SPAZIO DI QUIETE</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="muteIntroBtn" class="glass w-10 h-10 rounded-full shadow-md text-base flex items-center justify-center text-[#715d64] dark:text-[#f1dce1]" title="Disattiva musica di sottofondo">🔊</button>
+                    <button id="themeBtn" class="glass w-10 h-10 rounded-full shadow-md text-base flex items-center justify-center text-[#715d64] dark:text-[#f1dce1]">☾</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- TAB STANZE -->
+        <main id="tab-stanze" class="tab-content active px-4 mt-4 max-w-5xl mx-auto">
+            <!-- AVATAR & BENVENUTO -->
+            <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl overflow-hidden mb-10">
+                <div class="grid md:grid-cols-12 gap-8 items-center">
+                    <div class="md:col-span-5 flex justify-center">
+                        <img src="avatar.png" class="w-56 h-56 sm:w-64 sm:h-64 rounded-full object-cover shadow-xl border-4 border-white/40">
+                    </div>
+                    <div class="md:col-span-7 text-left">
+                        <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-3 font-semibold text-[#b07d89]">La tua guida</p>
+                        <h2 class="serif text-3xl sm:text-4xl md:text-5xl leading-[1.2] tracking-tight text-[#9a717d] mb-4">
+                            Ciao, sono Alessandra<br> 
+                            <span class="text-xl sm:text-2xl md:text-3xl opacity-90 block mt-3 font-sans font-light text-[#715d64] dark:text-[#f1dce1]">
+                                e sono qui per accompagnarti nelle tue Stanze Interiori.
+                            </span>
+                        </h2>
+                        <div class="h-1 w-20 bg-[#c0909b]/30 rounded-full mt-6"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CAROSELLO STANZE INTERIORI -->
+            <div class="glass rounded-[36px] p-5 sm:p-6 shadow-xl mb-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
+                    <h3 class="serif text-xl sm:text-2xl text-[#9a717d] text-center px-2">Le tue stanze interiori</h3>
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
+                </div>
+                
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-2">
+                    <a href="ansia.html" data-stanza="Ansia" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="ansia.png" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="tensioni-fisiche.html" data-stanza="Tensioni Fisiche" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="tensioni-fisiche.png" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="accettazione.html" data-stanza="Accettazione" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="accettazione.jpg" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="stress.html" data-stanza="Periodo di Stress" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="stress.jpg" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="cambiamento.html" data-stanza="Cambiamento" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="cambiamento.jpg" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="lasciar-andare.html" data-stanza="Lasciar Andare" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="lasciar-andare.jpg" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="sonno.html" data-stanza="Sonno" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="sonno.jpg" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="respiro.html" data-stanza="Respiro" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="respiro.jpg" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="gratitudine.html" data-stanza="Gratitudine" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="gratitudine.jpg" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="meteo.html" data-stanza="Meteo Interiore" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="meteo.jpg" class="w-full h-full object-cover object-top">
+                    </a>
+                </div>
+
+                <!-- BANNER PROSSIME STANZE -->
+                <div class="flex items-center gap-3 mt-8 mb-6">
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
+                    <span class="flex items-center gap-2 bg-[#c0909b] text-white text-[10px] uppercase tracking-[0.2em] font-semibold px-4 py-1.5 rounded-full shadow-sm">
+                        <i class="fa-solid fa-sparkles text-[9px]"></i> Prossimamente
+                    </span>
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
+                </div>
+
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-2">
+                    <a href="coraggio.html" data-stanza="Coraggio" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="coraggio.png" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="autocompassione.html" data-stanza="Autocompassione" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="autocompassione.png" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="inizio-giornata.html" data-stanza="Inizio Giornata" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="inizio-giornata.png" class="w-full h-full object-cover object-top">
+                    </a>
+                    <a href="fine-giornata.html" data-stanza="Fine Giornata" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
+                        <img src="fine-giornata.png" class="w-full h-full object-cover object-top">
+                    </a>
+                </div>
+            </div>
+
+            <!-- SEZIONE GUIDA PRATICA (RESPIRAZIONE YOGICA) -->
+            <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
+                    <h3 class="serif text-xl sm:text-2xl text-[#9a717d] text-center px-2">Guida Pratica</h3>
+                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
+                </div>
+
+                <div class="grid md:grid-cols-12 gap-6 items-center">
+                    <div class="md:col-span-5 flex justify-center">
+                        <a href="respirazioneyogica.html" class="card block w-full max-w-[240px] h-[320px] rounded-[28px] shadow-xl overflow-hidden border border-white/30 relative text-left">
+                            <img src="respirazioneyogica.png" class="w-full h-full object-cover object-top">
+                        </a>
+                    </div>
+                    <div class="md:col-span-7 text-left flex flex-col justify-center">
+                        <p class="uppercase tracking-[0.25em] text-[10px] opacity-60 mb-2 font-semibold text-[#b07d89]">Videolezione Consapevole</p>
+                        <h4 class="serif text-2xl sm:text-3xl text-[#9a717d] mb-3">Impara a Respirare</h4>
+                        <p class="text-sm opacity-85 leading-relaxed font-light mb-6">
+                            Impara insieme a me a rendere più efficace il tuo respiro attraverso la tecnica della Respirazione Yogica.
+                        </p>
+                        <div>
+                            <a href="respirazioneyogica.html" class="inline-flex items-center gap-2 bg-[#c0909b] text-white px-6 py-3 rounded-full text-xs uppercase tracking-widest font-medium shadow-md hover:bg-[#b07d89] transition">
+                                <i class="fa-solid fa-play text-xs"></i> Entra nella Stanza del Respiro
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB ALLENAMENTO RESPIRO -->
+        <main id="tab-respiro-allenamento" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
+            <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl text-center min-h-[520px] flex flex-col justify-between items-center relative overflow-hidden">
+                <div class="max-w-xl mx-auto">
+                    <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL RESPIRO CONSAPEVOLE</p>
+                    <h3 class="serif text-2xl sm:text-3xl text-[#9b7280] mb-3">L'Essenza del Respiro</h3>
+                    <p id="breathInstruction" class="text-xs sm:text-sm opacity-85 font-light leading-relaxed px-2">
+                        In questo spazio puoi coltivare la purezza e l'essenza del tuo respiro. 3 minuti da dedicarti intensamente per fare ritorno a te stesso: sincronizza il ritmo del tuo respiro inspirando per 4 secondi mentre la bolla si espande, ed espirando per 4 secondi mentre la bolla si riduce.
+                    </p>
+                </div>
+
+                <div class="my-6 flex justify-center items-center h-64 w-full">
+                    <div id="fullScreenBreathBubble" class="soap-bubble w-48 h-48 sm:w-56 sm:h-56 rounded-full flex flex-col items-center justify-center border border-white/30 transition-all duration-1000">
+                        <div id="breathCountdown" class="serif text-3xl font-light text-[#b07d89]">03:00</div>
+                        <p id="breathPhase" class="text-[11px] uppercase tracking-widest opacity-60 mt-2 font-medium">Pronto</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 z-10">
+                    <button id="muteBubbleMusicBtn" class="glass w-12 h-12 rounded-full text-sm shadow-md flex items-center justify-center text-[#715d64] dark:text-[#f1dce1]" title="Silenzia sottofondo">🔊</button>
+                    <button id="startBreathBtn" class="bg-[#c0909b] text-white px-8 py-3.5 rounded-full text-xs uppercase tracking-widest font-medium shadow-xl hover:bg-[#b07d89] transition active:scale-95">Inizia Sessione</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB PRATICHE (TIMER LIBERO) -->
+        <main id="tab-pratiche" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
+            <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl">
+                <div class="mb-6 text-center max-w-xl mx-auto">
+                    <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">TIMER LIBERO</p>
+                    <h3 class="serif text-2xl sm:text-3xl text-[#9b7280] mb-3">La tua pratica libera</h3>
+                    <p class="text-xs sm:text-sm opacity-80 leading-relaxed font-light">
+                        In questo spazio puoi dedicarti alla tua pratica libera scegliendo il silenzio o un sottofondo musicale.
+                    </p>
+                </div>
+
+                <div class="flex justify-center mb-8 h-60 items-center">
+                    <div id="breathBubble" class="soap-bubble w-48 h-48 sm:w-52 sm:h-52 rounded-full flex flex-col items-center justify-center border border-white/30">
+                        <div id="time" class="serif text-4xl sm:text-5xl font-light text-[#b07d89]">05:00</div>
+                        <p id="status" class="text-[11px] uppercase tracking-wider opacity-60 mt-2 text-center px-4">Pronto</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-3 flex-wrap mb-8">
+                    <button class="duration-btn active px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-time="300">5 min</button>
+                    <button class="duration-btn glass px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-time="600">10 min</button>
+                    <button class="duration-btn glass px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-time="900">15 min</button>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+                    <button class="music-btn active glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="none">🤫<br><span class="block mt-1 opacity-80">Silenzio</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="432hz.mp3">✨<br><span class="block mt-1 opacity-80">432 Hz</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="ethereal.mp3">🌌<br><span class="block mt-1 opacity-80">Ethereal</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="nature.mp3">🌿<br><span class="block mt-1 opacity-80">Natura</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="koshi.mp3">🎐<br><span class="block mt-1 opacity-80">Koshi</span></button>
+                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="piano.mp3">🎹<br><span class="block mt-1 opacity-80">Piano</span></button>
+                </div>
+
+                <div class="flex justify-center items-center gap-6">
+                    <button id="resetBtn" class="glass w-14 h-14 rounded-full text-lg shadow-md flex items-center justify-center active:scale-95 transition">↺</button>
+                    <button id="playBtn" class="bg-[#c0909b] text-white w-20 h-20 rounded-full text-2xl shadow-xl flex items-center justify-center active:scale-95 transition font-light">▶</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB DIARIO -->
+        <main id="tab-diario" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
+            <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl">
+                <div class="grid md:grid-cols-12 gap-8 items-center mb-8">
+                    <div class="md:col-span-7 text-left">
+                        <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL DIARIO DELL'ANIMA</p>
+                        <h3 class="serif text-3xl text-[#9b7280] mb-4">Ancorare l'esperienza</h3>
+                        <p class="text-sm opacity-90 leading-relaxed font-light mb-4">
+                            Dopo una meditazione, le sensazioni sono come nuvole: bellissime ma volatili. Il diario serve a <strong>fissare</strong> questo stato di grazia, trasformando un'emozione astratta in una consapevolezza concreta.
+                        </p>
+                        <p class="text-sm opacity-90 leading-relaxed font-light">
+                            Scrivere aiuta a decantare i pensieri residui e a creare un ponte prezioso tra il silenzio della tua Stanza Interiore e il rumore del mondo esterno.
+                        </p>
+                    </div>
+                    <div class="md:col-span-5 flex justify-center">
+                        <div class="w-full h-48 rounded-2xl bg-white/20 border border-white/30 shadow-inner flex items-center justify-center text-5xl opacity-60">✍️</div>
+                    </div>
+                </div>
+
+                <div class="border-t border-[#c8a7b0]/20 pt-6">
+                    <label class="block text-xs uppercase tracking-wider opacity-65 mb-3 font-medium">Cosa porti con te da questa pratica?</label>
+                    <textarea id="diaryText" rows="5" placeholder="Scrivi liberamente, senza giudizio..." class="w-full px-4 py-3 rounded-2xl border border-[#c8a7b0]/30 bg-white/40 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm mb-4 resize-none"></textarea>
+                    <div class="flex justify-end">
+                        <button id="saveDiaryBtn" class="bg-[#c0909b] text-white px-6 py-3 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition shadow-md">Fissa i pensieri</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl mt-6">
+                <h4 class="serif text-xl text-[#9b7280] mb-4">I tuoi pensieri custoditi</h4>
+                <div id="diaryLogsContainer" class="space-y-4 max-h-[350px] overflow-y-auto hide-scrollbar">
+                    <p id="noLogsMessage" class="text-sm opacity-60 italic font-light">Nessun pensiero salvato finora. Il tuo viaggio inizia qui.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB PROFILO -->
+        <main id="tab-profilo" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 flex flex-col gap-6">
+                    <div class="glass rounded-[28px] p-6 shadow-xl text-left">
+                        <h4 class="serif text-lg text-[#9b7280] mb-4">Il tuo nome</h4>
+                        <input type="text" id="profileNameInput" class="w-full px-4 py-3 rounded-xl border border-[#c8a7b0]/30 bg-white/50 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm mb-3">
+                        <button id="updateNameBtn" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition">Salva modifiche</button>
+                    </div>
+
+                    <div class="glass rounded-[28px] p-6 shadow-xl text-center">
+                        <h4 class="serif text-lg text-[#9b7280] mb-2">Portami sul tuo telefono</h4>
+                        <p class="text-xs opacity-70 mb-4 font-light">Accedi alla Stanza Interiore con un tocco direttamente dalla tua home.</p>
+                        <button id="installBtn" class="w-full bg-white/40 border border-[#c8a7b0]/40 py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-white/60 transition">Installa applicazione</button>
+                    </div>
+
+                    <div class="glass rounded-[28px] p-6 shadow-xl text-center">
+                        <h4 class="serif text-lg text-[#9b7280] mb-2">Visita il mio sito</h4>
+                        <p class="text-xs opacity-70 mb-4 font-light">Scopri le informazioni sulla tua Scuola di Meditazione in presenza</p>
+                        <a id="scuolaLink" href="https://www.studiomindfulnessesofrologia.it" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
+                            Vai al Sito Web
+                        </a>
+                    </div>
+
+                    <div class="glass rounded-[28px] p-6 shadow-xl text-center">
+                        <h4 class="serif text-lg text-[#9b7280] mb-3">Il mio libro</h4>
+                        <div class="mb-4 flex justify-center">
+                            <img src="Copertina.jpg" alt="Copertina La Via del Loto in tuta da corsa" class="w-36 h-auto rounded-xl shadow-md border border-white/30 object-cover">
+                        </div>
+                        <a id="libroLink" href="https://www.amazon.it/dp/B0G2YW1WXH" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
+                            Scopri di più su Amazon
+                        </a>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <div class="glass rounded-[28px] p-6 shadow-xl h-full flex flex-col">
+                        <div class="mb-4">
+                            <p class="uppercase tracking-[0.25em] text-[9px] opacity-50 mb-0.5">I TUOI PROGRESSI</p>
+                            <h4 class="serif text-xl text-[#9b7280]">Il tempo per te stesso</h4>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-white/30 border border-white/20 p-4 rounded-xl text-center">
+                                <span class="block text-2xl font-light text-[#b07d89]" id="statTotalMinutes">0</span>
+                                <span class="text-[10px] uppercase opacity-60 tracking-wider">Minuti Totali</span>
+                            </div>
+                            <div class="bg-white/30 border border-white/20 p-4 rounded-xl text-center">
+                                <span class="block text-2xl font-light text-[#b07d89]" id="statSessions">0</span>
+                                <span class="text-[10px] uppercase opacity-60 tracking-wider">Sessioni Complete</span>
+                            </div>
+                        </div>
+
+                        <p class="text-[11px] uppercase tracking-wider opacity-60 mb-2">Costanza Settimanale</p>
+                        <div class="flex-1 min-h-[150px] bg-white/20 rounded-xl p-2 border border-white/20 flex items-end">
+                            <svg class="w-full h-32" viewBox="0 0 100 30" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#c0909b; stop-opacity:0.4" />
+                                        <stop offset="100%" style="stop-color:#c0909b; stop-opacity:0" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 0 30 Q 20 18, 40 22 T 80 10 T 100 5 L 100 30 L 0 30 Z" fill="url(#grad)" />
+                                <path d="M 0 30 Q 20 18, 40 22 T 80 10 T 100 5" fill="none" stroke="#c0909b" stroke-width="1" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- NAV BAR BOTTOM -->
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-white/70 dark:bg-[#2d2434]/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/30 dark:border-white/10 px-4 py-4 flex justify-between items-center">
+        <a href="index.html" id="nav-lezioni" class="text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-2.5" title="Le mie lezioni">
+            <i class="fa-solid fa-calendar-days"></i>
+        </a>
+        <button onclick="switchTab('stanze')" id="nav-stanze" class="nav-icon text-[#c0909b] text-xl transition-all duration-300 transform active:scale-90 px-2.5">
+            <i class="fa-solid fa-house-chimney"></i>
+        </button>
+        <button onclick="switchTab('respiro-allenamento')" id="nav-respiro-allenamento" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-2.5" title="Allenamento Respiro">
+            <i class="fa-solid fa-wind"></i>
+        </button>
+        <button onclick="switchTab('pratiche')" id="nav-pratiche" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-2.5">
+            <i class="fa-solid fa-hourglass-start"></i>
+        </button>
+        <button onclick="switchTab('diario')" id="nav-diario" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-2.5">
+            <i class="fa-solid fa-feather-pointed"></i>
+        </button>
+        <button onclick="switchTab('profilo')" id="nav-profilo" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-2.5">
+            <i class="fa-solid fa-circle-user"></i>
+        </button>
+    </nav>
+
+    <script>
+        let intro, introAudio, userNameInput, nameLabel, inputContainer, welcomeName, body;
+        let total = 300;
+        let current = 300;
+        let running = false;
+        let timer;
+        let selectedMusic = "none";
+        let time, status, bgMusic, gong, muteIntroBtn, breathBubble;
+
+        let breathBubbleTimer;
+        let breathTimeLeft = 180; 
+        let breathRunning = false;
+        let breathCycleTimer = null; 
+        let bubbleMusic, startBreathBtn, breathCountdown, breathPhase, fullScreenBreathBubble, muteBubbleMusicBtn;
+
+        let deferredPrompt;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            intro = document.getElementById('intro');
+            introAudio = document.getElementById('introAudio');
+            userNameInput = document.getElementById('userNameInput');
+            nameLabel = document.getElementById('nameLabel');
+            inputContainer = document.getElementById('inputContainer');
+            welcomeName = document.getElementById('welcomeName');
+            body = document.getElementById('body');
+            time = document.getElementById('time');
+            status = document.getElementById('status');
+            bgMusic = document.getElementById('bgMusic');
+            gong = document.getElementById('gong');
+            muteIntroBtn = document.getElementById('muteIntroBtn');
+            breathBubble = document.getElementById('breathBubble');
+
+            bubbleMusic = document.getElementById('bubbleMusic');
+            startBreathBtn = document.getElementById('startBreathBtn');
+            breathCountdown = document.getElementById('breathCountdown');
+            breathPhase = document.getElementById('breathPhase');
+            fullScreenBreathBubble = document.getElementById('fullScreenBreathBubble');
+            muteBubbleMusicBtn = document.getElementById('muteBubbleMusicBtn');
+
+            setupEventListeners();
+            checkAndShowIntro();
+            updateTime();
+            renderDiaryLogs();
+
+            // Apertura diretta di una sezione (es. stanze.html#diario dall'Area Allievi)
+            const tabDaLink = location.hash.replace('#', '');
+            if (tabDaLink && document.getElementById('tab-' + tabDaLink)) switchTab(tabDaLink);
+        });
+
+        window.addEventListener('pageshow', (event) => {
+            let hasEnteredSession = sessionStorage.getItem('hasEntered');
+            if (hasEnteredSession === 'true') {
+                if (intro) intro.classList.add('hidden');
+                playIntroAudio();
+            }
+        });
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                const sessioneAttiva = running || breathRunning;
+                if (!sessioneAttiva) {
+                    if (introAudio) introAudio.pause();
+                    if (bgMusic) bgMusic.pause();
+                    if (bubbleMusic) bubbleMusic.pause();
+                }
+            }
+        });
+
+        function playIntroAudio() {
+            if (introAudio && !introAudio.muted) {
+                introAudio.currentTime = 0;
+                let playPromise = introAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch((err) => { 
+                        console.log("Audio in attesa di interazione dell'utente."); 
+                    });
+                }
+            }
+        }
+
+        function checkAndShowIntro() {
+            let storedUser = localStorage.getItem('utente');
+            let hasEnteredSession = sessionStorage.getItem('hasEntered');
+
+            if (hasEnteredSession === 'true') {
+                if (intro) intro.classList.add('hidden');
+                if (storedUser && welcomeName) {
+                    welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
+                }
+                playIntroAudio();
+                return;
+            }
+
+            if (storedUser) {
+                welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
+                nameLabel.innerHTML = `Bentornato/a, <strong>${storedUser}</strong>!`;
+                inputContainer.style.display = 'none';
+                intro.classList.remove('hidden');
+            } else {
+                nameLabel.innerHTML = "Come preferisci che ti chiami?";
+                inputContainer.style.display = 'flex';
+                userNameInput.value = '';
+                intro.classList.remove('hidden');
+            }
+        }
+
+        function startBreathTextSync() {
+            if (breathCycleTimer) clearInterval(breathCycleTimer);
+            let startTime = Date.now();
+            
+            function updateText() {
+                let elapsed = (Date.now() - startTime) % 8000;
+                if (elapsed < 4000) {
+                    breathPhase.innerHTML = "Inspira";
+                } else {
+                    breathPhase.innerHTML = "Espira";
+                }
+            }
+            
+            updateText();
+            breathCycleTimer = setInterval(updateText, 100);
+        }
+
+        function setupEventListeners() {
+            const installBtn = document.getElementById('installBtn');
+            if (installBtn) {
+                installBtn.onclick = async () => {
+                    gtag('event', 'click_installa');
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        deferredPrompt = null;
+                    } else {
+                        alert("L'applicazione è già installata o il tuo browser non supporta l'installazione diretta. Se usi iPhone, usa il tasto 'Condividi' in basso su Safari e poi seleziona 'Aggiungi alla schermata Home'.");
+                    }
+                };
+            }
+
+            const scuolaLink = document.getElementById('scuolaLink');
+            if (scuolaLink) {
+                scuolaLink.onclick = () => {
+                    gtag('event', 'click_scuola');
+                };
+            }
+
+            const libroLink = document.getElementById('libroLink');
+            if (libroLink) {
+                libroLink.onclick = () => {
+                    gtag('event', 'click_libro');
+                };
+            }
+
+            document.getElementById('enterBtn').onclick = () => {
+                let storedUser = localStorage.getItem('utente');
+                if (!storedUser) {
+                    const currentName = userNameInput.value.trim();
+                    if (currentName) {
+                        localStorage.setItem('utente', currentName);
+                        welcomeName.innerHTML = `La Stanza Interiore di ${currentName}`;
+                    }
+                } else {
+                    welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
+                }
+
+                sessionStorage.setItem('hasEntered', 'true');
+                intro.classList.add('hidden');
+                playIntroAudio();
+            };
+
+            muteIntroBtn.onclick = () => {
+                if (introAudio.muted) {
+                    introAudio.muted = false;
+                    muteIntroBtn.innerHTML = "🔊";
+                    playIntroAudio();
+                } else {
+                    introAudio.muted = true;
+                    introAudio.pause();
+                    muteIntroBtn.innerHTML = "🔇";
+                }
+            };
+
+            muteBubbleMusicBtn.onclick = () => {
+                if (bubbleMusic.muted) {
+                    bubbleMusic.muted = false;
+                    muteBubbleMusicBtn.innerHTML = "🔊";
+                } else {
+                    bubbleMusic.muted = true;
+                    muteBubbleMusicBtn.innerHTML = "🔇";
+                }
+            };
+
+            startBreathBtn.onclick = () => {
+                if (breathRunning) {
+                    clearInterval(breathBubbleTimer);
+                    if (breathCycleTimer) clearInterval(breathCycleTimer);
+                    breathRunning = false;
+                    bubbleMusic.pause();
+                    startBreathBtn.innerHTML = "Riprendi";
+                    fullScreenBreathBubble.classList.remove('bubble-breathing');
+                    breathPhase.innerHTML = "In Pausa";
+                    return;
+                }
+
+                if (introAudio) introAudio.pause();
+
+                breathRunning = true;
+                gtag('event', 'allenamento_respiro_avviato');
+                startBreathBtn.innerHTML = "Pausa";
+                fullScreenBreathBubble.classList.add('bubble-breathing');
+                startBreathTextSync();
+                bubbleMusic.play().catch(() => {});
+
+                breathBubbleTimer = setInterval(() => {
+                    breathTimeLeft--;
+                    let bm = Math.floor(breathTimeLeft / 60).toString().padStart(2, '0');
+                    let bs = (breathTimeLeft % 60).toString().padStart(2, '0');
+                    breathCountdown.innerHTML = `${bm}:${bs}`;
+
+                    if (breathTimeLeft <= 0) {
+                        clearInterval(breathBubbleTimer);
+                        if (breathCycleTimer) clearInterval(breathCycleTimer);
+                        breathRunning = false;
+                        bubbleMusic.pause();
+                        fullScreenBreathBubble.classList.remove('bubble-breathing');
+                        if (gong) gong.play().catch(() => {});
+                        gtag('event', 'allenamento_respiro_completato');
+                        startBreathBtn.innerHTML = "Inizia Sessione";
+                        breathPhase.innerHTML = "Completato";
+                        breathTimeLeft = 180;
+                        breathCountdown.innerHTML = "03:00";
+                        
+                        let mins = parseFloat(localStorage.getItem('stats_minutes') || '0');
+                        let sessions = parseInt(localStorage.getItem('stats_sessions') || '0');
+                        localStorage.setItem('stats_minutes', (mins + 3).toString());
+                        localStorage.setItem('stats_sessions', (sessions + 1).toString());
+                    }
+                }, 1000);
+            };
+
+            document.querySelectorAll('.stanza-link').forEach(link => {
+                link.onclick = function(e) {
+                    sessionStorage.setItem('hasEntered', 'true');
+                    const nomeStanza = this.getAttribute('data-stanza');
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'select_content', {
+                            'content_type': 'stanza_meditazione',
+                            'item_id': nomeStanza
+                        });
+                    }
+                };
+            });
+
+            document.getElementById('themeBtn').onclick = () => { body.classList.toggle('dark'); };
+
+            document.getElementById('updateNameBtn').onclick = () => {
+                const updatedName = document.getElementById('profileNameInput').value.trim();
+                if (updatedName) {
+                    localStorage.setItem('utente', updatedName);
+                    welcomeName.innerHTML = `La Stanza Interiore di ${updatedName}`;
+                    alert('Nome salvato!');
+                }
+            };
+
+            document.getElementById('saveDiaryBtn').onclick = () => {
+                const text = document.getElementById('diaryText').value.trim();
+                if (text) {
+                    let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
+                    logs.push({ 
+                        data: new Date().toLocaleDateString('it-IT') + ' - ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}), 
+                        nota: text 
+                    });
+                    localStorage.setItem('diario_logs', JSON.stringify(logs));
+                    gtag('event', 'diario_salvato');
+                    document.getElementById('diaryText').value = '';
+                    renderDiaryLogs();
+                }
+            };
+
+            document.querySelectorAll('.duration-btn').forEach(btn => {
+                btn.onclick = () => {
+                    if (running) return;
+                    document.querySelectorAll('.duration-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.add('glass');
+                    });
+                    btn.classList.add('active');
+                    total = parseInt(btn.dataset.time);
+                    current = total;
+                    updateTime();
+                };
+            });
+
+            document.querySelectorAll('.music-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.music-btn').forEach(b => { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    selectedMusic = btn.dataset.src;
+
+                    if (running) {
+                        if (selectedMusic === "none") {
+                            bgMusic.pause();
+                        } else {
+                            bgMusic.src = selectedMusic;
+                            bgMusic.loop = true;
+                            bgMusic.play().catch(() => {});
+                        }
+                    }
+                };
+            });
+
+            document.getElementById('playBtn').onclick = () => {
+                if (running) {
+                    clearInterval(timer);
+                    running = false;
+                    bgMusic.pause();
+                    document.getElementById('playBtn').innerHTML = '▶';
+                    if (breathBubble) breathBubble.classList.remove('bubble-breathing');
+                    return;
+                }
+
+                if (introAudio) introAudio.pause();
+                
+                if (selectedMusic !== "none") {
+                    bgMusic.src = selectedMusic;
+                    bgMusic.loop = true;
+                    bgMusic.play().catch(() => {});
+                }
+
+                running = true;
+                gtag('event', 'meditazione_avviata');
+                document.getElementById('playBtn').innerHTML = '❚❚';
+                status.innerHTML = 'In Sessione';
+                if (breathBubble) breathBubble.classList.add('bubble-breathing');
+
+                timer = setInterval(() => {
+                    current--;
+                    updateTime();
+                    if (current <= 0) {
+                        clearInterval(timer);
+                        running = false;
+                        bgMusic.pause();
+                        if (breathBubble) breathBubble.classList.remove('bubble-breathing');
+                        if(gong) gong.play().catch(() => {});
+                        gtag('event', 'meditazione_completata', {
+                            'durata_secondi': total,
+                            'durata_minuti': total / 60
+                        });
+                        document.getElementById('playBtn').innerHTML = '▶';
+                        status.innerHTML = 'Conclusa';
+                        
+                        let mins = parseFloat(localStorage.getItem('stats_minutes') || '0');
+                        let sessions = parseInt(localStorage.getItem('stats_sessions') || '0');
+                        localStorage.setItem('stats_minutes', (mins + (total / 60)).toString());
+                        localStorage.setItem('stats_sessions', (sessions + 1).toString());
+                    }
+                }, 1000);
+            };
+
+            document.getElementById('resetBtn').onclick = () => {
+                clearInterval(timer);
+                running = false;
+                bgMusic.pause();
+                if (breathBubble) breathBubble.classList.remove('bubble-breathing');
+                current = total;
+                updateTime();
+                document.getElementById('playBtn').innerHTML = '▶';
+                status.innerHTML = 'Pronto';
+            };
+        }
+
+        function switchTab(tabId) {
+            if (tabId !== 'respiro-allenamento' && breathRunning) {
+                clearInterval(breathBubbleTimer);
+                if (breathCycleTimer) clearInterval(breathCycleTimer);
+                breathRunning = false;
+                bubbleMusic.pause();
+                startBreathBtn.innerHTML = "Inizia Sessione";
+                fullScreenBreathBubble.classList.remove('bubble-breathing');
+                breathPhase.innerHTML = "Pronto";
+                breathTimeLeft = 180;
+                breathCountdown.innerHTML = "03:00";
+            }
+
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            const destinationTab = document.getElementById(`tab-${tabId}`);
+            if (destinationTab) destinationTab.classList.add('active');
+
+            document.querySelectorAll('.nav-icon').forEach(icon => {
+                icon.classList.remove('text-[#c0909b]', 'dark:text-[#d4a3ae]');
+                icon.classList.add('text-gray-400', 'dark:text-gray-500');
+            });
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.remove('text-gray-400', 'dark:text-gray-500');
+                activeNav.classList.add('text-[#c0909b]', 'dark:text-[#d4a3ae]');
+            }
+            
+            if (tabId === 'diario') { renderDiaryLogs(); }
+            if (tabId === 'profilo') {
+                const pInput = document.getElementById('profileNameInput');
+                if(pInput) pInput.value = localStorage.getItem('utente') || '';
+                renderStats();
+            }
+        }
+
+        function updateTime() {
+            if(!time) return;
+            let m = Math.floor(current / 60).toString().padStart(2, '0');
+            let s = (current % 60).toString().padStart(2, '0');
+            time.innerHTML = `${m}:${s}`;
+        }
+
+        function renderStats() {
+            const mins = localStorage.getItem('stats_minutes') || '0';
+            const sessions = localStorage.getItem('stats_sessions') || '0';
+            const tMins = document.getElementById('statTotalMinutes');
+            const tSess = document.getElementById('statSessions');
+            if(tMins) tMins.innerText = Math.round(parseFloat(mins));
+            if(tSess) tSess.innerText = sessions;
+        }
+
+        function deleteDiaryLog(originalIndex) {
+            if (confirm('Vuoi davvero eliminare questo pensiero?')) {
+                let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
+                logs.splice(originalIndex, 1);
+                localStorage.setItem('diario_logs', JSON.stringify(logs));
+                renderDiaryLogs();
+            }
+        }
+
+        function renderDiaryLogs() {
+            const container = document.getElementById('diaryLogsContainer');
+            if (!container) return;
+            const logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
+            
+            if (logs.length === 0) {
+                container.innerHTML = '<p id="noLogsMessage" class="text-sm opacity-60 italic font-light">Nessun pensiero salvato finora. Il tuo viaggio inizia qui.</p>';
+                return;
+            }
+            
+            const logsWithIndex = logs.map((log, index) => ({ ...log, originalIndex: index }));
+            
+            container.innerHTML = logsWithIndex.slice().reverse().map(log => `
+                <div class="bg-white/40 dark:bg-white/5 border border-[#c8a7b0]/20 p-4 rounded-2xl shadow-sm text-left relative group">
+                    <div class="flex justify-between items-start gap-4 mb-1">
+                        <div class="text-[11px] uppercase tracking-wider text-[#b07d89] font-medium">${log.data}</div>
+                        <button onclick="deleteDiaryLog(${log.originalIndex})" class="text-gray-400 hover:text-rose-500 text-xs transition p-1" title="Elimina pensiero">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm opacity-90 font-light leading-relaxed whitespace-pre-wrap pr-4">${log.nota}</p>
+                </div>
+            `).join('');
+        }
+
+        const closeBannerBtn = document.getElementById('closeInAppBanner');
+        if (closeBannerBtn) {
+            closeBannerBtn.onclick = () => {
+                document.getElementById('inAppBanner').classList.add('hidden');
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,7 +1,9 @@
 {
+  "id": "/",
   "name": "La Stanza Interiore",
   "short_name": "La Stanza Interiore",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f5efe8",
   "theme_color": "#c0909b",
@@ -9,8 +11,15 @@
   "icons": [
     {
       "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

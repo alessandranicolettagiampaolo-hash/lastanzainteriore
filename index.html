@@ -1,997 +1,2191 @@
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Stanza Interiore</title>
-    
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-49EZT9DGYL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-49EZT9DGYL');
-    </script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>La Stanza Interiore</title>
+  <meta name="theme-color" content="#c0909b">
     <link rel="manifest" href="manifest.json">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom, #f8f3ef, #efe4de);
-            overflow-x: hidden;
-            color: #715d64;
-            transition: .6s;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <style>
+    :root {
+      --rosa: #c0909b;
+      --rosa-scuro: #b07d89;
+      --malva: #9a717d;
+      --testo: #715d64;
+      --linea: rgba(200, 167, 176, 0.28);
+      --verde: #5e9a73;
+      --verde-chiaro: #e6f2ea;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    html { background: #efe4de; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom, #f8f3ef, #efe4de);
+      background-attachment: fixed;
+      color: var(--testo);
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    .serif { font-family: 'Cormorant Garamond', serif; }
+    .blob { position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
+    .blob.a { width: 380px; height: 380px; background: #f6cfd9; opacity: .35; top: -90px; left: -90px; }
+    .blob.b { width: 380px; height: 380px; background: #fbe4e6; opacity: .5; bottom: -60px; right: -80px; }
 
-        body.dark {
-            background: linear-gradient(to bottom, #1d1721, #2d2434);
-            color: #f1dce1;
-        }
+    .wrap { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 20px 16px 60px; }
+    .glass {
+      background: rgba(255, 255, 255, 0.42);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 18px 40px rgba(113, 93, 100, 0.08);
+    }
+    .hidden { display: none !important; }
 
-        .serif {
-            font-family: 'Cormorant Garamond', serif;
-        }
+    /* Pulsanti */
+    .btn {
+      appearance: none; border: 0; cursor: pointer;
+      font: 500 12px/1 'Inter', sans-serif; letter-spacing: .14em; text-transform: uppercase;
+      padding: 15px 22px; border-radius: 14px; transition: .2s; width: 100%;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .55; cursor: default; }
+    .btn-primary { background: var(--rosa); color: #fff; box-shadow: 0 8px 20px rgba(192,144,155,.3); }
+    .btn-primary:hover { background: var(--rosa-scuro); }
+    .btn-soft { background: rgba(255,255,255,.7); color: var(--testo); border: 1px solid var(--linea); }
+    .btn-verde { background: var(--verde); color: #fff; box-shadow: 0 8px 20px rgba(94,154,115,.25); }
+    .btn-link { background: none; border: 0; color: var(--rosa-scuro); font: 500 13px 'Inter', sans-serif; cursor: pointer; padding: 6px; text-decoration: underline; text-underline-offset: 3px; }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.22);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-        }
+    /* Form */
+    label.lab { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin: 0 0 8px; font-weight: 500; }
+    input.inp {
+      width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--linea);
+      background: rgba(255,255,255,.65); color: var(--testo); font: 400 16px 'Inter', sans-serif; outline: none; transition: .2s;
+    }
+    input.inp:focus { border-color: var(--rosa); background: #fff; }
+    .msg { font-size: 13px; line-height: 1.5; border-radius: 12px; padding: 10px 14px; margin-top: 14px; }
+    .msg.err { background: #fbe9ec; color: #9c4a5b; }
+    .msg.ok { background: var(--verde-chiaro); color: #3f7353; }
 
-        body.dark .glass {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+    /* Accesso */
+    .auth { min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; }
+    .auth-box { width: 100%; max-width: 400px; text-align: center; }
+    .auth-box img { width: 120px; height: auto; margin: 0 auto 10px; display: block; }
+    .auth-card { border-radius: 28px; padding: 26px 22px; text-align: left; margin-top: 22px; }
+    .kicker { text-transform: uppercase; letter-spacing: .25em; font-size: 10px; font-weight: 500; opacity: .6; }
 
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { scrollbar-width: none; }
+    /* Header */
+    header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    header.top .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+    header.top img { width: 72px; height: 72px; object-fit: contain; }
+    header.top h1 { margin: 0; font-size: 22px; color: var(--rosa-scuro); font-weight: 500; line-height: 1.1; }
+    .icon-btn { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; border: 0; cursor: pointer; color: var(--testo); text-decoration: none; font-size: 15px; }
 
-        .card { transition: .4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .card:hover { transform: translateY(-6px); }
+    /* Benvenuto + saldo */
+    .hello { border-radius: 30px; padding: 22px; display: grid; gap: 16px; margin-bottom: 18px; }
+    @media (min-width: 720px) { .hello { grid-template-columns: 1fr auto; align-items: center; padding: 26px 30px; } }
+    .hello h2 { margin: 4px 0 0; font-size: 30px; font-weight: 500; color: var(--malva); line-height: 1.1; }
+    .saldo { font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; transition: .15s; background: rgba(255,255,255,.7); border: 1px solid var(--linea); border-radius: 22px; padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
+    .saldo .num { font-family: 'Cormorant Garamond', serif; font-size: 46px; line-height: 1; color: var(--rosa-scuro); font-weight: 600; min-width: 34px; text-align: center; }
+    .saldo .txt { font-size: 13px; line-height: 1.4; }
+    .saldo .txt small { display: block; opacity: .65; font-size: 11.5px; margin-top: 2px; }
+    .admin-note { font-size: 12px; background: rgba(192,144,155,.12); border-radius: 12px; padding: 8px 12px; margin-top: 10px; display: inline-block; }
 
-        .music-btn.active, .duration-btn.active {
-            background: #c0909b !important;
-            color: white !important;
-            border-color: #c0909b !important;
-            box-shadow: 0 8px 20px rgba(192, 144, 155, 0.3);
-        }
+    /* Calendario */
+    .cal { border-radius: 30px; padding: 18px 14px 16px; margin-bottom: 18px; }
+    @media (min-width: 720px) { .cal { padding: 24px; } }
+    .cal-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 0 4px 16px; border-bottom: 1px solid var(--linea); margin-bottom: 14px; }
+    .cal-head h3 { margin: 0; font-size: 24px; font-weight: 500; color: var(--malva); }
+    .nav { display: flex; gap: 6px; }
+    .nav button { border: 1px solid var(--linea); background: rgba(255,255,255,.75); color: var(--testo); border-radius: 12px; height: 38px; min-width: 38px; padding: 0 12px; cursor: pointer; font: 500 12px 'Inter', sans-serif; letter-spacing: .08em; }
+    .nav button:active { transform: scale(.96); }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11.5px; opacity: .8; padding: 0 4px 12px; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
 
-        body.dark .music-btn.active, body.dark .duration-btn.active {
-            background: #d4a3ae !important;
-            color: #1d1721 !important;
-            border-color: #d4a3ae !important;
-            box-shadow: 0 0 15px rgba(212, 163, 174, 0.5);
-        }
+    .scroller { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; scroll-snap-type: x proximity; }
+    .scroller::-webkit-scrollbar { display: none; }
+    .grid { display: grid; grid-template-columns: 50px repeat(7, minmax(96px, 1fr)); gap: 6px; min-width: 740px; }
+    .dayh { text-align: center; padding: 8px 4px; border-radius: 14px; background: rgba(255,255,255,.55); border: 1px solid var(--linea); scroll-snap-align: start; }
+    .dayh b { display: block; font-size: 10.5px; letter-spacing: .12em; font-weight: 600; color: var(--malva); }
+    .dayh span { font-size: 11px; opacity: .65; }
+    .dayh.today { background: var(--rosa); border-color: var(--rosa); }
+    .dayh.today b, .dayh.today span { color: #fff; opacity: 1; }
+    .timeh { font-size: 11px; font-weight: 600; opacity: .6; text-align: right; padding: 12px 4px 0 0; }
+    .cell { min-height: 74px; border-radius: 14px; background: rgba(255,255,255,.22); border: 1px dashed rgba(200,167,176,.2); padding: 3px; display: flex; flex-direction: column; gap: 4px; }
+    .cell.today { background: rgba(192,144,155,.07); }
 
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.5s ease forwards;
-        }
-        .tab-content.active { display: block; }
+    .lez {
+      position: relative; text-align: left; border-radius: 12px; padding: 8px 8px 7px; cursor: pointer; border: 1px solid transparent;
+      font: inherit; color: inherit; width: 100%; transition: transform .15s, box-shadow .15s; box-shadow: 0 3px 10px rgba(113,93,100,.07);
+    }
+    .lez:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(113,93,100,.12); }
+    .lez .ora { font-size: 11px; font-weight: 600; }
+    .lez .tit { font-size: 12px; font-weight: 500; line-height: 1.25; margin-top: 2px; }
+    .lez .stato { font-size: 10.5px; margin-top: 5px; opacity: .8; }
+    .lez .loto { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; }
+    .lez.prenotata { border: 2px solid var(--verde); box-shadow: 0 0 0 3px rgba(94,154,115,.15); }
+    .lez.prenotata .stato { color: #3f7353; font-weight: 600; opacity: 1; }
+    .lez.passata { opacity: .45; }
+    .lez.annullata { opacity: .55; background: #eee !important; }
+    .lez.annullata .tit { text-decoration: line-through; }
+    .lez.piena .stato { color: #9c4a5b; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .empty { text-align: center; padding: 34px 12px; font-size: 14px; opacity: .75; }
+    .empty .serif { font-size: 22px; color: var(--malva); display: block; margin-bottom: 4px; opacity: 1; }
 
-        #intro {
-            position: fixed;
-            inset: 0;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(to bottom, #f8f3ef, #efe4de);
-            transition: 1s cubic-bezier(0.16, 1, 0.3, 1);
-            opacity: 1;
-            pointer-events: auto;
-        }
-        #intro.hidden { opacity: 0; pointer-events: none; }
-        body.dark #intro { background: linear-gradient(to bottom, #1d1721, #2d2434); }
+    /* Le mie prenotazioni */
+    .mine { border-radius: 30px; padding: 20px; }
+    .mine h3 { margin: 0 0 12px; font-size: 22px; font-weight: 500; color: var(--malva); }
+    .mine-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,.6); border: 1px solid var(--linea); margin-bottom: 8px; cursor: pointer; }
+    .mine-item .when { font-size: 12px; opacity: .7; }
+    .mine-item .what { font-size: 14px; font-weight: 500; }
+    .mine-item svg { flex: none; }
 
-        .soap-bubble {
-            position: relative;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(244, 197, 209, 0.2) 70%, rgba(186, 220, 245, 0.25) 100%);
-            box-shadow: 
-                inset 0 10px 20px rgba(255,255,255,0.4),
-                inset 0 -10px 20px rgba(113, 93, 100, 0.05),
-                inset -5px 0 15px rgba(186, 220, 245, 0.3),
-                inset 5px 0 15px rgba(244, 197, 209, 0.3),
-                0 10px 25px rgba(113, 93, 100, 0.04);
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    /* Popup */
+    .overlay { position: fixed; inset: 0; background: rgba(60, 44, 50, .35); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: flex-end; justify-content: center; opacity: 0; transition: opacity .25s; }
+    .overlay.open { opacity: 1; }
+    .sheet { width: 100%; max-width: 440px; background: #fbf7f5; border-radius: 28px 28px 0 0; padding: 22px 22px calc(22px + env(safe-area-inset-bottom)); transform: translateY(30px); transition: transform .3s cubic-bezier(.16,1,.3,1); max-height: 90vh; overflow-y: auto; }
+    .overlay.open .sheet { transform: none; }
+    @media (min-width: 600px) { .overlay { align-items: center; } .sheet { border-radius: 28px; } }
+    .sheet .grab { width: 42px; height: 4px; border-radius: 4px; background: rgba(113,93,100,.2); margin: -8px auto 14px; }
+    .sheet h4 { margin: 0; font-size: 28px; font-weight: 500; color: var(--malva); line-height: 1.15; }
+    .sheet .quando { font-size: 14px; margin-top: 6px; }
+    .posti { margin: 18px 0; padding: 14px 16px; border-radius: 16px; background: #fff; border: 1px solid var(--linea); }
+    .posti .riga { display: flex; justify-content: space-between; font-size: 13px; }
+    .bar { height: 7px; border-radius: 7px; background: #f1e6e8; margin-top: 10px; overflow: hidden; }
+    .bar i { display: block; height: 100%; background: var(--rosa); border-radius: 7px; }
+    .nota { font-size: 13px; background: #fff7ea; border-radius: 12px; padding: 10px 12px; margin-bottom: 14px; line-height: 1.5; }
+    .info { font-size: 13px; line-height: 1.55; margin: 0 0 16px; }
+    .badge-ok { display: flex; align-items: center; gap: 10px; background: var(--verde-chiaro); color: #3f7353; border-radius: 14px; padding: 12px 14px; font-size: 14px; font-weight: 500; margin-bottom: 14px; }
+    .azioni { display: grid; gap: 10px; }
 
-        body.dark .soap-bubble {
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(212, 163, 174, 0.15) 80%, rgba(138, 180, 219, 0.15) 100%);
-            box-shadow: 
-                inset 0 8px 15px rgba(255,255,255,0.2),
-                inset -5px 0 12px rgba(138, 180, 219, 0.2),
-                inset 5px 0 12px rgba(212, 163, 174, 0.2),
-                0 10px 30px rgba(0, 0, 0, 0.2);
-        }
+    /* Avviso */
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); z-index: 80; max-width: calc(100% - 32px); width: 420px; padding: 14px 18px; border-radius: 16px; font-size: 14px; line-height: 1.45; box-shadow: 0 14px 30px rgba(60,44,50,.18); opacity: 0; transition: .3s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast.ok { background: #fff; color: #3f7353; border-left: 4px solid var(--verde); }
+    .toast.err { background: #fff; color: #9c4a5b; border-left: 4px solid #c9707f; }
 
-        .soap-bubble::after {
-            content: '';
-            position: absolute;
-            top: 12%;
-            left: 15%;
-            width: 25%;
-            height: 15%;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.65);
-            transform: rotate(-30px);
-            filter: blur(1px);
-        }
+    .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(192,144,155,.25); border-top-color: var(--rosa); animation: spin 1s linear infinite; margin: 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .bubble-breathing {
-            animation: breatheAnimation 8s ease-in-out infinite;
-        }
+    /* Anteprima calendario (benvenuto) */
+    .preview { position: relative; margin-top: 22px; border-radius: 24px; overflow: hidden; background: rgba(255,255,255,.35); border: 1px solid rgba(255,255,255,.5); height: 120px; }
+    .preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 10px; filter: blur(3px); opacity: .85; }
+    .preview-grid i { display: block; height: 28px; border-radius: 8px; background: rgba(255,255,255,.5); }
+    .preview-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; background: linear-gradient(to bottom, rgba(248,243,239,.25), rgba(248,243,239,.75)); }
+    .preview-label .serif { font-size: 22px; color: var(--malva); }
+    .discover { display: flex; align-items: center; gap: 14px; text-align: left; margin-top: 14px; border-radius: 22px; padding: 16px 18px; text-decoration: none; color: inherit; }
+    .discover-ico { width: 40px; height: 40px; object-fit: contain; flex: none; margin: 0 !important; }
+    .discover b { display: block; font-size: 20px; font-weight: 500; color: var(--malva); }
+    .discover small { display: block; font-size: 12px; opacity: .7; }
 
-        @keyframes breatheAnimation {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.4); }
-        }
-    </style>
+    /* Barra in basso (come nella app) */
+    .bnav { position: fixed; bottom: calc(18px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 40; width: 92%; max-width: 440px;
+      background: rgba(255,255,255,.78); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.6);
+      border-radius: 30px; box-shadow: 0 18px 40px rgba(113,93,100,.18); display: flex; justify-content: space-around; padding: 10px 6px; }
+    .bnav a { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #a8a0a3; font-size: 19px; padding: 2px 10px; transition: .2s; }
+    .bnav a span { font-size: 10px; letter-spacing: .06em; }
+    .bnav a.on { color: var(--rosa); }
+    #scr-app { padding-bottom: 90px; }
+
+    /* ===== Pannello della Scuola ===== */
+    #scr-admin { padding-bottom: 90px; }
+    .panel { border-radius: 30px; padding: 20px; margin-bottom: 18px; }
+    @media (min-width: 720px) { .panel { padding: 26px; } }
+    .panel-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--linea); margin-bottom: 14px; }
+    .panel-head h3 { margin: 4px 0 0; font-size: 26px; font-weight: 500; color: var(--malva); }
+    .muted { font-size: 13.5px; opacity: .65; margin: 6px 0; }
+    .row, .alez { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+      background: rgba(255,255,255,.62); border: 1px solid var(--linea); border-radius: 16px; padding: 12px 14px; margin-bottom: 8px; transition: .15s; }
+    .row:hover, .alez:hover { background: rgba(255,255,255,.85); }
+    .row-main { flex: 1; min-width: 0; }
+    .row-title { font-size: 14.5px; font-weight: 500; }
+    .row-sub { font-size: 12px; opacity: .7; margin-top: 2px; }
+    .nick { font-size: 11.5px; font-weight: 400; background: rgba(192,144,155,.14); color: var(--rosa-scuro); padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+    .pill { font-size: 11.5px; font-weight: 600; background: var(--verde-chiaro); color: #3f7353; border-radius: 12px; padding: 4px 10px; white-space: nowrap; flex: none; }
+    .pill.warn { background: #fbe9ec; color: #9c4a5b; }
+    .pill.off { background: #eee; color: #777; font-weight: 500; }
+    .alez { flex-direction: column; align-items: stretch; gap: 4px; border-left: 4px solid var(--rosa); }
+    .alez-top { display: flex; justify-content: space-between; align-items: center; }
+    .alez-ora { font-size: 12.5px; font-weight: 600; }
+    .alez-tit { font-size: 16px; font-weight: 500; }
+    .alez.annullata { opacity: .55; }
+    .alez.annullata .alez-tit { text-decoration: line-through; }
+    .saldo-mini { margin-top: 14px; background: #fff; border: 1px solid var(--linea); border-radius: 16px; padding: 10px 14px; font-size: 14px; }
+    .saldo-mini .serif { font-size: 30px; color: var(--rosa-scuro); font-weight: 600; margin-right: 4px; }
+    .pkg { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #fff; border: 1px solid var(--linea); border-radius: 14px; padding: 10px 12px; margin-bottom: 6px; font-size: 13.5px; }
+    .pkg.scaduto { opacity: .5; }
+    .pm { display: flex; gap: 6px; flex: none; }
+    .pm button { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--linea); background: #fff; font-size: 18px; color: var(--testo); cursor: pointer; }
+    .box { background: rgba(255,255,255,.7); border: 1px solid var(--linea); border-radius: 18px; padding: 14px; margin-top: 12px; }
+    .box .lab { margin-bottom: 10px; }
+    .two { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+    .two > div { min-width: 0; }
+    input.inp[type=date], input.inp[type=time] { min-width: 0; -webkit-appearance: none; appearance: none; min-height: 50px; }
+    label.mini { display: block; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; opacity: .7; margin: 12px 0 6px; font-weight: 500; }
+    .two label.mini { margin-top: 0; }
+    .check { display: flex; align-items: center; gap: 8px; font-size: 13.5px; margin-top: 12px; cursor: pointer; }
+    .check input { width: 18px; height: 18px; accent-color: var(--rosa); }
+    .inp:disabled { opacity: .45; }
+    .linkbox { font-size: 12px; word-break: break-all; background: #fff; border: 1px dashed var(--linea); border-radius: 12px; padding: 10px 12px; max-height: 90px; overflow: auto; user-select: all; }
+    .person { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; background: #fff; border: 1px solid var(--linea); border-radius: 12px; margin-bottom: 6px; font-size: 14px; }
+    .mini-btn { flex: none; border: 1px solid var(--linea); background: #fff; color: #9c4a5b; border-radius: 10px; padding: 6px 10px; font: 500 12px 'Inter', sans-serif; cursor: pointer; }
+    .mini-btn.verde { color: #fff; background: var(--verde); border-color: var(--verde); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { border: 1px solid var(--linea); background: rgba(255,255,255,.7); color: var(--testo); border-radius: 20px; padding: 8px 14px; font: 500 12.5px 'Inter', sans-serif; cursor: pointer; }
+    .chip.on { background: var(--rosa); border-color: var(--rosa); color: #fff; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .stat { background: #fff; border: 1px solid var(--linea); border-radius: 16px; padding: 12px 14px; }
+    .stat b { display: block; font-family: 'Cormorant Garamond', serif; font-size: 30px; line-height: 1; color: var(--rosa-scuro); font-weight: 600; }
+    .stat span { font-size: 11.5px; opacity: .75; }
+    .stat.wide { grid-column: 1 / -1; }
+    .stat.wide b { font-size: 20px; font-family: 'Inter', sans-serif; font-weight: 600; color: var(--malva); margin-bottom: 2px; }
+
+    /* Installazione sul telefono */
+    .install-card { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border-radius: 22px; padding: 12px 14px; margin-bottom: 14px; cursor: pointer; font: inherit; color: inherit; }
+    .install-card img { width: 44px; height: 44px; object-fit: contain; flex: none; }
+    .install-card b { display: block; font-size: 18px; font-weight: 500; color: var(--malva); line-height: 1.2; }
+    .install-card small { display: block; font-size: 12px; opacity: .72; margin-top: 2px; }
+    .install-go { flex: none; background: var(--rosa); color: #fff; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; padding: 8px 12px; border-radius: 12px; }
+    .steps { list-style: none; padding: 0; margin: 16px 0 0; counter-reset: s; }
+    .steps li { counter-increment: s; display: flex; gap: 12px; align-items: flex-start; background: #fff; border: 1px solid var(--linea); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+    .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--rosa); color: #fff; font-size: 12px; font-weight: 600; display: grid; place-items: center; margin-top: 1px; }
+    .ico { display: inline-block; vertical-align: -4px; }
+
+    .saldo:hover { background: #fff; }
+    .saldo-go { margin-left: auto; font-size: 11.5px; font-weight: 600; color: var(--rosa-scuro); white-space: nowrap; padding-left: 10px; border-left: 1px solid var(--linea); }
+    .mov { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--linea); border-radius: 14px; padding: 10px 12px; margin-bottom: 6px; }
+    .mov-ico { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+    .mov-ico.piu { background: var(--verde-chiaro); color: #3f7353; }
+    .mov-ico.meno { background: #f8e1e6; color: #9c4a5b; }
+    .mov-ico.zero { background: #f1ecee; color: #8b7a80; }
+    .mov-main { flex: 1; min-width: 0; }
+    .mov-tit { font-size: 14px; font-weight: 500; }
+    .mov-sub { font-size: 12px; opacity: .7; margin-top: 1px; }
+    .mov-data { flex: none; font-size: 11.5px; opacity: .6; text-align: right; }
+    .mese { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .55; margin: 14px 2px 6px; font-weight: 600; }
+
+    .iscr-head { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 8px; }
+    .round-btn { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--linea); background: #fff; cursor: pointer; font: 400 20px/1 'Inter', sans-serif; display: grid; place-items: center; transition: .15s; }
+    .round-btn.add { background: var(--verde); border-color: var(--verde); color: #fff; font-size: 22px; }
+    .round-btn.add.on { transform: rotate(45deg); }
+    .round-btn.del { color: #9c4a5b; }
+    .round-btn.del.confirm { width: auto; border-radius: 17px; padding: 0 12px; font-size: 12.5px; font-weight: 600; background: #c9707f; border-color: #c9707f; color: #fff; }
+
+    .slot { display: grid; grid-template-columns: 44px minmax(0,1fr) minmax(0,1fr); gap: 8px; align-items: center; margin-bottom: 6px; }
+    .slot b { font-size: 14px; color: var(--malva); }
+    .slot .inp { padding: 10px 12px; min-height: 44px; }
+    .slot-head span { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; opacity: .65; font-weight: 500; }
+    .cp-row.escluso span { text-decoration: line-through; opacity: .45; }
+    .cp-row.escluso .cp-x { color: var(--verde); }
+
+    .viste { margin: 0 0 12px; }
+    .wgrid { display: grid; grid-template-columns: repeat(7, minmax(92px, 1fr)); gap: 6px; min-width: 680px; }
+    .wcol { display: flex; flex-direction: column; gap: 5px; }
+    .wcol .dayh { border: 1px solid var(--linea); cursor: pointer; font: inherit; }
+    .wlez { display: flex; flex-direction: column; text-align: left; border: 0; border-radius: 10px; padding: 7px 8px; cursor: pointer; font: inherit; box-shadow: 0 2px 8px rgba(113,93,100,.07); }
+    .wl-ora { font-size: 11px; font-weight: 700; }
+    .wl-tit { font-size: 12px; line-height: 1.25; margin-top: 1px; }
+    .wl-posti { font-size: 10.5px; opacity: .8; margin-top: 3px; }
+    .wlez.annullata, .mlez.annullata { opacity: .45; text-decoration: line-through; }
+    .wvuoto { min-height: 40px; border-radius: 10px; border: 1px dashed rgba(200,167,176,.25); }
+    .mgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .mhead { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-align: center; opacity: .6; padding: 2px 0 4px; }
+    .mcell { min-height: 78px; background: rgba(255,255,255,.55); border: 1px solid var(--linea); border-radius: 10px; padding: 4px; display: flex; flex-direction: column; gap: 3px; cursor: pointer; overflow: hidden; }
+    .mcell.fuori { opacity: .4; }
+    .mcell.today { border-color: var(--rosa); box-shadow: inset 0 0 0 1px var(--rosa); }
+    .mnum { font-size: 11.5px; font-weight: 600; }
+    .mcell.today .mnum { color: var(--rosa-scuro); }
+    .mlez { border: 0; border-radius: 6px; padding: 2px 4px; font: inherit; font-size: 10px; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mlez b { font-weight: 700; }
+    .mpiu { font-size: 10px; opacity: .7; padding-left: 2px; }
+    @media (max-width: 560px) { .mlez span { display: none; } .mlez { font-size: 9px; padding: 2px 0; text-align: center; text-overflow: clip; letter-spacing: -.02em; } .mcell { min-height: 64px; padding: 3px 2px; } .mgrid { gap: 3px; } }
+
+    .mlez.mia { box-shadow: inset 0 0 0 1.5px var(--verde); position: relative; }
+    .mlez.passata { opacity: .5; }
+    .mloto { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--verde); margin-right: 3px; vertical-align: 1px; }
+    @media (max-width: 560px) { .mloto { display: none; } }
+
+    /* Tocchi comodi sul telefono */
+    .btn-link { min-height: 44px; padding: 10px 12px; }
+    .bnav a { padding: 6px 12px; min-height: 48px; justify-content: center; }
+    .round-btn { width: 40px; height: 40px; }
+    .chip { min-height: 40px; }
+    .nav button { height: 42px; min-width: 42px; }
+    .pm button { width: 40px; height: 40px; }
+    input.inp, select, textarea { font-size: 16px; }
+    @media (max-width: 400px) {
+      .wrap { padding-left: 12px; padding-right: 12px; }
+      .hello h2 { font-size: 26px; }
+      .cal-head h3, .panel-head h3 { font-size: 22px; }
+      .sheet { padding-left: 18px; padding-right: 18px; }
+      .saldo { padding: 12px 14px; gap: 10px; }
+      .saldo .num { font-size: 40px; }
+    }
+
+    /* ===== Ottimizzazione telefono ===== */
+    @media (max-width: 560px) {
+      .wrap { padding: 12px 12px 60px; }
+      header.top { margin-bottom: 12px; }
+      header.top img { width: 60px; height: 60px; }
+      header.top h1 { font-size: 20px; }
+      .hello { padding: 16px 18px; gap: 12px; margin-bottom: 12px; border-radius: 24px; }
+      .hello h2 { font-size: 26px; }
+      .saldo { padding: 10px 14px; gap: 10px; }
+      .saldo .num { font-size: 36px; }
+      .install-card { padding: 10px 12px; margin-bottom: 12px; }
+      .install-card img { width: 36px; height: 36px; }
+      .install-card b { font-size: 16px; }
+      .install-card small { display: none; }
+      .cal, .panel, .mine { padding: 16px 12px; border-radius: 24px; margin-bottom: 12px; }
+      .cal-head h3, .panel-head h3 { font-size: 22px; }
+      .legend { font-size: 11px; gap: 10px; }
+      .grid { grid-template-columns: 44px repeat(7, minmax(88px, 1fr)); min-width: 660px; }
+      .mlez { min-height: 20px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+      .mcell { min-height: 70px; }
+      .sheet { padding: 20px 18px calc(24px + env(safe-area-inset-bottom)); }
+      .sheet h4 { font-size: 25px; }
+      .bnav { bottom: calc(12px + env(safe-area-inset-bottom)); }
+      .bnav a { min-width: 56px; padding: 4px 8px; }
+    }
+    .btn, .nav button, .chip, .round-btn, .icon-btn { touch-action: manipulation; }
+    .footer { text-align: center; font-size: 11.5px; opacity: .55; margin-top: 30px; }
+    /* Mostra/nascondi password */
+    .pw-wrap { position: relative; }
+    .pw-wrap input.inp { padding-right: 52px; }
+    .pw-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: 0; background: none; color: var(--rosa-scuro); cursor: pointer; border-radius: 12px; opacity: .75; display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
+    .pw-eye:hover, .pw-eye:focus-visible { opacity: 1; }
+  </style>
 </head>
+<body>
+  <div class="blob a"></div><div class="blob b"></div>
 
-<body id="body">
+  <div class="wrap">
 
-    <!-- BANNER: APRI NEL BROWSER (per chi arriva da Instagram/Facebook in-app) -->
-    <div id="inAppBanner" class="hidden fixed inset-x-0 top-0 z-[9999] p-4">
-        <div class="glass max-w-md mx-auto rounded-2xl shadow-xl p-4 flex items-start gap-3 border border-white/40">
-            <i class="fa-solid fa-arrow-up-right-from-square text-[#b07d89] text-lg mt-0.5"></i>
-            <div class="text-left">
-                <p class="text-sm font-medium mb-1">Per installare l'app sulla tua Home</p>
-                <p class="text-xs opacity-80 leading-relaxed">Tocca <strong>⋮</strong> o l'icona di condivisione in alto e scegli <strong>"Apri nel Browser"</strong> (Safari o Chrome). Da lì potrai aggiungere l'app alla schermata Home.</p>
-            </div>
-            <button id="closeInAppBanner" class="text-lg opacity-50 hover:opacity-100 transition ml-auto shrink-0">&times;</button>
+    <!-- CARICAMENTO -->
+    <section id="scr-loading" class="auth"><div class="spinner"></div></section>
+
+    <!-- BENVENUTO / ACCESSO -->
+    <section id="scr-login" class="auth hidden">
+      <div class="auth-box">
+        <img src="logo.png" alt="">
+        <h1 class="serif" style="margin:0;font-size:36px;font-weight:500;color:var(--rosa-scuro)">La Stanza Interiore</h1>
+        <p style="margin:6px 0 0;font-size:13px;letter-spacing:.08em;opacity:.7;font-weight:500">Scuola di Meditazione Molfetta</p>
+
+        <div class="preview" aria-hidden="true">
+          <div class="preview-grid">
+            <i style="background:#f8e1e6"></i><i></i><i style="background:#ebe3f5"></i><i></i><i style="background:#e1eef4"></i>
+            <i></i><i style="background:#f7e9dc"></i><i></i><i style="background:#f8e1e6"></i><i></i>
+            <i style="background:#eef0dc"></i><i></i><i></i><i style="background:#ebe3f5"></i><i style="background:#e1eef4"></i>
+          </div>
+          <div class="preview-label"><span class="serif">Il calendario delle lezioni</span>prenota, cancella e segui le tue lezioni</div>
         </div>
-    </div>
 
-    <script>
-        (function() {
-            const ua = navigator.userAgent || navigator.vendor || window.opera;
-            const isInApp = /FBAN|FBAV|Instagram|Line\//i.test(ua);
-            if (isInApp) {
-                document.addEventListener('DOMContentLoaded', () => {
-                    const banner = document.getElementById('inAppBanner');
-                    if (banner) banner.classList.remove('hidden');
-                });
-            }
-        })();
-    </script>
+        <form id="loginForm" class="glass auth-card" autocomplete="on" style="margin-top:14px">
+          <p class="serif" style="margin:0 0 16px;font-size:22px;color:var(--malva);text-align:center">Sei un allievo della scuola?</p>
+          <label class="lab" for="loginEmail">Email</label>
+          <input class="inp" id="loginEmail" type="email" autocomplete="email" required placeholder="la tua email">
+          <div style="height:14px"></div>
+          <label class="lab" for="loginPass">Password</label>
+          <input class="inp" id="loginPass" type="password" autocomplete="current-password" required placeholder="la tua password">
+          <div id="loginMsg"></div>
+          <div style="height:18px"></div>
+          <button class="btn btn-primary" id="loginBtn" type="submit">Entra</button>
+          <p style="text-align:center;margin:14px 0 0">
+            <button type="button" class="btn-link" id="forgotLink">Password dimenticata?</button>
+          </p>
+          <p style="font-size:12.5px;opacity:.7;text-align:center;margin:8px 0 0;line-height:1.5">
+            Non hai ancora un accesso? Chiedi alla tua scuola.
+          </p>
+        </form>
 
-    <audio id="introAudio" preload="auto" loop><source src="intro.mp3" type="audio/mpeg"></audio>
-    <audio id="bgMusic" loop></audio>
-    <audio id="gong"><source src="gong.mp3" type="audio/mpeg"></audio>
-    <audio id="bubbleMusic" preload="auto" loop><source src="bolla.mp3" type="audio/mpeg"></audio>
+        <a href="stanze.html" class="discover glass">
+          <img src="logo.png" alt="" class="discover-ico">
+          <b class="serif">Scopri le Stanze Interiori</b>
+          <span style="margin-left:auto;font-size:18px;opacity:.6">→</span>
+        </a>
+      </div>
+    </section>
 
-    <!-- SCHERMATA BENVENUTO -->
-    <div id="intro">
-        <div class="text-center px-6 w-full max-w-md mx-auto">
-            <img src="logo.png" class="w-44 h-auto mx-auto mb-6 drop-shadow-xl object-contain">
-            <h1 class="serif text-4xl sm:text-5xl leading-tight text-[#b07d89] mb-1">La Stanza Interiore</h1>
-            <p class="uppercase tracking-[0.25em] text-[11px] sm:text-[12px] font-medium opacity-70 mb-8">MEDITAZIONE & BENESSERE</p>
-            
-            <div class="glass rounded-[28px] p-6 shadow-xl mb-6 text-left">
-                <label id="nameLabel" for="userNameInput" class="block text-xs uppercase tracking-wider opacity-65 mb-3 font-medium">Come preferisci che ti chiami?</label>
-                <div id="inputContainer" class="flex gap-2">
-                    <input type="text" id="userNameInput" placeholder="Il tuo nome..." class="w-full px-4 py-3 rounded-xl border border-[#c8a7b0]/30 bg-white/50 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm">
-                </div>
-            </div>
-            <button id="enterBtn" class="w-full bg-[#c0909b] text-white py-4 rounded-xl shadow-lg text-sm uppercase tracking-widest font-medium hover:bg-[#b07d89] transition">Entra nella Stanza</button>
+    <!-- RECUPERO PASSWORD -->
+    <section id="scr-forgot" class="auth hidden">
+      <div class="auth-box">
+        <img src="logo.png" alt="">
+        <h1 class="serif" style="margin:0;font-size:34px;font-weight:500;color:var(--rosa-scuro)">Recupera la password</h1>
+        <p style="margin:8px 0 0;font-size:14px;line-height:1.5">Scrivi l'email con cui accedi: ti mandiamo un link per sceglierne una nuova.</p>
+        <form id="forgotForm" class="glass auth-card">
+          <label class="lab" for="forgotEmail">Email</label>
+          <input class="inp" id="forgotEmail" type="email" autocomplete="email" required placeholder="la tua email">
+          <div id="forgotMsg"></div>
+          <div style="height:18px"></div>
+          <button class="btn btn-primary" id="forgotBtn" type="submit">Inviami il link</button>
+          <p style="font-size:12.5px;opacity:.7;text-align:center;margin:16px 0 0;line-height:1.5">
+            Non ricevi l'email o non hai ancora un accesso? Chiedi alla tua scuola.
+          </p>
+        </form>
+        <p style="margin-top:18px"><button type="button" class="btn-link" id="backToLogin">← Torna all'accesso</button></p>
+      </div>
+    </section>
+
+    <!-- SCELTA PASSWORD (invito / recupero) -->
+    <section id="scr-password" class="auth hidden">
+      <div class="auth-box">
+        <img src="logo.png" alt="">
+        <h1 class="serif" id="passTitle" style="margin:0;font-size:34px;font-weight:500;color:var(--rosa-scuro)">Benvenuto/a</h1>
+        <p id="passIntro" style="margin:8px 0 0;font-size:14px;line-height:1.5">Scegli la password che userai per entrare nella tua Area Allievi.</p>
+        <form id="passForm" class="glass auth-card">
+          <label class="lab" for="newPass">Nuova password</label>
+          <input class="inp" id="newPass" type="password" autocomplete="new-password" minlength="6" required placeholder="almeno 6 caratteri">
+          <div style="height:14px"></div>
+          <label class="lab" for="newPass2">Ripeti la password</label>
+          <input class="inp" id="newPass2" type="password" autocomplete="new-password" minlength="6" required>
+          <div id="passMsg"></div>
+          <div style="height:18px"></div>
+          <button class="btn btn-primary" id="passBtn" type="submit">Salva e entra</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- AREA ALLIEVO -->
+    <section id="scr-app" class="hidden">
+      <header class="top">
+        <div class="brand">
+          <img src="logo-scuola.png" alt="Scuola di Meditazione Mindfulness Molfetta">
+          <div>
+            <h1 class="serif">La Stanza Interiore</h1>
+            <span class="kicker" style="font-size:8.5px">Area Allievi</span>
+          </div>
         </div>
-    </div>
+        <div style="display:flex;gap:8px">
+          <button class="icon-btn glass" id="logoutBtn" title="Esci" style="width:auto;padding:0 16px;border-radius:20px;font:500 11px 'Inter',sans-serif;letter-spacing:.12em;text-transform:uppercase">Esci</button>
+        </div>
+      </header>
 
-    <!-- SFONDO SFUMATO -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="absolute w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-30 -top-20 -left-20"></div>
-        <div class="absolute w-96 h-96 bg-rose-100 rounded-full blur-3xl opacity-40 bottom-0 right-0"></div>
-    </div>
+      <button type="button" id="installCard" class="install-card glass hidden">
+        <img src="logo.png" alt="">
+        <span><b class="serif">Porta la Stanza Interiore sul tuo telefono</b><small>Aggiungila alla schermata Home: si apre con un tocco, come un'app.</small></span>
+        <span class="install-go">Installa</span>
+      </button>
 
-    <div class="relative z-10 pb-36">
-        
-        <!-- HEADER -->
-        <header class="px-4 pt-6 pb-4">
-            <div class="flex items-center justify-between max-w-5xl mx-auto gap-4">
-                <div class="flex items-center gap-4">
-                    <img src="logo.png" style="width: 85px !important; height: 85px !important; max-height: 85px !important;" class="shrink-0 object-contain">
-                    <div>
-                        <h1 id="welcomeName" class="serif text-xl sm:text-2xl tracking-tight text-[#b07d89]">La Stanza Interiore</h1>
-                        <p class="uppercase tracking-[0.2em] text-[8px] opacity-60 font-medium text-left">IL TUO SPAZIO DI QUIETE</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button id="muteIntroBtn" class="glass w-10 h-10 rounded-full shadow-md text-base flex items-center justify-center text-[#715d64] dark:text-[#f1dce1]" title="Disattiva musica di sottofondo">🔊</button>
-                    <button id="themeBtn" class="glass w-10 h-10 rounded-full shadow-md text-base flex items-center justify-center text-[#715d64] dark:text-[#f1dce1]">☾</button>
-                </div>
-            </div>
-        </header>
-
-        <!-- TAB STANZE -->
-        <main id="tab-stanze" class="tab-content active px-4 mt-4 max-w-5xl mx-auto">
-            <!-- AVATAR & BENVENUTO -->
-            <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl overflow-hidden mb-10">
-                <div class="grid md:grid-cols-12 gap-8 items-center">
-                    <div class="md:col-span-5 flex justify-center">
-                        <img src="avatar.png" class="w-56 h-56 sm:w-64 sm:h-64 rounded-full object-cover shadow-xl border-4 border-white/40">
-                    </div>
-                    <div class="md:col-span-7 text-left">
-                        <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-3 font-semibold text-[#b07d89]">La tua guida</p>
-                        <h2 class="serif text-3xl sm:text-4xl md:text-5xl leading-[1.2] tracking-tight text-[#9a717d] mb-4">
-                            Ciao, sono Alessandra<br> 
-                            <span class="text-xl sm:text-2xl md:text-3xl opacity-90 block mt-3 font-sans font-light text-[#715d64] dark:text-[#f1dce1]">
-                                e sono qui per accompagnarti nelle tue Stanze Interiori.
-                            </span>
-                        </h2>
-                        <div class="h-1 w-20 bg-[#c0909b]/30 rounded-full mt-6"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CAROSELLO STANZE INTERIORI -->
-            <div class="glass rounded-[36px] p-5 sm:p-6 shadow-xl mb-10">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
-                    <h3 class="serif text-xl sm:text-2xl text-[#9a717d] text-center px-2">Le tue stanze interiori</h3>
-                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
-                </div>
-                
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-2">
-                    <a href="ansia.html" data-stanza="Ansia" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="ansia.png" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="tensioni-fisiche.html" data-stanza="Tensioni Fisiche" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="tensioni-fisiche.png" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="accettazione.html" data-stanza="Accettazione" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="accettazione.jpg" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="stress.html" data-stanza="Periodo di Stress" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="stress.jpg" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="cambiamento.html" data-stanza="Cambiamento" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="cambiamento.jpg" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="lasciar-andare.html" data-stanza="Lasciar Andare" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="lasciar-andare.jpg" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="sonno.html" data-stanza="Sonno" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="sonno.jpg" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="respiro.html" data-stanza="Respiro" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="respiro.jpg" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="gratitudine.html" data-stanza="Gratitudine" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="gratitudine.jpg" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="meteo.html" data-stanza="Meteo Interiore" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="meteo.jpg" class="w-full h-full object-cover object-top">
-                    </a>
-                </div>
-
-                <!-- BANNER PROSSIME STANZE -->
-                <div class="flex items-center gap-3 mt-8 mb-6">
-                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
-                    <span class="flex items-center gap-2 bg-[#c0909b] text-white text-[10px] uppercase tracking-[0.2em] font-semibold px-4 py-1.5 rounded-full shadow-sm">
-                        <i class="fa-solid fa-sparkles text-[9px]"></i> Prossimamente
-                    </span>
-                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
-                </div>
-
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-2">
-                    <a href="coraggio.html" data-stanza="Coraggio" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="coraggio.png" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="autocompassione.html" data-stanza="Autocompassione" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="autocompassione.png" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="inizio-giornata.html" data-stanza="Inizio Giornata" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="inizio-giornata.png" class="w-full h-full object-cover object-top">
-                    </a>
-                    <a href="fine-giornata.html" data-stanza="Fine Giornata" class="stanza-link card min-w-[190px] sm:min-w-[210px] h-[340px] sm:h-[380px] rounded-[28px] shadow-lg snap-start relative overflow-hidden block border border-white/20">
-                        <img src="fine-giornata.png" class="w-full h-full object-cover object-top">
-                    </a>
-                </div>
-            </div>
-
-            <!-- SEZIONE GUIDA PRATICA (RESPIRAZIONE YOGICA) -->
-            <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
-                    <h3 class="serif text-xl sm:text-2xl text-[#9a717d] text-center px-2">Guida Pratica</h3>
-                    <div class="h-px flex-1 bg-[#d9bcc4] opacity-30"></div>
-                </div>
-
-                <div class="grid md:grid-cols-12 gap-6 items-center">
-                    <div class="md:col-span-5 flex justify-center">
-                        <a href="respirazioneyogica.html" class="card block w-full max-w-[240px] h-[320px] rounded-[28px] shadow-xl overflow-hidden border border-white/30 relative text-left">
-                            <img src="respirazioneyogica.png" class="w-full h-full object-cover object-top">
-                        </a>
-                    </div>
-                    <div class="md:col-span-7 text-left flex flex-col justify-center">
-                        <p class="uppercase tracking-[0.25em] text-[10px] opacity-60 mb-2 font-semibold text-[#b07d89]">Videolezione Consapevole</p>
-                        <h4 class="serif text-2xl sm:text-3xl text-[#9a717d] mb-3">Impara a Respirare</h4>
-                        <p class="text-sm opacity-85 leading-relaxed font-light mb-6">
-                            Impara insieme a me a rendere più efficace il tuo respiro attraverso la tecnica della Respirazione Yogica.
-                        </p>
-                        <div>
-                            <a href="respirazioneyogica.html" class="inline-flex items-center gap-2 bg-[#c0909b] text-white px-6 py-3 rounded-full text-xs uppercase tracking-widest font-medium shadow-md hover:bg-[#b07d89] transition">
-                                <i class="fa-solid fa-play text-xs"></i> Entra nella Stanza del Respiro
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- TAB ALLENAMENTO RESPIRO -->
-        <main id="tab-respiro-allenamento" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
-            <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl text-center min-h-[520px] flex flex-col justify-between items-center relative overflow-hidden">
-                <div class="max-w-xl mx-auto">
-                    <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL RESPIRO CONSAPEVOLE</p>
-                    <h3 class="serif text-2xl sm:text-3xl text-[#9b7280] mb-3">L'Essenza del Respiro</h3>
-                    <p id="breathInstruction" class="text-xs sm:text-sm opacity-85 font-light leading-relaxed px-2">
-                        In questo spazio puoi coltivare la purezza e l'essenza del tuo respiro. 3 minuti da dedicarti intensamente per fare ritorno a te stesso: sincronizza il ritmo del tuo respiro inspirando per 4 secondi mentre la bolla si espande, ed espirando per 4 secondi mentre la bolla si riduce.
-                    </p>
-                </div>
-
-                <div class="my-6 flex justify-center items-center h-64 w-full">
-                    <div id="fullScreenBreathBubble" class="soap-bubble w-48 h-48 sm:w-56 sm:h-56 rounded-full flex flex-col items-center justify-center border border-white/30 transition-all duration-1000">
-                        <div id="breathCountdown" class="serif text-3xl font-light text-[#b07d89]">03:00</div>
-                        <p id="breathPhase" class="text-[11px] uppercase tracking-widest opacity-60 mt-2 font-medium">Pronto</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-4 z-10">
-                    <button id="muteBubbleMusicBtn" class="glass w-12 h-12 rounded-full text-sm shadow-md flex items-center justify-center text-[#715d64] dark:text-[#f1dce1]" title="Silenzia sottofondo">🔊</button>
-                    <button id="startBreathBtn" class="bg-[#c0909b] text-white px-8 py-3.5 rounded-full text-xs uppercase tracking-widest font-medium shadow-xl hover:bg-[#b07d89] transition active:scale-95">Inizia Sessione</button>
-                </div>
-            </div>
-        </main>
-
-        <!-- TAB PRATICHE (TIMER LIBERO) -->
-        <main id="tab-pratiche" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
-            <div class="glass rounded-[36px] p-6 sm:p-8 shadow-xl">
-                <div class="mb-6 text-center max-w-xl mx-auto">
-                    <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">TIMER LIBERO</p>
-                    <h3 class="serif text-2xl sm:text-3xl text-[#9b7280] mb-3">La tua pratica libera</h3>
-                    <p class="text-xs sm:text-sm opacity-80 leading-relaxed font-light">
-                        In questo spazio puoi dedicarti alla tua pratica libera scegliendo il silenzio o un sottofondo musicale.
-                    </p>
-                </div>
-
-                <div class="flex justify-center mb-8 h-60 items-center">
-                    <div id="breathBubble" class="soap-bubble w-48 h-48 sm:w-52 sm:h-52 rounded-full flex flex-col items-center justify-center border border-white/30">
-                        <div id="time" class="serif text-4xl sm:text-5xl font-light text-[#b07d89]">05:00</div>
-                        <p id="status" class="text-[11px] uppercase tracking-wider opacity-60 mt-2 text-center px-4">Pronto</p>
-                    </div>
-                </div>
-
-                <div class="flex justify-center gap-3 flex-wrap mb-8">
-                    <button class="duration-btn active px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-time="300">5 min</button>
-                    <button class="duration-btn glass px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-time="600">10 min</button>
-                    <button class="duration-btn glass px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-time="900">15 min</button>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-                    <button class="music-btn active glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="none">🤫<br><span class="block mt-1 opacity-80">Silenzio</span></button>
-                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="432hz.mp3">✨<br><span class="block mt-1 opacity-80">432 Hz</span></button>
-                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="ethereal.mp3">🌌<br><span class="block mt-1 opacity-80">Ethereal</span></button>
-                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="nature.mp3">🌿<br><span class="block mt-1 opacity-80">Natura</span></button>
-                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="koshi.mp3">🎐<br><span class="block mt-1 opacity-80">Koshi</span></button>
-                    <button class="music-btn glass rounded-2xl p-4 text-center text-xs sm:text-sm font-medium transition" data-src="piano.mp3">🎹<br><span class="block mt-1 opacity-80">Piano</span></button>
-                </div>
-
-                <div class="flex justify-center items-center gap-6">
-                    <button id="resetBtn" class="glass w-14 h-14 rounded-full text-lg shadow-md flex items-center justify-center active:scale-95 transition">↺</button>
-                    <button id="playBtn" class="bg-[#c0909b] text-white w-20 h-20 rounded-full text-2xl shadow-xl flex items-center justify-center active:scale-95 transition font-light">▶</button>
-                </div>
-            </div>
-        </main>
-
-        <!-- TAB DIARIO -->
-        <main id="tab-diario" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
-            <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl">
-                <div class="grid md:grid-cols-12 gap-8 items-center mb-8">
-                    <div class="md:col-span-7 text-left">
-                        <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL DIARIO DELL'ANIMA</p>
-                        <h3 class="serif text-3xl text-[#9b7280] mb-4">Ancorare l'esperienza</h3>
-                        <p class="text-sm opacity-90 leading-relaxed font-light mb-4">
-                            Dopo una meditazione, le sensazioni sono come nuvole: bellissime ma volatili. Il diario serve a <strong>fissare</strong> questo stato di grazia, trasformando un'emozione astratta in una consapevolezza concreta.
-                        </p>
-                        <p class="text-sm opacity-90 leading-relaxed font-light">
-                            Scrivere aiuta a decantare i pensieri residui e a creare un ponte prezioso tra il silenzio della tua Stanza Interiore e il rumore del mondo esterno.
-                        </p>
-                    </div>
-                    <div class="md:col-span-5 flex justify-center">
-                        <div class="w-full h-48 rounded-2xl bg-white/20 border border-white/30 shadow-inner flex items-center justify-center text-5xl opacity-60">✍️</div>
-                    </div>
-                </div>
-
-                <div class="border-t border-[#c8a7b0]/20 pt-6">
-                    <label class="block text-xs uppercase tracking-wider opacity-65 mb-3 font-medium">Cosa porti con te da questa pratica?</label>
-                    <textarea id="diaryText" rows="5" placeholder="Scrivi liberamente, senza giudizio..." class="w-full px-4 py-3 rounded-2xl border border-[#c8a7b0]/30 bg-white/40 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm mb-4 resize-none"></textarea>
-                    <div class="flex justify-end">
-                        <button id="saveDiaryBtn" class="bg-[#c0909b] text-white px-6 py-3 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition shadow-md">Fissa i pensieri</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass rounded-[36px] p-6 sm:p-10 shadow-xl mt-6">
-                <h4 class="serif text-xl text-[#9b7280] mb-4">I tuoi pensieri custoditi</h4>
-                <div id="diaryLogsContainer" class="space-y-4 max-h-[350px] overflow-y-auto hide-scrollbar">
-                    <p id="noLogsMessage" class="text-sm opacity-60 italic font-light">Nessun pensiero salvato finora. Il tuo viaggio inizia qui.</p>
-                </div>
-            </div>
-        </main>
-
-        <!-- TAB PROFILO -->
-        <main id="tab-profilo" class="tab-content px-4 mt-4 max-w-5xl mx-auto">
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="md:col-span-1 flex flex-col gap-6">
-                    <div class="glass rounded-[28px] p-6 shadow-xl text-left">
-                        <h4 class="serif text-lg text-[#9b7280] mb-4">Il tuo nome</h4>
-                        <input type="text" id="profileNameInput" class="w-full px-4 py-3 rounded-xl border border-[#c8a7b0]/30 bg-white/50 text-[#715d64] focus:outline-none focus:border-[#c0909b] transition text-sm mb-3">
-                        <button id="updateNameBtn" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition">Salva modifiche</button>
-                    </div>
-
-                    <div class="glass rounded-[28px] p-6 shadow-xl text-center">
-                        <h4 class="serif text-lg text-[#9b7280] mb-2">Portami sul tuo telefono</h4>
-                        <p class="text-xs opacity-70 mb-4 font-light">Accedi alla Stanza Interiore con un tocco direttamente dalla tua home.</p>
-                        <button id="installBtn" class="w-full bg-white/40 border border-[#c8a7b0]/40 py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-white/60 transition">Installa applicazione</button>
-                    </div>
-
-                    <div class="glass rounded-[28px] p-6 shadow-xl text-center">
-                        <h4 class="serif text-lg text-[#9b7280] mb-2">Visita il mio sito</h4>
-                        <p class="text-xs opacity-70 mb-4 font-light">Scopri le informazioni sulla tua Scuola di Meditazione in presenza</p>
-                        <a id="scuolaLink" href="https://www.studiomindfulnessesofrologia.it" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
-                            Vai al Sito Web
-                        </a>
-                    </div>
-
-                    <div class="glass rounded-[28px] p-6 shadow-xl text-center">
-                        <h4 class="serif text-lg text-[#9b7280] mb-3">Il mio libro</h4>
-                        <div class="mb-4 flex justify-center">
-                            <img src="Copertina.jpg" alt="Copertina La Via del Loto in tuta da corsa" class="w-36 h-auto rounded-xl shadow-md border border-white/30 object-cover">
-                        </div>
-                        <a id="libroLink" href="https://www.amazon.it/dp/B0G2YW1WXH" target="_blank" class="w-full bg-[#c0909b] text-white py-2.5 rounded-xl text-xs uppercase tracking-wider font-medium hover:bg-[#b07d89] transition block text-center shadow-md">
-                            Scopri di più su Amazon
-                        </a>
-                    </div>
-                </div>
-
-                <div class="md:col-span-2">
-                    <div class="glass rounded-[28px] p-6 shadow-xl h-full flex flex-col">
-                        <div class="mb-4">
-                            <p class="uppercase tracking-[0.25em] text-[9px] opacity-50 mb-0.5">I TUOI PROGRESSI</p>
-                            <h4 class="serif text-xl text-[#9b7280]">Il tempo per te stesso</h4>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="bg-white/30 border border-white/20 p-4 rounded-xl text-center">
-                                <span class="block text-2xl font-light text-[#b07d89]" id="statTotalMinutes">0</span>
-                                <span class="text-[10px] uppercase opacity-60 tracking-wider">Minuti Totali</span>
-                            </div>
-                            <div class="bg-white/30 border border-white/20 p-4 rounded-xl text-center">
-                                <span class="block text-2xl font-light text-[#b07d89]" id="statSessions">0</span>
-                                <span class="text-[10px] uppercase opacity-60 tracking-wider">Sessioni Complete</span>
-                            </div>
-                        </div>
-
-                        <p class="text-[11px] uppercase tracking-wider opacity-60 mb-2">Costanza Settimanale</p>
-                        <div class="flex-1 min-h-[150px] bg-white/20 rounded-xl p-2 border border-white/20 flex items-end">
-                            <svg class="w-full h-32" viewBox="0 0 100 30" preserveAspectRatio="none">
-                                <defs>
-                                    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#c0909b; stop-opacity:0.4" />
-                                        <stop offset="100%" style="stop-color:#c0909b; stop-opacity:0" />
-                                    </linearGradient>
-                                </defs>
-                                <path d="M 0 30 Q 20 18, 40 22 T 80 10 T 100 5 L 100 30 L 0 30 Z" fill="url(#grad)" />
-                                <path d="M 0 30 Q 20 18, 40 22 T 80 10 T 100 5" fill="none" stroke="#c0909b" stroke-width="1" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-    </div>
-
-    <!-- NAV BAR BOTTOM -->
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-white/70 dark:bg-[#2d2434]/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/30 dark:border-white/10 px-4 py-4 flex justify-between items-center">
-        <button onclick="switchTab('stanze')" id="nav-stanze" class="nav-icon text-[#c0909b] text-xl transition-all duration-300 transform active:scale-90 px-3">
-            <i class="fa-solid fa-house-chimney"></i>
+      <div class="hello glass">
+        <div>
+          <span class="kicker">Bentornato/a</span>
+          <h2 class="serif" id="helloName">Ciao</h2>
+        </div>
+        <button type="button" class="saldo" id="saldoBtn" aria-label="Apri lo storico delle tue lezioni">
+          <div class="num" id="saldoNum">–</div>
+          <div class="txt" id="saldoTxt">lezioni disponibili</div>
+          <span class="saldo-go">Storico →</span>
         </button>
-        <button onclick="switchTab('respiro-allenamento')" id="nav-respiro-allenamento" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-3" title="Allenamento Respiro">
-            <i class="fa-solid fa-wind"></i>
-        </button>
-        <button onclick="switchTab('pratiche')" id="nav-pratiche" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-3">
-            <i class="fa-solid fa-hourglass-start"></i>
-        </button>
-        <button onclick="switchTab('diario')" id="nav-diario" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-3">
-            <i class="fa-solid fa-feather-pointed"></i>
-        </button>
-        <button onclick="switchTab('profilo')" id="nav-profilo" class="nav-icon text-gray-400 dark:text-gray-500 text-xl transition-all duration-300 transform active:scale-90 px-3">
-            <i class="fa-solid fa-circle-user"></i>
-        </button>
-    </nav>
+      </div>
 
-    <script>
-        let intro, introAudio, userNameInput, nameLabel, inputContainer, welcomeName, body;
-        let total = 300;
-        let current = 300;
-        let running = false;
-        let timer;
-        let selectedMusic = "none";
-        let time, status, bgMusic, gong, muteIntroBtn, breathBubble;
+      <div class="cal glass">
+        <div class="cal-head">
+          <h3 class="serif" id="weekLabel">Settimana</h3>
+          <div class="nav">
+            <button id="prevW" aria-label="Settimana precedente">←</button>
+            <button id="todayW">Oggi</button>
+            <button id="nextW" aria-label="Settimana successiva">→</button>
+          </div>
+        </div>
+        <div class="chips viste" id="sViews" style="padding:0 4px">
+          <button type="button" class="chip on" data-v="settimana">Settimana</button>
+          <button type="button" class="chip" data-v="mese">Mese</button>
+        </div>
+        <div class="legend">
+          <span><span id="legendLoto"></span> prenotata da te</span>
+          <span>Tocca una lezione per prenotare</span>
+        </div>
+        <div class="scroller" id="scroller">
+          <div id="calBody"></div>
+        </div>
+      </div>
 
-        let breathBubbleTimer;
-        let breathTimeLeft = 180; 
-        let breathRunning = false;
-        let breathCycleTimer = null; 
-        let bubbleMusic, startBreathBtn, breathCountdown, breathPhase, fullScreenBreathBubble, muteBubbleMusicBtn;
+      <div class="mine glass">
+        <h3 class="serif">Le tue prossime lezioni</h3>
+        <div id="mineList"></div>
+      </div>
 
-        let deferredPrompt;
+      <p class="footer">Scuola di Meditazione Molfetta</p>
+    </section>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            intro = document.getElementById('intro');
-            introAudio = document.getElementById('introAudio');
-            userNameInput = document.getElementById('userNameInput');
-            nameLabel = document.getElementById('nameLabel');
-            inputContainer = document.getElementById('inputContainer');
-            welcomeName = document.getElementById('welcomeName');
-            body = document.getElementById('body');
-            time = document.getElementById('time');
-            status = document.getElementById('status');
-            bgMusic = document.getElementById('bgMusic');
-            gong = document.getElementById('gong');
-            muteIntroBtn = document.getElementById('muteIntroBtn');
-            breathBubble = document.getElementById('breathBubble');
+    <!-- PANNELLO DELLA SCUOLA (solo amministratrice) -->
+    <section id="scr-admin" class="hidden">
+      <header class="top">
+        <div class="brand">
+          <img src="logo-scuola.png" alt="Scuola di Meditazione Mindfulness Molfetta">
+          <div>
+            <h1 class="serif">La Stanza Interiore</h1>
+            <span class="kicker" style="font-size:8.5px">Pannello della Scuola</span>
+          </div>
+        </div>
+        <button class="icon-btn glass" id="adminLogoutBtn" title="Esci" style="width:auto;padding:0 16px;border-radius:20px;font:500 11px 'Inter',sans-serif;letter-spacing:.12em;text-transform:uppercase">Esci</button>
+      </header>
 
-            bubbleMusic = document.getElementById('bubbleMusic');
-            startBreathBtn = document.getElementById('startBreathBtn');
-            breathCountdown = document.getElementById('breathCountdown');
-            breathPhase = document.getElementById('breathPhase');
-            fullScreenBreathBubble = document.getElementById('fullScreenBreathBubble');
-            muteBubbleMusicBtn = document.getElementById('muteBubbleMusicBtn');
+      <!-- LEZIONI DEL GIORNO -->
+      <div class="glass panel" id="sezLezioni">
+        <div class="panel-head">
+          <div>
+            <span class="kicker" id="aKicker">Lezioni del giorno</span>
+            <h3 class="serif" id="aDayLabel">Oggi</h3>
+          </div>
+          <div class="nav">
+            <button id="aPrevDay" aria-label="Giorno precedente">←</button>
+            <button id="aToday">Oggi</button>
+            <button id="aNextDay" aria-label="Giorno successivo">→</button>
+          </div>
+        </div>
+        <div class="chips viste" id="aViews">
+          <button type="button" class="chip on" data-v="giorno">Giorno</button>
+          <button type="button" class="chip" data-v="settimana">Settimana</button>
+          <button type="button" class="chip" data-v="mese">Mese</button>
+        </div>
+        <div id="aDayList"></div>
+        <button class="btn btn-soft" id="aNewLesson" style="margin-top:14px">+ Nuova lezione</button>
+        <button class="btn btn-soft" id="aCopyMonth" style="margin-top:8px">Copia nel mese dopo</button>
+      </div>
 
-            setupEventListeners();
-            checkAndShowIntro();
-            updateTime();
-            renderDiaryLogs();
+      <!-- ALLIEVI -->
+      <div class="glass panel" id="sezAllievi">
+        <div class="panel-head">
+          <div>
+            <span class="kicker">I tuoi allievi</span>
+            <h3 class="serif">Allievi <span id="aCount" style="font-size:18px;opacity:.6"></span></h3>
+          </div>
+        </div>
+        <div class="search">
+          <input class="inp" id="aSearch" type="search" placeholder="Cerca per nome, cognome, nickname o email" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" id="aNewStudent" style="margin:12px 0 14px">+ Nuovo allievo</button>
+        <div id="aStudentList"></div>
+      </div>
+
+      <!-- REPORT -->
+      <div class="glass panel hidden" id="sezReport">
+        <div class="panel-head">
+          <div>
+            <span class="kicker">Andamento della scuola</span>
+            <h3 class="serif">Report</h3>
+          </div>
+        </div>
+        <div class="chips">
+          <button type="button" class="chip on" data-per="mese">Questo mese</button>
+          <button type="button" class="chip" data-per="scorso">Mese scorso</button>
+          <button type="button" class="chip" data-per="anno">Quest'anno</button>
+        </div>
+        <div class="two" style="margin-top:12px">
+          <div><label class="mini" for="rFrom">Dal</label><input class="inp" id="rFrom" type="date"></div>
+          <div><label class="mini" for="rTo">Al</label><input class="inp" id="rTo" type="date"></div>
+        </div>
+        <div id="rSummary" class="stats"></div>
+        <button class="btn btn-primary" id="rDownload" style="margin-top:14px">Scarica report Excel</button>
+        <p class="row-sub" style="text-align:center;margin-top:8px">Il file contiene tre fogli: Prenotazioni, Lezioni e Allievi.</p>
+      </div>
+
+      <p style="text-align:center;margin:6px 0 0"><button type="button" class="btn-link" id="aMyPass">Cambia la mia password</button> · <button type="button" class="btn-link" id="aInstall">Installa l'app sul telefono</button></p>
+      <p class="footer">Scuola di Meditazione Molfetta</p>
+    </section>
+  </div>
+
+  <nav id="adminNav" class="bnav hidden">
+    <a href="#" id="aNavLezioni" class="on"><i class="fa-solid fa-calendar-days"></i><span>Calendario</span></a>
+    <a href="#" id="aNavReport"><i class="fa-solid fa-chart-column"></i><span>Report</span></a>
+    <a href="stanze.html"><i class="fa-solid fa-spa"></i><span>Stanze</span></a>
+  </nav>
+
+  <nav id="bottomNav" class="bnav hidden">
+    <a href="#" class="on" aria-current="page"><i class="fa-solid fa-calendar-days"></i><span>Lezioni</span></a>
+    <a href="stanze.html"><i class="fa-solid fa-spa"></i><span>Stanze</span></a>
+    <a href="stanze.html#respiro-allenamento"><i class="fa-solid fa-wind"></i><span>Respiro</span></a>
+    <a href="stanze.html#diario"><i class="fa-solid fa-feather-pointed"></i><span>Diario</span></a>
+  </nav>
+  <div>
+  </div>
+
+  <!-- POPUP LEZIONE -->
+  <div class="overlay hidden" id="overlay">
+    <div class="sheet" role="dialog" aria-modal="true" id="sheet"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============ CONFIGURAZIONE ============
+    const SUPABASE_URL = 'https://ueornmyqyxqmgukxtcga.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_aXKmwMNnW_9Vfdl5o8pCWQ_pmjjKlGQ';
+    const TZ = 'Europe/Rome';
+    const ORE_CANCELLAZIONE = 2;
+
+    // Invito o recupero password: va letto prima che la libreria pulisca l'indirizzo
+    const hashParams = new URLSearchParams(location.hash.slice(1));
+    const linkType = hashParams.get('type');
+    const linkError = hashParams.get('error_description');
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ============ STATO ============
+    let me = null;          // profilo
+    let weekOffset = 0;
+    let weekLessons = [];
+    let upcoming = [];
+    let busy = false;
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+    // ============ LOTO VERDE ============
+    function loto(size = 22) {
+      return `<svg class="loto" width="${size}" height="${size}" viewBox="0 0 32 32" aria-label="Prenotata" role="img">
+        <path d="M16 5c-2.6 3-3.9 6.3-3.9 9.6 0 3.4 1.5 6.3 3.9 8.4 2.4-2.1 3.9-5 3.9-8.4 0-3.3-1.3-6.6-3.9-9.6z" fill="#5e9a73"/>
+        <path d="M5 11.5c.3 3.8 1.8 7 4.4 9.1 2 1.6 4.3 2.3 6.6 2.4-.9-2.6-2.4-5.2-4.6-7.2-1.8-1.8-4-3.2-6.4-4.3z" fill="#7fb592"/>
+        <path d="M27 11.5c-.3 3.8-1.8 7-4.4 9.1-2 1.6-4.3 2.3-6.6 2.4.9-2.6 2.4-5.2 4.6-7.2 1.8-1.8 4-3.2 6.4-4.3z" fill="#7fb592"/>
+        <path d="M4 24.2c3.2 1.9 7.2 2.8 12 2.8s8.8-.9 12-2.8" stroke="#5e9a73" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      </svg>`;
+    }
+    $('legendLoto').innerHTML = loto(18).replace('class="loto"', 'style="vertical-align:middle"');
+
+    // ============ COLORI LEZIONI ============
+    const PALETTE = [
+      { bg: '#f8e1e6', fg: '#8a4f5e' },  // rosa
+      { bg: '#ebe3f5', fg: '#634f86' },  // lavanda
+      { bg: '#e1eef4', fg: '#3f6479' },  // cielo
+      { bg: '#f7e9dc', fg: '#86593a' },  // pesca
+      { bg: '#eef0dc', fg: '#5f6636' },  // salvia
+      { bg: '#f3e6ee', fg: '#7c4d6a' },  // malva
+    ];
+    function colorFor(title) {
+      let h = 0;
+      for (const ch of (title || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      return PALETTE[h % PALETTE.length];
+    }
+
+    // ============ DATE ============
+    const fmtOra = new Intl.DateTimeFormat('it-IT', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
+    const fmtGiorno = new Intl.DateTimeFormat('it-IT', { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long' });
+    const fmtBreve = new Intl.DateTimeFormat('it-IT', { timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short' });
+    const fmtKey = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+    const dayKey = d => fmtKey.format(d);
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+    function startOfWeek(offset) {
+      const d = new Date();
+      const dow = (d.getDay() + 6) % 7; // lunedì = 0
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - dow + offset * 7);
+      return d;
+    }
+
+    // ============ SCHERMATE ============
+    function show(id) {
+      ['scr-loading', 'scr-login', 'scr-forgot', 'scr-password', 'scr-app', 'scr-admin'].forEach(s => $(s).classList.toggle('hidden', s !== id));
+      $('bottomNav').classList.toggle('hidden', id !== 'scr-app');
+      $('adminNav').classList.toggle('hidden', id !== 'scr-admin');
+      window.scrollTo(0, 0);
+    }
+    function setMsg(el, text, kind = 'err') {
+      $(el).innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : '';
+    }
+    let toastTimer;
+    function toast(text, kind = 'ok') {
+      const t = $('toast');
+      t.className = `toast ${kind}`;
+      t.textContent = text;
+      requestAnimationFrame(() => t.classList.add('show'));
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 4200);
+    }
+
+    // ============ AVVIO ============
+    async function init() {
+      if (linkError) {
+        show('scr-login');
+        setMsg('loginMsg', 'Il link che hai usato non è più valido o è già stato usato. Chiedi alla tua scuola un nuovo invito.');
+        history.replaceState(null, '', location.pathname);
+        return;
+      }
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && (linkType === 'invite' || linkType === 'recovery')) {
+        showPasswordScreen(linkType === 'recovery');
+        return;
+      }
+      if (session) return enterApp();
+      show('scr-login');
+    }
+
+    sb.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') showPasswordScreen(true);
+      if (event === 'SIGNED_OUT') { me = null; show('scr-login'); }
+    });
+
+    function showPasswordScreen(isRecovery) {
+      $('passTitle').textContent = isRecovery ? 'Nuova password' : 'Benvenuto/a';
+      $('passIntro').textContent = isRecovery
+        ? 'Scegli una nuova password per entrare nella tua Area Allievi.'
+        : 'Scegli la password che userai per entrare nella tua Area Allievi.';
+      show('scr-password');
+    }
+
+    // ============ RECUPERO PASSWORD ============
+    $('forgotLink').addEventListener('click', () => {
+      $('forgotEmail').value = $('loginEmail').value.trim();
+      setMsg('forgotMsg', '');
+      $('forgotBtn').disabled = false;
+      show('scr-forgot');
+    });
+    $('backToLogin').addEventListener('click', () => show('scr-login'));
+
+    $('forgotForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setMsg('forgotMsg', '');
+      $('forgotBtn').disabled = true;
+      $('forgotBtn').textContent = 'Un momento…';
+      const { error } = await sb.auth.resetPasswordForEmail($('forgotEmail').value.trim(), {
+        redirectTo: location.origin + location.pathname,
+      });
+      $('forgotBtn').textContent = 'Inviami il link';
+      if (error && /rate|seconds/i.test(error.message)) {
+        $('forgotBtn').disabled = false;
+        return setMsg('forgotMsg', 'Hai già richiesto un link da poco. Attendi qualche minuto e riprova.');
+      }
+      if (error) {
+        $('forgotBtn').disabled = false;
+        return setMsg('forgotMsg', 'Non è stato possibile inviare l\'email. Controlla la connessione e riprova.');
+      }
+      // Per sicurezza non diciamo se l'email esiste o no
+      setMsg('forgotMsg', 'Se questa email ha un accesso attivo, a breve riceverai un link per scegliere una nuova password. Controlla anche nello spam.', 'ok');
+    });
+
+    // ============ ACCESSO ============
+    $('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setMsg('loginMsg', '');
+      $('loginBtn').disabled = true;
+      $('loginBtn').textContent = 'Un momento…';
+      const { error } = await sb.auth.signInWithPassword({
+        email: $('loginEmail').value.trim(),
+        password: $('loginPass').value,
+      });
+      $('loginBtn').disabled = false;
+      $('loginBtn').textContent = 'Entra';
+      if (error) {
+        const m = /invalid/i.test(error.message) ? 'Email o password non corretti. Riprova.'
+                : /confirm/i.test(error.message) ? 'Il tuo accesso non è ancora stato attivato. Controlla la tua email o chiedi alla tua scuola.'
+                : 'Non è stato possibile entrare. Controlla la connessione e riprova.';
+        setMsg('loginMsg', m);
+        return;
+      }
+      $('loginPass').value = '';
+      enterApp();
+    });
+
+    $('passForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const p1 = $('newPass').value, p2 = $('newPass2').value;
+      if (p1.length < 6) return setMsg('passMsg', 'La password deve avere almeno 6 caratteri.');
+      if (p1 !== p2) return setMsg('passMsg', 'Le due password non coincidono.');
+      $('passBtn').disabled = true;
+      const { error } = await sb.auth.updateUser({ password: p1 });
+      $('passBtn').disabled = false;
+      if (error) return setMsg('passMsg', /weak|short/i.test(error.message) ? 'Questa password è troppo semplice, provane un\'altra.' : 'Non è stato possibile salvare la password. Riprova.');
+      history.replaceState(null, '', location.pathname);
+      toast('Password salvata. Benvenuto/a!');
+      await enterApp();
+      setTimeout(() => openInstall(true), 900);
+    });
+
+    $('logoutBtn').addEventListener('click', async () => {
+      await sb.auth.signOut();
+    });
+
+    // ============ AREA ALLIEVO ============
+    async function enterApp() {
+      show('scr-loading');
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return show('scr-login');
+      const { data: profile, error } = await sb.from('profiles').select('id, nome, cognome, role, stato').eq('id', user.id).single();
+      if (error || !profile) {
+        show('scr-login');
+        setMsg('loginMsg', 'Il tuo accesso non è ancora attivo. Chiedi alla tua scuola.');
+        await sb.auth.signOut();
+        return;
+      }
+      if (profile.stato !== 'active') {
+        await sb.auth.signOut();
+        show('scr-login');
+        setMsg('loginMsg', 'Il tuo accesso non è attivo. Chiedi alla tua scuola.');
+        return;
+      }
+      me = profile;
+      try {
+        sessionStorage.setItem('hasEntered', 'true');
+        if (!localStorage.getItem('utente') && profile.nome) localStorage.setItem('utente', profile.nome);
+      } catch (e) {}
+      if (profile.role === 'admin') return enterAdmin();
+      $('helloName').textContent = `Ciao, ${profile.nome || ''}`.trim();
+      show('scr-app');
+      refreshInstallCard();
+      await refreshAll(true);
+    }
+
+    async function refreshAll(scrollToToday = false) {
+      await Promise.all([loadSaldo(), loadWeek(), loadUpcoming()]);
+      if (scrollToToday) scrollToTodayColumn();
+    }
+
+    async function loadSaldo() {
+      const { data, error } = await sb.from('lesson_packages').select('lezioni_rimanenti, data_scadenza').eq('user_id', me.id);
+      if (error) { $('saldoNum').textContent = '–'; return; }
+      const oggi = dayKey(new Date());
+      const validi = (data || []).filter(p => p.lezioni_rimanenti > 0 && (!p.data_scadenza || p.data_scadenza >= oggi));
+      const tot = validi.reduce((s, p) => s + p.lezioni_rimanenti, 0);
+      $('saldoNum').textContent = tot;
+      let txt = tot === 1 ? 'lezione disponibile' : 'lezioni disponibili';
+      const scad = validi.filter(p => p.data_scadenza).map(p => p.data_scadenza).sort()[0];
+      if (scad && tot > 0) {
+        const d = new Date(scad + 'T12:00:00');
+        txt += `<small>da usare entro il ${d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })}</small>`;
+      } else if (tot === 0) {
+        txt += '<small>Per rinnovare il tuo abbonamento rivolgiti alla tua scuola</small>';
+      }
+      $('saldoTxt').innerHTML = txt;
+    }
+
+    let sView = 'settimana', monthOffset = 0;
+    const MESI_S = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+    async function loadWeek() {
+      let from, to;
+      if (typeof aggiornaFrecciaIndietro === 'function') aggiornaFrecciaIndietro();
+      if (sView === 'mese') {
+        const n = new Date(); const primo = new Date(n.getFullYear(), n.getMonth() + monthOffset, 1);
+        const ultimo = new Date(primo.getFullYear(), primo.getMonth() + 1, 0);
+        from = new Date(primo); from.setDate(from.getDate() - ((from.getDay() + 6) % 7));
+        to = new Date(ultimo); to.setDate(to.getDate() - ((to.getDay() + 6) % 7) + 7);
+        const { data, error } = await sb.rpc('get_lessons', { p_from: from.toISOString(), p_to: to.toISOString() });
+        if (error) { toast('Non riesco a caricare il calendario. Controlla la connessione.', 'err'); weekLessons = []; }
+        else weekLessons = data || [];
+        return renderMonthS(from, to, primo);
+      }
+      if (weekOffset < 0) weekOffset = 0;
+      from = startOfWeek(weekOffset);
+      to = new Date(from); to.setDate(to.getDate() + 7);
+      const { data, error } = await sb.rpc('get_lessons', { p_from: from.toISOString(), p_to: to.toISOString() });
+      if (error) { toast('Non riesco a caricare il calendario. Controlla la connessione.', 'err'); weekLessons = []; }
+      else weekLessons = data || [];
+      renderWeek(from);
+    }
+
+    function renderMonthS(from, to, primo) {
+      $('weekLabel').textContent = cap(`${MESI_S[primo.getMonth()]} ${primo.getFullYear()}`);
+      const oggi = dayKey(new Date());
+      const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      let celle = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(n => `<div class="mhead">${n}</div>`).join('');
+      for (const x = new Date(from); x < to; x.setDate(x.getDate() + 1)) {
+        const k = ymd(x);
+        const les = weekLessons.filter(l => dayKey(new Date(l.data_ora_inizio)) === k);
+        const vis = les.slice(0, 3);
+        celle += `<div class="mcell ${x.getMonth() !== primo.getMonth() ? 'fuori' : ''} ${k === oggi ? 'today' : ''}" data-goto="${k}">
+          <span class="mnum">${x.getDate()}</span>
+          ${vis.map(l => {
+            const st = statoLezione(l); const c = colorFor(l.titolo);
+            const mia = st.prenotata && !st.annullata;
+            return `<button type="button" class="mlez ${st.annullata ? 'annullata' : ''} ${mia ? 'mia' : ''} ${st.passata ? 'passata' : ''}" data-id="${l.id}" style="background:${c.bg};color:${c.fg}">${mia ? '<i class="mloto"></i>' : ''}<b>${fmtOra.format(new Date(l.data_ora_inizio))}</b><span> ${esc(l.titolo)}</span></button>`;
+          }).join('')}
+          ${les.length > 3 ? `<span class="mpiu">+${les.length - 3}</span>` : ''}
+        </div>`;
+      }
+      $('calBody').innerHTML = `<div class="mgrid">${celle}</div>`;
+      $('calBody').querySelectorAll('.mlez').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); openLesson(b.dataset.id); }));
+      $('calBody').querySelectorAll('[data-goto]').forEach(c => c.addEventListener('click', async () => {
+        // vai alla settimana di quel giorno
+        const d = new Date(c.dataset.goto + 'T12:00:00');
+        const lun = startOfWeek(0);
+        weekOffset = Math.floor((d - lun) / (7 * 86400000));
+        sSetView('settimana');
+      }));
+    }
+
+    async function sSetView(v) {
+      sView = v;
+      document.querySelectorAll('#sViews .chip').forEach(c => c.classList.toggle('on', c.dataset.v === v));
+      await loadWeek();
+      if (v === 'settimana') scrollToTodayColumn();
+    }
+    document.querySelectorAll('#sViews .chip').forEach(c => c.addEventListener('click', () => sSetView(c.dataset.v)));
+
+    async function loadUpcoming() {
+      const from = new Date();
+      const to = new Date(); to.setDate(to.getDate() + 90);
+      const { data } = await sb.rpc('get_lessons', { p_from: from.toISOString(), p_to: to.toISOString() });
+      upcoming = (data || []).filter(l => (l.my_booking_id || l.posizione_attesa) && !l.annullata)
+        .sort((a, b) => new Date(a.data_ora_inizio) - new Date(b.data_ora_inizio));
+      renderUpcoming();
+    }
+
+    function statoLezione(l) {
+      const now = Date.now();
+      const inizio = new Date(l.data_ora_inizio).getTime();
+      const liberi = l.posti_totali == null ? null : Math.max(0, l.posti_totali - l.posti_occupati);
+      return {
+        passata: inizio <= now,
+        prenotata: !!l.my_booking_id,
+        inAttesa: !!l.posizione_attesa,
+        annullata: l.annullata,
+        liberi,
+        piena: liberi === 0,
+        entroLimite: inizio - now < ORE_CANCELLAZIONE * 3600 * 1000,
+      };
+    }
+
+    function renderWeek(from) {
+      const days = [...Array(7)].map((_, i) => { const d = new Date(from); d.setDate(d.getDate() + i); return d; });
+      const last = days[6];
+      const sameMonth = from.getMonth() === last.getMonth();
+      $('weekLabel').textContent = sameMonth
+        ? `${from.getDate()} – ${last.getDate()} ${last.toLocaleDateString('it-IT', { month: 'long' })}`
+        : `${from.getDate()} ${from.toLocaleDateString('it-IT', { month: 'short' })} – ${last.getDate()} ${last.toLocaleDateString('it-IT', { month: 'short' })}`;
+
+      if (!weekLessons.length) {
+        $('calBody').innerHTML = `<div class="empty"><span class="serif">Nessuna lezione in questa settimana</span>Prova a guardare la settimana successiva.</div>`;
+        return;
+      }
+
+      const oggi = dayKey(new Date());
+      const keys = days.map(dayKey);
+      const orari = [...new Set(weekLessons.map(l => fmtOra.format(new Date(l.data_ora_inizio))))].sort();
+      const nomi = ['LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB', 'DOM'];
+
+      let html = '<div class="grid"><div></div>';
+      days.forEach((d, i) => {
+        html += `<div class="dayh ${keys[i] === oggi ? 'today' : ''}" data-col="${i}"><b>${nomi[i]}</b><span>${d.getDate()}/${d.getMonth() + 1}</span></div>`;
+      });
+      orari.forEach(ora => {
+        html += `<div class="timeh">${ora}</div>`;
+        keys.forEach(k => {
+          const qui = weekLessons.filter(l => dayKey(new Date(l.data_ora_inizio)) === k && fmtOra.format(new Date(l.data_ora_inizio)) === ora);
+          html += `<div class="cell ${k === oggi ? 'today' : ''}">${qui.map(cardLezione).join('')}</div>`;
+        });
+      });
+      html += '</div>';
+      $('calBody').innerHTML = html;
+      $('calBody').querySelectorAll('.lez').forEach(b => b.addEventListener('click', () => openLesson(b.dataset.id)));
+    }
+
+    function cardLezione(l) {
+      const s = statoLezione(l);
+      const c = colorFor(l.titolo);
+      let stato = '';
+      if (s.annullata) stato = 'Annullata';
+      else if (s.prenotata) stato = 'Prenotata';
+      else if (s.inAttesa) stato = `In lista d'attesa · ${l.posizione_attesa}°`;
+      else if (s.passata) stato = 'Conclusa';
+      else if (s.liberi == null) stato = 'Posti liberi';
+      else if (s.piena) stato = 'Completa';
+      else stato = s.liberi === 1 ? '1 posto libero' : `${s.liberi} posti liberi`;
+      const cls = ['lez', s.prenotata && !s.annullata ? 'prenotata' : '', s.passata ? 'passata' : '', s.annullata ? 'annullata' : '', s.piena && !s.prenotata ? 'piena' : ''].join(' ');
+      return `<button class="${cls}" data-id="${l.id}" style="background:${c.bg};color:${c.fg}">
+        ${s.prenotata && !s.annullata ? loto() : ''}
+        <div class="ora">${fmtOra.format(new Date(l.data_ora_inizio))}</div>
+        <div class="tit" style="${s.prenotata ? 'padding-right:18px' : ''}">${esc(l.titolo)}</div>
+        <div class="stato">${stato}</div>
+      </button>`;
+    }
+
+    function scrollToTodayColumn() {
+      const sc = $('scroller');
+      const today = sc.querySelector('.dayh.today');
+      if (today && sc.scrollWidth > sc.clientWidth) sc.scrollLeft = Math.max(0, today.offsetLeft - 56);
+    }
+
+    function renderUpcoming() {
+      if (!upcoming.length) {
+        $('mineList').innerHTML = '<p style="font-size:14px;opacity:.7;margin:0">Non hai lezioni prenotate. Scegline una dal calendario.</p>';
+        return;
+      }
+      $('mineList').innerHTML = upcoming.map(l => {
+        const d = new Date(l.data_ora_inizio);
+        const extra = l.my_booking_id ? loto(26).replace('class="loto"', '') :
+          `<span style="font-size:11px;background:#fff;border:1px solid var(--linea);border-radius:10px;padding:4px 8px;flex:none">In attesa · ${l.posizione_attesa}°</span>`;
+        return `<div class="mine-item" data-id="${l.id}">${extra}
+          <div><div class="what">${esc(l.titolo)}</div><div class="when">${cap(fmtBreve.format(d))} · ore ${fmtOra.format(d)}</div></div></div>`;
+      }).join('');
+      $('mineList').querySelectorAll('.mine-item').forEach(el => el.addEventListener('click', () => openLesson(el.dataset.id)));
+    }
+
+    // ============ POPUP ============
+    function findLesson(id) {
+      return weekLessons.find(l => l.id === id) || upcoming.find(l => l.id === id);
+    }
+
+    function openLesson(id) {
+      const l = findLesson(id);
+      if (!l) return;
+      const s = statoLezione(l);
+      const inizio = new Date(l.data_ora_inizio), fine = new Date(l.data_ora_fine);
+      let h = `<div class="grab"></div>
+        <h4 class="serif">${esc(l.titolo)}</h4>
+        <div class="quando">${cap(fmtGiorno.format(inizio))}<br>ore ${fmtOra.format(inizio)} – ${fmtOra.format(fine)}</div>`;
+
+      if (l.posti_totali != null && !s.annullata) {
+        const pct = Math.min(100, Math.round(l.posti_occupati / l.posti_totali * 100));
+        h += `<div class="posti"><div class="riga"><span>Posti liberi</span><b>${s.liberi} su ${l.posti_totali}</b></div><div class="bar"><i style="width:${pct}%"></i></div></div>`;
+      } else {
+        h += '<div style="height:16px"></div>';
+      }
+      if (l.note_eccezionali) h += `<div class="nota">${esc(l.note_eccezionali)}</div>`;
+      if (!l.consuma_lezione && !s.annullata) h += `<p class="info">Questo incontro è libero: non scala nessuna delle tue lezioni.</p>`;
+
+      h += '<div class="azioni">';
+      if (s.annullata) {
+        h += `<p class="info">Questa lezione è stata annullata. Se l'avevi prenotata, la lezione ti è stata restituita.</p>`;
+      } else if (s.prenotata) {
+        h += `<div class="badge-ok">${loto(24).replace('class="loto"', '')} Hai prenotato questa lezione</div>`;
+        if (!s.passata) {
+          h += s.entroLimite
+            ? `<p class="info">Mancano meno di ${ORE_CANCELLAZIONE} ore all'inizio: puoi ancora cancellare, ma la lezione <b>non ti verrà restituita</b>.</p>`
+            : `<p class="info">Puoi cancellare fino a ${ORE_CANCELLAZIONE} ore prima dell'inizio e la lezione ti verrà restituita.</p>`;
+          h += `<button class="btn btn-soft" data-act="cancel" data-bid="${l.my_booking_id}" data-late="${s.entroLimite ? 1 : 0}">Cancella prenotazione</button>`;
+        }
+      } else if (s.passata) {
+        h += `<p class="info">Questa lezione si è già svolta.</p>`;
+      } else if (s.inAttesa) {
+        h += `<p class="info">Sei in lista d'attesa, in posizione <b>${l.posizione_attesa}</b>. Se si libera un posto entro ${ORE_CANCELLAZIONE} ore dall'inizio verrai iscritto/a automaticamente${l.consuma_lezione ? ' e ti verrà scalata una lezione' : ''}.</p>`;
+        h += `<button class="btn btn-soft" data-act="leave">Esci dalla lista d'attesa</button>`;
+      } else if (s.piena) {
+        h += `<p class="info">I posti sono esauriti. Iscriviti alla lista d'attesa: se qualcuno cancella, entri tu automaticamente.</p>`;
+        h += `<button class="btn btn-primary" data-act="wait">Mettimi in lista d'attesa</button>`;
+      } else {
+        h += `<button class="btn btn-primary" data-act="book">Prenota${l.consuma_lezione ? '' : ' (gratuito)'}</button>`;
+      }
+      h += `<button class="btn-link" data-act="close" style="margin-top:4px">Chiudi</button></div>`;
+
+      $('sheet').innerHTML = h;
+      $('sheet').dataset.id = l.id;
+      const ov = $('overlay');
+      ov.classList.remove('hidden');
+      requestAnimationFrame(() => ov.classList.add('open'));
+    }
+
+    function closeSheet() {
+      const ov = $('overlay');
+      ov.classList.remove('open');
+      setTimeout(() => ov.classList.add('hidden'), 250);
+    }
+    $('overlay').addEventListener('click', (e) => { if (e.target.id === 'overlay') closeSheet(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+    $('sheet').addEventListener('click', async (e) => {
+      const b = e.target.closest('[data-act]');
+      if (!b || busy) return;
+      const act = b.dataset.act;
+      const lessonId = $('sheet').dataset.id;
+      if (act === 'close') return closeSheet();
+
+      if (act === 'cancel' && !b.dataset.confirm) {
+        b.dataset.confirm = '1';
+        b.className = 'btn btn-primary';
+        b.textContent = b.dataset.late === '1' ? 'Sì, cancella comunque' : 'Sì, cancella';
+        return;
+      }
+
+      busy = true;
+      const label = b.textContent;
+      b.disabled = true; b.textContent = 'Un momento…';
+      let res;
+      if (act === 'book') res = await sb.rpc('book_lesson', { p_lesson_id: lessonId });
+      if (act === 'wait') res = await sb.rpc('join_waitlist', { p_lesson_id: lessonId });
+      if (act === 'leave') res = await sb.rpc('leave_waitlist', { p_lesson_id: lessonId });
+      if (act === 'cancel') res = await sb.rpc('cancel_booking', { p_booking_id: b.dataset.bid });
+      busy = false;
+
+      if (res.error || !res.data) {
+        b.disabled = false; b.textContent = label;
+        toast('Qualcosa non ha funzionato. Controlla la connessione e riprova.', 'err');
+        return;
+      }
+      const r = res.data;
+      toast(r.message, r.success ? 'ok' : 'err');
+      closeSheet();
+      await refreshAll();
+    });
+
+    // ============ NAVIGAZIONE SETTIMANE ============
+    $('prevW').onclick = () => {
+      if (sView === 'mese') { if (monthOffset <= 0) return; monthOffset--; } else { if (weekOffset <= 0) return; weekOffset--; }
+      loadWeek();
+    };
+    // gli allievi non tornano ai periodi passati
+    function aggiornaFrecciaIndietro() {
+      const alInizio = sView === 'mese' ? monthOffset <= 0 : weekOffset <= 0;
+      $('prevW').disabled = alInizio;
+      $('prevW').style.opacity = alInizio ? '.35' : '';
+      $('prevW').style.cursor = alInizio ? 'default' : '';
+    }
+    $('nextW').onclick = () => { if (sView === 'mese') monthOffset++; else weekOffset++; loadWeek(); };
+    $('todayW').onclick = async () => { weekOffset = 0; monthOffset = 0; await loadWeek(); if (sView === 'settimana') scrollToTodayColumn(); };
+
+    // Aggiorna quando l'allievo torna sull'app
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden || !me) return;
+      if (me.role === 'admin') { aLoadDay(); aLoadStudents(); } else refreshAll();
+    });
+
+    // =====================================================================
+    // PANNELLO DELLA SCUOLA (solo amministratrice — i permessi veri sono nel database)
+    // =====================================================================
+    const A = { day: 0, profiles: [], byId: {}, packages: [], lessons: [], bookings: [], waitlist: [], titles: [] };
+    const fmtGiornoLungo = new Intl.DateTimeFormat('it-IT', { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long' });
+    const oggiISO = () => dayKey(new Date());
+    const dataIT = iso => iso ? iso.split('-').reverse().join('/') : '';
+    const nomeCompleto = p => p ? `${p.nome || ''} ${p.cognome || ''}`.trim() : 'Allievo';
+
+    function openSheetHtml(h) {
+      $('sheet').innerHTML = '<div class="grab"></div>' + h;
+      delete $('sheet').dataset.id;
+      const ov = $('overlay');
+      ov.classList.remove('hidden');
+      requestAnimationFrame(() => ov.classList.add('open'));
+    }
+
+    async function enterAdmin() {
+      show('scr-admin');
+      await Promise.all([aLoadStudents(), aLoadDay()]);
+      if (!$('rFrom').value) rSetPeriod('mese');
+    }
+
+    // ---------- Allievi ----------
+    async function aLoadStudents() {
+      const [p, k, t] = await Promise.all([
+        sb.from('profiles').select('id, nome, cognome, nickname, email, role, stato, created_at').order('nome'),
+        sb.from('lesson_packages').select('id, user_id, lezioni_totali, lezioni_rimanenti, data_scadenza, created_at').order('created_at'),
+        sb.from('lessons').select('titolo').order('created_at', { ascending: false }).limit(200),
+      ]);
+      if (p.error) { toast('Non riesco a caricare gli allievi. Controlla la connessione.', 'err'); return; }
+      A.profiles = p.data || [];
+      A.byId = Object.fromEntries(A.profiles.map(x => [x.id, x]));
+      A.packages = k.data || [];
+      A.titles = [...new Set((t.data || []).map(x => x.titolo))];
+      aRenderStudents();
+    }
+
+    function saldoDi(uid) {
+      const oggi = oggiISO();
+      const validi = A.packages.filter(k => k.user_id === uid && k.lezioni_rimanenti > 0 && (!k.data_scadenza || k.data_scadenza >= oggi));
+      const tot = validi.reduce((s, k) => s + k.lezioni_rimanenti, 0);
+      const scad = validi.filter(k => k.data_scadenza).map(k => k.data_scadenza).sort()[0];
+      const open = validi.some(k => !k.data_scadenza);
+      return { tot, scad, open };
+    }
+
+    function matchStudente(p, q) {
+      if (!q) return true;
+      return [p.nome, p.cognome, p.nickname, p.email, `${p.nome} ${p.cognome}`].some(v => (v || '').toLowerCase().includes(q));
+    }
+
+    function aRenderStudents() {
+      const q = $('aSearch').value.trim().toLowerCase();
+      const allievi = A.profiles.filter(p => p.role !== 'admin');
+      $('aCount').textContent = allievi.length ? `(${allievi.length})` : '';
+      const list = allievi.filter(p => matchStudente(p, q));
+      if (!allievi.length) { $('aStudentList').innerHTML = '<p class="muted">Non hai ancora allievi. Crea il primo con “Nuovo allievo”.</p>'; return; }
+      if (!list.length) { $('aStudentList').innerHTML = '<p class="muted">Nessun allievo trovato.</p>'; return; }
+      $('aStudentList').innerHTML = list.map(p => {
+        const s = saldoDi(p.id);
+        const info = s.tot === 0 ? '<span class="pill warn">0 lezioni</span>'
+          : `<span class="pill">${s.tot} ${s.tot === 1 ? 'lezione' : 'lezioni'}</span>`;
+        const scad = s.tot > 0 ? (s.scad ? `valide fino al ${dataIT(s.scad)}` : 'senza scadenza') : '';
+        return `<button class="row" data-uid="${p.id}">
+          <div class="row-main">
+            <div class="row-title">${esc(nomeCompleto(p))}${p.nickname ? ` <span class="nick">${esc(p.nickname)}</span>` : ''}</div>
+            <div class="row-sub">${p.stato !== 'active' ? '<span class="pill off">Sospeso</span> ' : ''}${esc(scad)}</div>
+          </div>
+          ${info}
+        </button>`;
+      }).join('');
+      $('aStudentList').querySelectorAll('.row').forEach(b => b.addEventListener('click', () => aOpenStudent(b.dataset.uid)));
+    }
+    $('aSearch').addEventListener('input', aRenderStudents);
+
+    function aOpenStudent(uid) {
+      const p = A.byId[uid]; if (!p) return;
+      const s = saldoDi(uid);
+      const oggi = oggiISO();
+      const gruppi = A.packages.filter(k => k.user_id === uid).slice().reverse();
+      const righe = gruppi.map(k => {
+        const scaduto = k.data_scadenza && k.data_scadenza < oggi;
+        return `<div class="pkg ${scaduto ? 'scaduto' : ''}">
+          <div><b>${k.lezioni_rimanenti}</b> su ${k.lezioni_totali} rimaste
+            <div class="row-sub">${k.data_scadenza ? (scaduto ? 'scadute il ' : 'valide fino al ') + dataIT(k.data_scadenza) : 'senza scadenza'} · assegnate il ${new Date(k.created_at).toLocaleDateString('it-IT')}</div></div>
+          <div class="pm"><button data-aact="adj" data-pkg="${k.id}" data-d="-1" aria-label="Togli una lezione">−</button><button data-aact="adj" data-pkg="${k.id}" data-d="1" aria-label="Aggiungi una lezione">+</button></div>
+        </div>`;
+      }).join('') || '<p class="muted">Nessuna lezione assegnata finora.</p>';
+
+      openSheetHtml(`
+        <h4 class="serif">${esc(nomeCompleto(p))}</h4>
+        <div class="quando">${p.nickname ? esc(p.nickname) + ' · ' : ''}${esc(p.email || '')}</div>
+        <div class="saldo-mini"><span class="serif">${s.tot}</span> ${s.tot === 1 ? 'lezione disponibile' : 'lezioni disponibili'}</div>
+
+        <p class="lab" style="margin-top:18px">Lezioni assegnate</p>
+        ${righe}
+
+        <form class="box" id="assignForm" data-uid="${uid}">
+          <p class="lab">Aggiungi lezioni</p>
+          <div class="two">
+            <div><label class="mini" for="asN">Quante</label><input class="inp" id="asN" type="number" min="1" max="200" value="4" required inputmode="numeric"></div>
+            <div><label class="mini" for="asD">Valide fino al</label><input class="inp" id="asD" type="date" min="${oggi}"></div>
+          </div>
+          <label class="check"><input type="checkbox" id="asOpen"> Senza scadenza (abbonamento open)</label>
+          <button class="btn btn-primary" type="submit" style="margin-top:12px">Aggiungi lezioni</button>
+        </form>
+
+        <div class="azioni" style="margin-top:16px">
+          <button class="btn btn-soft" data-aact="storico" data-uid="${uid}">Vedi lo storico</button>
+          <button class="btn btn-soft" data-aact="link" data-uid="${uid}">Link di accesso per ${esc(p.nome || 'l’allievo')}</button>
+          <button class="btn btn-soft" data-aact="stato" data-uid="${uid}">${p.stato === 'active' ? 'Sospendi accesso' : 'Riattiva accesso'}</button>
+          <button class="btn-link" data-aact="close">Chiudi</button>
+        </div>
+      `);
+      $('asOpen').addEventListener('change', e => { $('asD').disabled = e.target.checked; if (e.target.checked) $('asD').value = ''; });
+      $('assignForm').addEventListener('submit', aAssign);
+    }
+
+    async function aAssign(e) {
+      e.preventDefault();
+      const uid = e.target.dataset.uid;
+      const n = parseInt($('asN').value, 10);
+      const open = $('asOpen').checked;
+      const d = $('asD').value || null;
+      if (!open && !d) return toast('Scegli una data di scadenza oppure spunta “Senza scadenza”.', 'err');
+      const btn = e.target.querySelector('button[type=submit]');
+      btn.disabled = true;
+      const { data, error } = await sb.rpc('admin_assign_lessons', { p_user_id: uid, p_lezioni: n, p_scadenza: open ? null : d });
+      btn.disabled = false;
+      if (error || !data) return toast('Qualcosa non ha funzionato. Riprova.', 'err');
+      toast(data.message, data.success ? 'ok' : 'err');
+      if (data.success) { await aLoadStudents(); aOpenStudent(uid); }
+    }
+
+    // ---------- Nuovo allievo ----------
+    $('aNewStudent').addEventListener('click', () => {
+      const oggi = oggiISO();
+      openSheetHtml(`
+        <h4 class="serif">Nuovo allievo</h4>
+        <form id="newStudentForm" style="margin-top:16px">
+          <div class="two">
+            <div><label class="mini" for="nsNome">Nome</label><input class="inp" id="nsNome" required autocomplete="off"></div>
+            <div><label class="mini" for="nsCognome">Cognome</label><input class="inp" id="nsCognome" required autocomplete="off"></div>
+          </div>
+          <label class="mini" for="nsNick">Nickname <span style="opacity:.6;text-transform:none;letter-spacing:0">(lo vedi solo tu, utile per gli omonimi)</span></label>
+          <input class="inp" id="nsNick" autocomplete="off" placeholder="es. Anna del martedì">
+          <label class="mini" for="nsEmail">Email</label>
+          <input class="inp" id="nsEmail" type="email" required autocomplete="off" placeholder="la sua email">
+          <div class="box" style="margin-top:16px">
+            <p class="lab">Lezioni dell’abbonamento</p>
+            <div class="two">
+              <div><label class="mini" for="nsN">Quante</label><input class="inp" id="nsN" type="number" min="0" max="200" value="4" inputmode="numeric"></div>
+              <div><label class="mini" for="nsD">Valide fino al</label><input class="inp" id="nsD" type="date" min="${oggi}"></div>
+            </div>
+            <label class="check"><input type="checkbox" id="nsOpen"> Senza scadenza (abbonamento open)</label>
+          </div>
+          <div id="nsMsg"></div>
+          <button class="btn btn-primary" type="submit" id="nsBtn" style="margin-top:14px">Crea account</button>
+          <button class="btn-link" type="button" data-aact="close" style="display:block;margin:10px auto 0">Annulla</button>
+        </form>
+      `);
+      $('nsOpen').addEventListener('change', e => { $('nsD').disabled = e.target.checked; if (e.target.checked) $('nsD').value = ''; });
+      $('newStudentForm').addEventListener('submit', aCreateStudent);
+      setTimeout(() => $('nsNome').focus(), 250);
+    });
+
+    async function aCreateStudent(e) {
+      e.preventDefault();
+      setMsg('nsMsg', '');
+      const lezioni = parseInt($('nsN').value || '0', 10);
+      const open = $('nsOpen').checked;
+      const scad = $('nsD').value || null;
+      if (lezioni > 0 && !open && !scad) return setMsg('nsMsg', 'Scegli una data di scadenza oppure spunta “Senza scadenza”.');
+      $('nsBtn').disabled = true; $('nsBtn').textContent = 'Un momento…';
+      const { data, error } = await sb.functions.invoke('gestione-allievi', { body: {
+        action: 'create', nome: $('nsNome').value, cognome: $('nsCognome').value, nickname: $('nsNick').value,
+        email: $('nsEmail').value, lezioni, scadenza: open ? null : scad,
+      }});
+      $('nsBtn').disabled = false; $('nsBtn').textContent = 'Crea account';
+      if (error || !data) return setMsg('nsMsg', 'Non è stato possibile creare l’account. Controlla la connessione e riprova.');
+      if (!data.success) return setMsg('nsMsg', data.message);
+      await aLoadStudents();
+      const nome = $('nsNome').value.trim(), email = $('nsEmail').value.trim();
+      if (data.emailSent) {
+        openSheetHtml(`
+          <div style="text-align:center;font-size:40px;margin-top:4px">✉️</div>
+          <h4 class="serif" style="text-align:center">Account creato</h4>
+          <p class="info" style="margin-top:10px;text-align:center">Abbiamo inviato a <b>${esc(nome)}</b> l'email di benvenuto all'indirizzo <b>${esc(email)}</b>.
+          Aprendola sceglierà la sua password ed entrerà nell'Area Allievi. Il link nell'email vale 24 ore.</p>
+          <p class="row-sub" style="text-align:center">Se non la trova, può controllare nello spam. Oppure puoi mandarle il link su WhatsApp dalla sua scheda con “Link di accesso” (in quel caso il link dell'email non funzionerà più).</p>
+          <button class="btn btn-primary" data-aact="close" style="margin-top:14px">Fatto</button>`);
+      } else {
+        mostraLink(data.link, nome, true);
+      }
+    }
+
+    function mostraLink(link, nome, nuovo) {
+      const testo = `Ciao ${nome}! Ecco il link per entrare nell'Area Allievi de La Stanza Interiore e scegliere la tua password: ${link}`;
+      openSheetHtml(`
+        <h4 class="serif">${nuovo ? 'Account creato' : 'Link di accesso'}</h4>
+        <p class="info" style="margin-top:10px">Manda questo link a <b>${esc(nome)}</b>: aprendolo sceglierà la sua password ed entrerà direttamente.
+        Il link vale <b>24 ore</b> e si può usare una volta sola; se scade, ne crei uno nuovo dalla sua scheda.
+        ${nuovo ? '' : 'Eventuali link inviati prima (anche via email) non funzionano più.'}</p>
+        <div class="linkbox" id="linkBox">${esc(link || '')}</div>
+        <div class="azioni" style="margin-top:14px">
+          <a class="btn btn-verde" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(testo)}">Invia su WhatsApp</a>
+          <button class="btn btn-soft" data-aact="copy">Copia link</button>
+          <button class="btn-link" data-aact="close">Fatto</button>
+        </div>
+      `);
+      $('sheet').dataset.link = testo;
+    }
+
+    // ---------- Lezioni del giorno ----------
+    function dayBounds(offset) {
+      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + offset);
+      const e = new Date(d); e.setDate(e.getDate() + 1);
+      return [d, e];
+    }
+
+    // ---------- Viste: giorno / settimana / mese ----------
+    const MESI_C = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+    A.view = 'giorno';
+    function anchorDate() { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + A.day); return d; }
+    function lunediDi(d) { const x = new Date(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+    function viewRange() {
+      const d = anchorDate();
+      if (A.view === 'settimana') { const a = lunediDi(d); const b = new Date(a); b.setDate(b.getDate() + 7); return [a, b]; }
+      if (A.view === 'mese') {
+        const primo = new Date(d.getFullYear(), d.getMonth(), 1), ultimo = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+        const a = lunediDi(primo); const b = lunediDi(ultimo); b.setDate(b.getDate() + 7); return [a, b];
+      }
+      const e = new Date(d); e.setDate(e.getDate() + 1); return [d, e];
+    }
+    const offsetDi = d => Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12) - new Date(new Date().setHours(12, 0, 0, 0))) / 86400000);
+
+    async function aLoadDay() {
+      const [from, to] = viewRange();
+      const d = anchorDate();
+      if (A.view === 'giorno') {
+        const label = cap(fmtGiornoLungo.format(from));
+        $('aKicker').textContent = 'Lezioni del giorno';
+        $('aDayLabel').textContent = A.day === 0 ? `Oggi, ${label.toLowerCase()}` : A.day === 1 ? `Domani, ${label.toLowerCase()}` : label;
+      } else if (A.view === 'settimana') {
+        const last = new Date(from); last.setDate(last.getDate() + 6);
+        $('aKicker').textContent = 'Lezioni della settimana';
+        $('aDayLabel').textContent = from.getMonth() === last.getMonth()
+          ? `${from.getDate()} – ${last.getDate()} ${MESI_C[last.getMonth()]}`
+          : `${from.getDate()} ${MESI_C[from.getMonth()].slice(0, 3)} – ${last.getDate()} ${MESI_C[last.getMonth()].slice(0, 3)}`;
+      } else {
+        $('aKicker').textContent = 'Lezioni del mese';
+        $('aDayLabel').textContent = cap(`${MESI_C[d.getMonth()]} ${d.getFullYear()}`);
+      }
+      const { data: les, error } = await sb.from('lessons').select('*')
+        .gte('data_ora_inizio', from.toISOString()).lt('data_ora_inizio', to.toISOString()).order('data_ora_inizio');
+      if (error) { toast('Non riesco a caricare le lezioni.', 'err'); return; }
+      A.lessons = les || [];
+      const ids = A.lessons.map(l => l.id);
+      A.bookings = []; A.waitlist = [];
+      for (let i = 0; i < ids.length; i += 150) {
+        const part = ids.slice(i, i + 150);
+        const [b, w] = await Promise.all([
+          sb.from('bookings').select('id, lesson_id, user_id, created_at').in('lesson_id', part).eq('stato', 'confermata').order('created_at'),
+          sb.from('waitlist').select('lesson_id, user_id, created_at').in('lesson_id', part).order('created_at'),
+        ]);
+        A.bookings = A.bookings.concat(b.data || []); A.waitlist = A.waitlist.concat(w.data || []);
+      }
+      if (A.view === 'settimana') aRenderWeek(from);
+      else if (A.view === 'mese') aRenderMonth(from, to, d);
+      else aRenderDay();
+    }
+
+    function postiTxt(l) {
+      const n = A.bookings.filter(b => b.lesson_id === l.id).length;
+      return l.annullata ? 'Annullata' : l.posti_totali == null ? `${n} iscr.` : `${n}/${l.posti_totali}`;
+    }
+
+    function aRenderWeek(from) {
+      const oggi = oggiISO();
+      const giorni = [...Array(7)].map((_, i) => { const d = new Date(from); d.setDate(d.getDate() + i); return d; });
+      const nomi = ['LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB', 'DOM'];
+      const col = giorni.map((d, i) => {
+        const k = isoLocal(d);
+        const les = A.lessons.filter(l => dayKey(new Date(l.data_ora_inizio)) === k);
+        return `<div class="wcol">
+          <button type="button" class="dayh ${k === oggi ? 'today' : ''}" data-goto="${k}"><b>${nomi[i]}</b><span>${d.getDate()}/${d.getMonth() + 1}</span></button>
+          ${les.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="wlez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}">
+            <span class="wl-ora">${fmtOra.format(new Date(l.data_ora_inizio))}</span>
+            <span class="wl-tit">${esc(l.titolo)}</span>
+            <span class="wl-posti">${postiTxt(l)}</span></button>`; }).join('') || '<div class="wvuoto"></div>'}
+        </div>`;
+      }).join('');
+      $('aDayList').innerHTML = `<div class="scroller"><div class="wgrid">${col}</div></div>` +
+        (A.lessons.length ? '' : '<p class="muted" style="text-align:center;margin-top:10px">Nessuna lezione in questa settimana.</p>');
+      aBindCal();
+    }
+
+    function aRenderMonth(from, to, d) {
+      const oggi = oggiISO(); const mese = d.getMonth();
+      let celle = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(n => `<div class="mhead">${n}</div>`).join('');
+      for (const x = new Date(from); x < to; x.setDate(x.getDate() + 1)) {
+        const k = isoLocal(x);
+        const les = A.lessons.filter(l => dayKey(new Date(l.data_ora_inizio)) === k);
+        const vis = les.slice(0, 3);
+        celle += `<div class="mcell ${x.getMonth() !== mese ? 'fuori' : ''} ${k === oggi ? 'today' : ''}" data-goto="${k}">
+          <span class="mnum">${x.getDate()}</span>
+          ${vis.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="mlez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}"><b>${fmtOra.format(new Date(l.data_ora_inizio))}</b><span> ${esc(l.titolo)}</span></button>`; }).join('')}
+          ${les.length > 3 ? `<span class="mpiu">+${les.length - 3}</span>` : ''}
+        </div>`;
+      }
+      $('aDayList').innerHTML = `<div class="mgrid">${celle}</div>
+        <p class="row-sub" style="text-align:center;margin-top:8px">Tocca un giorno per vedere i dettagli, o una lezione per gli iscritti.</p>`;
+      aBindCal();
+    }
+
+    function aBindCal() {
+      $('aDayList').querySelectorAll('[data-lid]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); aOpenLesson(b.dataset.lid); }));
+      $('aDayList').querySelectorAll('[data-goto]').forEach(c => c.addEventListener('click', () => {
+        A.day = offsetDi(new Date(c.dataset.goto + 'T12:00:00')); aSetView('giorno');
+      }));
+    }
+
+    function aSetView(v) {
+      A.view = v;
+      document.querySelectorAll('#aViews .chip').forEach(c => c.classList.toggle('on', c.dataset.v === v));
+      aLoadDay();
+    }
+    document.querySelectorAll('#aViews .chip').forEach(c => c.addEventListener('click', () => aSetView(c.dataset.v)));
+
+    function aSposta(dir) {
+      if (A.view === 'giorno') A.day += dir;
+      else if (A.view === 'settimana') A.day += 7 * dir;
+      else { const d = anchorDate(); A.day = offsetDi(new Date(d.getFullYear(), d.getMonth() + dir, 1)); }
+      aLoadDay();
+    }
+    $('aPrevDay').onclick = () => aSposta(-1);
+    $('aNextDay').onclick = () => aSposta(1);
+    $('aToday').onclick = () => { A.day = 0; aLoadDay(); };
+
+    function aRenderDay() {
+      if (!A.lessons.length) {
+        $('aDayList').innerHTML = '<div class="empty" style="padding:22px 8px"><span class="serif">Nessuna lezione</span>in questo giorno</div>';
+        return;
+      }
+      $('aDayList').innerHTML = A.lessons.map(l => {
+        const iscritti = A.bookings.filter(b => b.lesson_id === l.id);
+        const attesa = A.waitlist.filter(w => w.lesson_id === l.id).length;
+        const c = colorFor(l.titolo);
+        const inizio = new Date(l.data_ora_inizio), fine = new Date(l.data_ora_fine);
+        const nomi = iscritti.map(b => esc(nomeCompleto(A.byId[b.user_id]))).join(', ');
+        return `<button class="alez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="border-left-color:${c.fg}">
+          <div class="alez-top">
+            <span class="alez-ora">${fmtOra.format(inizio)}–${fmtOra.format(fine)}</span>
+            <span class="pill">${l.annullata ? 'Annullata' : l.posti_totali == null ? `${iscritti.length} iscritti` : `${iscritti.length}/${l.posti_totali}`}</span>
+          </div>
+          <div class="alez-tit">${esc(l.titolo)}${l.consuma_lezione ? '' : ' <span class="row-sub">· gratuita</span>'}</div>
+          <div class="row-sub">${l.annullata ? '' : (nomi || 'Nessun iscritto')}${attesa ? ` · ${attesa} in attesa` : ''}</div>
+        </button>`;
+      }).join('');
+      $('aDayList').querySelectorAll('.alez').forEach(b => b.addEventListener('click', () => aOpenLesson(b.dataset.lid)));
+    }
+
+
+    function aOpenLesson(lid) {
+      const l = A.lessons.find(x => x.id === lid); if (!l) return;
+      const iscritti = A.bookings.filter(b => b.lesson_id === lid);
+      const attesa = A.waitlist.filter(w => w.lesson_id === lid);
+      const inizio = new Date(l.data_ora_inizio), fine = new Date(l.data_ora_fine);
+      const persona = (uid) => { const p = A.byId[uid]; return `${esc(nomeCompleto(p))}${p && p.nickname ? ` <span class="nick">${esc(p.nickname)}</span>` : ''}`; };
+      const liberi = l.posti_totali == null ? null : l.posti_totali - iscritti.length;
+
+      openSheetHtml(`
+        <h4 class="serif">${esc(l.titolo)}</h4>
+        <div class="quando">${cap(fmtGiorno.format(inizio))}<br>ore ${fmtOra.format(inizio)} – ${fmtOra.format(fine)}${l.consuma_lezione ? '' : ' · gratuita'}</div>
+        ${l.note_eccezionali ? `<div class="nota" style="margin-top:12px">${esc(l.note_eccezionali)}</div>` : ''}
+        ${l.annullata ? '<p class="info" style="margin-top:14px"><b>Questa lezione è annullata.</b></p>' : `
+        <div class="iscr-head">
+          <p class="lab" style="margin:0">Iscritti (${iscritti.length}${l.posti_totali != null ? ` su ${l.posti_totali}` : ''})</p>
+          ${liberi === 0 ? '' : '<button type="button" class="round-btn add" id="enrollToggle" aria-label="Aggiungi un allievo">+</button>'}
+        </div>
+        <div id="enrollBox" class="box hidden" style="margin:10px 0 12px">
+          <input class="inp" id="enrollSearch" type="search" placeholder="Cerca per nome o nickname" autocomplete="off">
+          <div id="enrollResults"></div>
+        </div>
+        ${iscritti.length ? iscritti.map(b => `<div class="person"><span>${persona(b.user_id)}</span>
+            <button class="round-btn del" data-aact="remove" data-bid="${b.id}" data-past="${inizio <= new Date() ? 1 : 0}" aria-label="Togli dalla lezione">×</button></div>`).join('')
+          : '<p class="muted">Ancora nessun iscritto.</p>'}
+        ${attesa.length ? `<p class="lab" style="margin-top:16px">Lista d’attesa</p>` + attesa.map((w, i) => `<div class="person"><span>${i + 1}. ${persona(w.user_id)}</span></div>`).join('') : ''}`}
+        <div class="azioni" style="margin-top:16px">
+          ${l.annullata ? '' : `<button class="btn btn-primary" data-aact="editLesson" data-lid="${lid}">Modifica lezione</button>
+          <button class="btn btn-soft" data-aact="cancelLesson" data-lid="${lid}">Annulla questa lezione</button>`}
+          <button class="btn-link" data-aact="close">Chiudi</button>
+        </div>
+      `);
+      $('sheet').dataset.lid = lid;
+      const et = $('enrollToggle');
+      if (et) et.addEventListener('click', () => {
+        const box = $('enrollBox'); box.classList.toggle('hidden');
+        et.classList.toggle('on', !box.classList.contains('hidden'));
+        if (!box.classList.contains('hidden')) $('enrollSearch').focus();
+      });
+      const es = $('enrollSearch');
+      if (es) es.addEventListener('input', () => {
+        const q = es.value.trim().toLowerCase();
+        const gia = new Set(iscritti.map(b => b.user_id));
+        const res = q.length < 2 ? [] : A.profiles.filter(p => p.role !== 'admin' && p.stato === 'active' && !gia.has(p.id) && matchStudente(p, q)).slice(0, 6);
+        $('enrollResults').innerHTML = res.map(p => {
+          const s = saldoDi(p.id);
+          return `<div class="person"><span>${esc(nomeCompleto(p))}${p.nickname ? ` <span class="nick">${esc(p.nickname)}</span>` : ''} <span class="row-sub">· ${s.tot} lez.</span></span>
+            <button class="round-btn add" data-aact="enroll" data-uid="${p.id}" aria-label="Iscrivi">+</button></div>`;
+        }).join('') || (q.length >= 2 ? '<p class="muted">Nessun allievo trovato.</p>' : '');
+      });
+    }
+
+    // ---------- Modifica lezione ----------
+    function aEditLesson(lid) {
+      const l = A.lessons.find(x => x.id === lid); if (!l) return;
+      const inizio = new Date(l.data_ora_inizio), fine = new Date(l.data_ora_fine);
+      const durata = Math.round((fine - inizio) / 60000);
+      const iscritti = A.bookings.filter(b => b.lesson_id === lid).length;
+      openSheetHtml(`
+        <h4 class="serif">Modifica lezione</h4>
+        <form id="editLessonForm" style="margin-top:16px">
+          <label class="mini" for="elTit">Nome della lezione</label>
+          <input class="inp" id="elTit" required autocomplete="off" value="${esc(l.titolo)}">
+          <div class="two">
+            <div><label class="mini" for="elDay">Giorno</label><input class="inp" id="elDay" type="date" required value="${dayKey(inizio)}"></div>
+            <div><label class="mini" for="elOra">Ora</label><input class="inp" id="elOra" type="time" required value="${fmtOra.format(inizio)}"></div>
+          </div>
+          <div class="two">
+            <div><label class="mini" for="elDur">Durata (minuti)</label><input class="inp" id="elDur" type="number" min="5" max="600" required value="${durata}" inputmode="numeric"></div>
+            <div><label class="mini" for="elPosti">Posti</label><input class="inp" id="elPosti" type="number" min="${Math.max(1, iscritti)}" max="500" value="${l.posti_totali ?? ''}" inputmode="numeric" placeholder="illimitati"></div>
+          </div>
+          ${iscritti ? `<p class="row-sub" style="margin-top:6px">Iscritti attuali: ${iscritti}. Non puoi scendere sotto questo numero di posti.</p>` : ''}
+          <label class="check"><input type="checkbox" id="elFree" ${l.consuma_lezione ? '' : 'checked'}> Incontro gratuito (non scala lezioni)</label>
+          <label class="mini" for="elNote">Nota per gli allievi</label>
+          <input class="inp" id="elNote" autocomplete="off" value="${esc(l.note_eccezionali || '')}" placeholder="facoltativa">
+          <div class="box" style="margin-top:14px">
+            <label class="check" style="margin:0"><input type="checkbox" id="elSeries"> Applica anche alle lezioni successive di questo corso</label>
+            <p class="row-sub" style="margin:6px 0 0">Stesso nome, stesso giorno della settimana e stessa ora.</p>
+          </div>
+          <div id="elMsg"></div>
+          <button class="btn btn-primary" type="submit" id="elBtn" style="margin-top:14px">Salva modifiche</button>
+          <button class="btn-link" type="button" data-aact="backLesson" data-lid="${lid}" style="display:block;margin:10px auto 0">Annulla</button>
+        </form>
+      `);
+      $('editLessonForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        setMsg('elMsg', '');
+        $('elBtn').disabled = true;
+        const { data, error } = await sb.rpc('admin_update_lesson', {
+          p_lesson_id: lid, p_titolo: $('elTit').value, p_data: $('elDay').value, p_ora: $('elOra').value,
+          p_durata_minuti: parseInt($('elDur').value, 10), p_posti: $('elPosti').value ? parseInt($('elPosti').value, 10) : null,
+          p_consuma: !$('elFree').checked, p_note: $('elNote').value, p_successive: $('elSeries').checked,
+        });
+        $('elBtn').disabled = false;
+        if (error || !data) return setMsg('elMsg', 'Qualcosa non ha funzionato. Riprova.');
+        if (!data.success) return setMsg('elMsg', data.message);
+        toast(data.message);
+        const [oggi] = dayBounds(0);
+        A.day = Math.round((new Date($('elDay').value + 'T12:00:00') - oggi) / 86400000);
+        await Promise.all([aLoadDay(), aLoadStudents()]);
+        aOpenLesson(lid);
+      });
+    }
+
+    // ---------- La mia password ----------
+    function aChangePassword() {
+      openSheetHtml(`
+        <h4 class="serif">La mia password</h4>
+        <form id="myPassForm" style="margin-top:16px">
+          <label class="mini" for="mp1">Nuova password</label>
+          <input class="inp" id="mp1" type="password" autocomplete="new-password" minlength="6" required placeholder="almeno 6 caratteri">
+          <label class="mini" for="mp2">Ripeti la password</label>
+          <input class="inp" id="mp2" type="password" autocomplete="new-password" minlength="6" required>
+          <div id="mpMsg"></div>
+          <button class="btn btn-primary" type="submit" id="mpBtn" style="margin-top:14px">Salva password</button>
+          <button class="btn-link" type="button" data-aact="close" style="display:block;margin:10px auto 0">Annulla</button>
+        </form>
+      `);
+      $('myPassForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if ($('mp1').value.length < 6) return setMsg('mpMsg', 'La password deve avere almeno 6 caratteri.');
+        if ($('mp1').value !== $('mp2').value) return setMsg('mpMsg', 'Le due password non coincidono.');
+        $('mpBtn').disabled = true;
+        const { error } = await sb.auth.updateUser({ password: $('mp1').value });
+        $('mpBtn').disabled = false;
+        if (error) return setMsg('mpMsg', /same|different/i.test(error.message) ? 'È uguale a quella di prima: scegline una diversa.' : 'Non è stato possibile salvare. Riprova.');
+        toast('Password cambiata.');
+        closeSheet();
+      });
+    }
+
+    // ---------- Nuova lezione (giorno della settimana + periodo dal/al) ----------
+    const GIORNI = [['1', 'Lun'], ['2', 'Mar'], ['3', 'Mer'], ['4', 'Gio'], ['5', 'Ven'], ['6', 'Sab'], ['0', 'Dom']];
+    $('aNewLesson').addEventListener('click', () => {
+      const [giorno] = dayBounds(A.day);
+      const base = dayKey(giorno) < oggiISO() ? new Date() : giorno;
+      openSheetHtml(`
+        <h4 class="serif">Nuova lezione</h4>
+        <form id="newLessonForm" style="margin-top:16px">
+          <label class="mini" for="nlTit">Nome della lezione</label>
+          <input class="inp" id="nlTit" required list="nlTitles" autocomplete="off" placeholder="es. Mindfulness">
+          <datalist id="nlTitles">${A.titles.map(t => `<option value="${esc(t)}">`).join('')}</datalist>
+          <label class="mini">Giorno della settimana</label>
+          <div class="chips" id="nlDays">${GIORNI.map(([v, n]) => `<button type="button" class="chip ${String(base.getDay()) === v ? 'on' : ''}" data-dow="${v}">${n}</button>`).join('')}</div>
+          <div id="nlSlots" style="margin-top:10px"></div>
+          <label class="mini" for="nlPosti">Posti</label>
+          <input class="inp" id="nlPosti" type="number" min="1" max="500" value="8" inputmode="numeric" placeholder="illimitati">
+          <div class="two" style="margin-top:12px">
+            <div><label class="mini" for="nlFrom">Dal</label><input class="inp" id="nlFrom" type="date" required value="${dayKey(base)}" min="${oggiISO()}"></div>
+            <div><label class="mini" for="nlTo">Al</label><input class="inp" id="nlTo" type="date" required min="${oggiISO()}"></div>
+          </div>
+          <p class="row-sub" style="margin:6px 2px 0">Per una lezione singola metti la stessa data in “Dal” e “Al”.</p>
+          <p class="row-sub" id="nlCount" style="margin:6px 2px 0;font-weight:600;opacity:.85"></p>
+          <label class="check"><input type="checkbox" id="nlFree"> Incontro gratuito (non scala lezioni)</label>
+          <label class="mini" for="nlNote">Nota per gli allievi <span style="opacity:.6;text-transform:none;letter-spacing:0">(facoltativa)</span></label>
+          <input class="inp" id="nlNote" autocomplete="off" placeholder="es. portate un cuscino">
+          <div id="nlMsg"></div>
+          <button class="btn btn-primary" type="submit" id="nlBtn" style="margin-top:14px">Crea lezioni</button>
+          <button class="btn-link" type="button" data-aact="close" style="display:block;margin:10px auto 0">Annulla</button>
+        </form>
+      `);
+      NL.orari = {};
+      $('nlDays').querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => { nlSalvaOrari(); c.classList.toggle('on'); nlRenderSlots(); nlUpdateCount(); }));
+      nlRenderSlots();
+      ['nlFrom', 'nlTo'].forEach(id => $(id).addEventListener('change', nlUpdateCount));
+      $('nlFrom').addEventListener('change', () => { if (!$('nlTo').value || $('nlTo').value < $('nlFrom').value) $('nlTo').value = $('nlFrom').value; nlUpdateCount(); });
+      $('newLessonForm').addEventListener('submit', aCreateLesson);
+    });
+
+    // un orario e una durata per ogni giorno scelto
+    const NL = { orari: {}, ultimo: { ora: '18:30', dur: 60 } };
+    function nlSalvaOrari() {
+      document.querySelectorAll('#nlSlots .slot[data-dow]').forEach(r => {
+        NL.orari[r.dataset.dow] = { ora: r.querySelector('.sl-ora').value, dur: r.querySelector('.sl-dur').value };
+        NL.ultimo = NL.orari[r.dataset.dow];
+      });
+    }
+    function nlRenderSlots() {
+      const scelti = [...$('nlDays').querySelectorAll('.chip.on')].map(c => [c.dataset.dow, c.textContent]);
+      if (!scelti.length) { $('nlSlots').innerHTML = ''; return; }
+      $('nlSlots').innerHTML = `<div class="slot slot-head"><span></span><span>Ora</span><span>Durata (min)</span></div>` +
+        scelti.map(([dow, nome]) => {
+          const v = NL.orari[dow] || NL.ultimo;
+          return `<div class="slot" data-dow="${dow}"><b>${nome}</b>
+            <input class="inp sl-ora" type="time" required value="${v.ora}">
+            <input class="inp sl-dur" type="number" min="5" max="600" required value="${v.dur}" inputmode="numeric"></div>`;
+        }).join('');
+      $('nlSlots').querySelectorAll('input').forEach(i => i.addEventListener('change', nlSalvaOrari));
+    }
+
+    // prima data >= dal che cade nel giorno della settimana scelto
+    function primaData(dalISO, dow) {
+      const d = new Date(dalISO + 'T12:00:00');
+      d.setDate(d.getDate() + ((dow - d.getDay() + 7) % 7));
+      return d;
+    }
+    function nlPiano() {
+      const dal = $('nlFrom').value, al = $('nlTo').value;
+      const giorni = [...$('nlDays').querySelectorAll('.chip.on')].map(c => parseInt(c.dataset.dow, 10));
+      if (!dal || !al || al < dal || !giorni.length) return { giorni, dal, al, voci: [], totale: 0 };
+      nlSalvaOrari();
+      const voci = giorni.map(g => {
+        const primo = primaData(dal, g);
+        const primoISO = isoLocal(primo);
+        let n = 0; const d = new Date(primo);
+        while (isoLocal(d) <= al) { n++; d.setDate(d.getDate() + 7); }
+        const o = NL.orari[String(g)] || NL.ultimo;
+        return { primoISO, n, ora: o.ora, dur: parseInt(o.dur, 10) };
+      }).filter(v => v.n > 0);
+      return { giorni, dal, al, voci, totale: voci.reduce((s, v) => s + v.n, 0) };
+    }
+    function nlUpdateCount() {
+      const p = nlPiano();
+      $('nlCount').textContent = !p.giorni.length ? 'Scegli almeno un giorno della settimana.'
+        : !p.dal || !p.al ? '' : p.al < p.dal ? '“Al” deve venire dopo “Dal”.'
+        : p.totale === 0 ? 'Nel periodo scelto non cade nessuno dei giorni selezionati.'
+        : `Verranno create ${p.totale} ${p.totale === 1 ? 'lezione' : 'lezioni'}.`;
+    }
+
+    async function aCreateLesson(e) {
+      e.preventDefault();
+      setMsg('nlMsg', '');
+      const p = nlPiano();
+      if (!p.giorni.length) return setMsg('nlMsg', 'Scegli almeno un giorno della settimana.');
+      if (p.al < p.dal) return setMsg('nlMsg', '“Al” deve venire dopo “Dal”.');
+      if (!p.totale) return setMsg('nlMsg', 'Nel periodo scelto non cade nessuno dei giorni selezionati.');
+      if (p.voci.some(v => !v.ora || !(v.dur >= 5))) return setMsg('nlMsg', 'Controlla ora e durata di ogni giorno.');
+      const posti = $('nlPosti').value ? parseInt($('nlPosti').value, 10) : null;
+      $('nlBtn').disabled = true; $('nlBtn').textContent = 'Un momento…';
+      let creati = 0, errore = null;
+      for (const v of p.voci) {
+        const { data, error } = await sb.rpc('admin_create_lessons', {
+          p_titolo: $('nlTit').value, p_data: v.primoISO, p_ora: v.ora,
+          p_durata_minuti: v.dur, p_posti: posti, p_consuma: !$('nlFree').checked,
+          p_ripeti_fino: v.n > 1 ? p.al : null, p_note: $('nlNote').value,
+        });
+        if (error || !data) { errore = 'Qualcosa non ha funzionato. Riprova.'; break; }
+        if (!data.success) { errore = data.message; break; }
+        creati += data.count || 0;
+      }
+      $('nlBtn').disabled = false; $('nlBtn').textContent = 'Crea lezioni';
+      if (errore && !creati) return setMsg('nlMsg', errore);
+      toast(creati === 1 ? 'Lezione creata.' : `${creati} lezioni create.` + (errore ? ' ' + errore : ''), errore ? 'err' : 'ok');
+      closeSheet();
+      const primo = p.voci.map(v => v.primoISO).sort()[0];
+      const [oggi] = dayBounds(0);
+      A.day = Math.round((new Date(primo + 'T12:00:00') - oggi) / 86400000);
+      await Promise.all([aLoadDay(), aLoadStudents()]);
+    }
+
+
+    // ---------- Copia l'orario in un altro mese ----------
+    const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+    const NOMI_DOW = ['', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+    function limitiMese(ym) { const [y, m] = ym.split('-').map(Number); return [isoLocal(new Date(y, m - 1, 1)), isoLocal(new Date(y, m, 0))]; }
+    function meseDopo(ym) { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m, 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
+
+    $('aCopyMonth').addEventListener('click', () => {
+      const n = new Date();
+      const cur = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}`;
+      openSheetHtml(`
+        <h4 class="serif">Copia le lezioni</h4>
+        <p class="info" style="margin-top:8px">Ricrea lo stesso orario settimanale (giorni, orari, durata e posti) in un altro periodo. Le lezioni che esistono già vengono saltate.</p>
+        <form id="copyForm">
+          <label class="mini" for="cpSrc">Mese da copiare</label>
+          <input class="inp" id="cpSrc" type="month" required value="${cur}">
+          <div id="cpPreview" style="margin-top:10px"></div>
+          <p class="lab" style="margin-top:16px">Copia nel periodo</p>
+          <div class="two">
+            <div><label class="mini" for="cpFrom">Dal</label><input class="inp" id="cpFrom" type="date" required min="${oggiISO()}"></div>
+            <div><label class="mini" for="cpTo">Al</label><input class="inp" id="cpTo" type="date" required min="${oggiISO()}"></div>
+          </div>
+          <div id="cpMsg"></div>
+          <button class="btn btn-primary" type="submit" id="cpBtn" style="margin-top:14px">Copia le lezioni</button>
+          <button class="btn-link" type="button" data-aact="close" style="display:block;margin:10px auto 0">Annulla</button>
+        </form>
+      `);
+      const setDest = () => {
+        const [a, b] = limitiMese(meseDopo($('cpSrc').value));
+        $('cpFrom').value = a < oggiISO() ? oggiISO() : a; $('cpTo').value = b;
+      };
+      $('cpSrc').addEventListener('change', () => { setDest(); cpPreview(); });
+      setDest(); cpPreview();
+      $('copyForm').addEventListener('submit', aCopySchedule);
+    });
+
+    async function cpPreview() {
+      const ym = $('cpSrc').value; if (!ym) return;
+      const [a, b] = limitiMese(ym);
+      const from = new Date(a + 'T00:00:00'), to = new Date(b + 'T00:00:00'); to.setDate(to.getDate() + 1);
+      $('cpPreview').innerHTML = '<p class="muted">Cerco le lezioni…</p>';
+      const { data } = await sb.from('lessons').select('titolo, data_ora_inizio, annullata')
+        .gte('data_ora_inizio', from.toISOString()).lt('data_ora_inizio', to.toISOString()).eq('annullata', false);
+      const slot = {};
+      (data || []).forEach(l => {
+        const d = new Date(l.data_ora_inizio);
+        const dow = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'short' }).format(d)) + 1;
+        const k = `${dow}|${fmtOra.format(d)}|${l.titolo}`;
+        slot[k] = true;
+      });
+      const righe = Object.keys(slot).sort().map(k => { const [dow, ora, tit] = k.split('|'); return `<div class="person cp-row" data-key="${esc(k)}"><span><b>${NOMI_DOW[dow]}</b> ore ${ora} · ${esc(tit)}</span>
+          <button type="button" class="round-btn del cp-x" aria-label="Non copiare">×</button></div>`; });
+      const [y, m] = ym.split('-').map(Number);
+      $('cpPreview').innerHTML = righe.length
+        ? `<p class="row-sub" style="margin:0 2px 6px">Appuntamenti fissi di ${MESI[m - 1]} ${y}:</p>` + righe.join('')
+        : `<p class="muted">A ${MESI[m - 1]} ${y} non ci sono lezioni da copiare.</p>`;
+      if (righe.length) $('cpPreview').insertAdjacentHTML('beforeend', '<p class="row-sub" style="margin:4px 2px 0">Tocca la × per non copiare un evento singolo.</p>');
+      $('cpPreview').querySelectorAll('.cp-x').forEach(x => x.addEventListener('click', () => {
+        const r = x.closest('.cp-row'); const off = r.classList.toggle('escluso');
+        x.textContent = off ? '↺' : '×'; x.setAttribute('aria-label', off ? 'Copia di nuovo' : 'Non copiare');
+      }));
+    }
+
+    async function aCopySchedule(e) {
+      e.preventDefault();
+      setMsg('cpMsg', '');
+      const [a, b] = limitiMese($('cpSrc').value);
+      if ($('cpTo').value < $('cpFrom').value) return setMsg('cpMsg', '“Al” deve venire dopo “Dal”.');
+      $('cpBtn').disabled = true; $('cpBtn').textContent = 'Un momento…';
+      const escludi = [...document.querySelectorAll('#cpPreview .cp-row.escluso')].map(r => r.dataset.key);
+      if (document.querySelectorAll('#cpPreview .cp-row').length && escludi.length === document.querySelectorAll('#cpPreview .cp-row').length) {
+        $('cpBtn').disabled = false; $('cpBtn').textContent = 'Copia le lezioni';
+        return setMsg('cpMsg', 'Hai escluso tutte le lezioni: non c’è niente da copiare.');
+      }
+      const { data, error } = await sb.rpc('admin_copy_schedule', { p_src_from: a, p_src_to: b, p_dst_from: $('cpFrom').value, p_dst_to: $('cpTo').value, p_escludi: escludi });
+      $('cpBtn').disabled = false; $('cpBtn').textContent = 'Copia le lezioni';
+      if (error || !data) return setMsg('cpMsg', 'Qualcosa non ha funzionato. Riprova.');
+      if (!data.success) return setMsg('cpMsg', data.message);
+      toast(data.message);
+      closeSheet();
+      await Promise.all([aLoadDay(), aLoadStudents()]);
+    }
+
+    // ---------- Azioni nei riquadri ----------
+    $('sheet').addEventListener('click', async (e) => {
+      const b = e.target.closest('[data-aact]');
+      if (!b || busy) return;
+      const act = b.dataset.aact;
+      if (act === 'close') return closeSheet();
+      if (act === 'editLesson') return aEditLesson(b.dataset.lid);
+      if (act === 'storico') return openStorico(b.dataset.uid, A.byId[b.dataset.uid]?.nome || '');
+      if (act === 'backLesson') return aOpenLesson(b.dataset.lid);
+      if (act === 'copy') {
+        try { await navigator.clipboard.writeText($('sheet').dataset.link); toast('Messaggio con il link copiato.'); }
+        catch { const r = document.createRange(); r.selectNodeContents($('linkBox')); getSelection().removeAllRanges(); getSelection().addRange(r); toast('Seleziona e copia il link.', 'err'); }
+        return;
+      }
+      // conferma per le azioni delicate
+      if (['remove', 'cancelLesson', 'stato'].includes(act) && !b.dataset.confirm) {
+        b.dataset.confirm = '1';
+        b.dataset.orig = b.textContent;
+        b.textContent = act === 'remove' ? 'Togli?' : act === 'cancelLesson' ? 'Sì, annulla e restituisci le lezioni' : 'Confermi?';
+        if (act === 'remove') b.classList.add('confirm');
+        else if (!b.classList.contains('mini-btn')) b.className = 'btn btn-primary';
+        return;
+      }
+
+      busy = true; b.disabled = true;
+      let res, reopen = null;
+      try {
+        if (act === 'adj') { res = await sb.rpc('admin_adjust_lessons', { p_package_id: b.dataset.pkg, p_delta: parseInt(b.dataset.d, 10) }); reopen = () => aOpenStudent(A.packages.find(k => k.id === b.dataset.pkg)?.user_id); }
+        if (act === 'stato') {
+          const p = A.byId[b.dataset.uid];
+          const r = await sb.from('profiles').update({ stato: p.stato === 'active' ? 'suspended' : 'active' }).eq('id', p.id);
+          res = { data: r.error ? null : { success: true, message: p.stato === 'active' ? 'Accesso sospeso.' : 'Accesso riattivato.' }, error: r.error };
+          reopen = () => aOpenStudent(p.id);
+        }
+        if (act === 'link') {
+          const r = await sb.functions.invoke('gestione-allievi', { body: { action: 'link', user_id: b.dataset.uid } });
+          busy = false; b.disabled = false;
+          if (r.error || !r.data?.success) return toast(r.data?.message || 'Non è stato possibile creare il link.', 'err');
+          return mostraLink(r.data.link, A.byId[b.dataset.uid]?.nome || '', false);
+        }
+        if (act === 'remove') { res = await sb.rpc('cancel_booking', { p_booking_id: b.dataset.bid }); reopen = () => aOpenLesson($('sheet').dataset.lid); }
+        if (act === 'enroll') { res = await sb.rpc('book_lesson', { p_lesson_id: $('sheet').dataset.lid, p_user_id: b.dataset.uid }); reopen = () => aOpenLesson($('sheet').dataset.lid); }
+        if (act === 'cancelLesson') { res = await sb.rpc('admin_cancel_lesson', { p_lesson_id: b.dataset.lid }); reopen = () => aOpenLesson(b.dataset.lid); }
+      } finally { busy = false; b.disabled = false; }
+
+      if (!res || res.error || !res.data) return toast('Qualcosa non ha funzionato. Riprova.', 'err');
+      let msg = res.data.message || 'Fatto.';
+      if (act === 'remove' && res.data.success && b.dataset.past === '1') msg = 'Lezione restituita.';
+      if (act === 'enroll' && !res.data.success) {
+        msg = res.data.code === 'no_lessons' ? 'Questo allievo non ha lezioni disponibili: assegnagliele dalla sua scheda.'
+            : res.data.code === 'expires_before' ? 'Le lezioni di questo allievo scadono prima di questa data.'
+            : res.data.code === 'full' ? 'La lezione è al completo.' : msg;
+      }
+      toast(msg, res.data.success ? 'ok' : 'err');
+      await Promise.all([aLoadStudents(), aLoadDay()]);
+      if (reopen) reopen();
+    });
+
+
+    // ---------- Report ----------
+    const R = { from: null, to: null, data: null };
+    const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    function rSetPeriod(kind) {
+      const n = new Date();
+      let a, b;
+      if (kind === 'mese') { a = new Date(n.getFullYear(), n.getMonth(), 1); b = new Date(n.getFullYear(), n.getMonth() + 1, 0); }
+      if (kind === 'scorso') { a = new Date(n.getFullYear(), n.getMonth() - 1, 1); b = new Date(n.getFullYear(), n.getMonth(), 0); }
+      if (kind === 'anno') { a = new Date(n.getFullYear(), 0, 1); b = new Date(n.getFullYear(), 11, 31); }
+      $('rFrom').value = isoLocal(a); $('rTo').value = isoLocal(b);
+      document.querySelectorAll('#sezReport .chip').forEach(c => c.classList.toggle('on', c.dataset.per === kind));
+      rLoad();
+    }
+    document.querySelectorAll('#sezReport .chip').forEach(c => c.addEventListener('click', () => rSetPeriod(c.dataset.per)));
+    ['rFrom', 'rTo'].forEach(id => $(id).addEventListener('change', () => { document.querySelectorAll('#sezReport .chip').forEach(c => c.classList.remove('on')); rLoad(); }));
+
+    const STATI = { confermata: 'Confermata', cancellata_in_tempo: 'Cancellata (lezione restituita)', cancellata_tardi: 'Cancellata tardi (lezione persa)' };
+
+    async function rLoad() {
+      const f = $('rFrom').value, t = $('rTo').value;
+      if (!f || !t || f > t) { $('rSummary').innerHTML = '<p class="muted stat wide">Scegli un periodo valido.</p>'; R.data = null; return; }
+      $('rSummary').innerHTML = '<div class="stat wide"><span>Calcolo in corso…</span></div>';
+      const from = new Date(f + 'T00:00:00'), to = new Date(t + 'T00:00:00'); to.setDate(to.getDate() + 1);
+      const { data: les, error } = await sb.from('lessons').select('*')
+        .gte('data_ora_inizio', from.toISOString()).lt('data_ora_inizio', to.toISOString()).order('data_ora_inizio');
+      if (error) { $('rSummary').innerHTML = '<p class="muted stat wide">Non riesco a caricare i dati.</p>'; return; }
+      const ids = (les || []).map(l => l.id);
+      let bk = [];
+      for (let i = 0; i < ids.length; i += 150) {   // a blocchi, per periodi lunghi
+        const r = await sb.from('bookings').select('id, lesson_id, user_id, stato, created_at').in('lesson_id', ids.slice(i, i + 150));
+        bk = bk.concat(r.data || []);
+      }
+      R.data = { lessons: les || [], bookings: bk, from: f, to: t };
+      rSummary();
+    }
+
+    function rSummary() {
+      const { lessons, bookings } = R.data;
+      const svolte = lessons.filter(l => !l.annullata);
+      const conf = bookings.filter(b => b.stato === 'confermata');
+      const tardi = bookings.filter(b => b.stato === 'cancellata_tardi').length;
+      const perTitolo = {};
+      conf.forEach(b => { const l = lessons.find(x => x.id === b.lesson_id); if (l) perTitolo[l.titolo] = (perTitolo[l.titolo] || 0) + 1; });
+      const top = Object.entries(perTitolo).sort((a, b) => b[1] - a[1])[0];
+      const perOra = {};
+      conf.forEach(b => { const l = lessons.find(x => x.id === b.lesson_id); if (l) { const o = fmtOra.format(new Date(l.data_ora_inizio)); perOra[o] = (perOra[o] || 0) + 1; } });
+      const topOra = Object.entries(perOra).sort((a, b) => b[1] - a[1])[0];
+      const allievi = new Set(conf.map(b => b.user_id)).size;
+      const conPosti = svolte.filter(l => l.posti_totali);
+      const riemp = conPosti.length ? Math.round(conPosti.reduce((s, l) => s + conf.filter(b => b.lesson_id === l.id).length / l.posti_totali, 0) / conPosti.length * 100) : null;
+      $('rSummary').innerHTML = `
+        <div class="stat"><b>${svolte.length}</b><span>lezioni in calendario</span></div>
+        <div class="stat"><b>${conf.length}</b><span>prenotazioni</span></div>
+        <div class="stat"><b>${allievi}</b><span>allievi diversi</span></div>
+        <div class="stat"><b>${riemp == null ? '–' : riemp + '%'}</b><span>posti occupati in media</span></div>
+        <div class="stat wide"><b>${top ? esc(top[0]) : '–'}</b><span>lezione più seguita${top ? ` · ${top[1]} prenotazioni` : ''}</span></div>
+        <div class="stat wide"><b>${topOra ? 'ore ' + topOra[0] : '–'}</b><span>orario preferito${tardi ? ` · ${tardi} cancellazioni tardive` : ''}</span></div>`;
+    }
+
+    function loadScript(src) {
+      return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    }
+
+    $('rDownload').addEventListener('click', async () => {
+      if (!R.data) return toast('Scegli prima un periodo.', 'err');
+      const btn = $('rDownload'); btn.disabled = true; btn.textContent = 'Preparo il file…';
+      try {
+        if (!window.XLSX) await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+        const { lessons, bookings, from, to } = R.data;
+        const byLesson = Object.fromEntries(lessons.map(l => [l.id, l]));
+        const dt = iso => new Date(iso);
+        const dataStr = iso => dt(iso).toLocaleDateString('it-IT', { timeZone: TZ });
+        const giornoStr = iso => cap(dt(iso).toLocaleDateString('it-IT', { timeZone: TZ, weekday: 'long' }));
+
+        const fPren = bookings.map(b => {
+          const l = byLesson[b.lesson_id]; const p = A.byId[b.user_id] || {};
+          return { 'Data': dataStr(l.data_ora_inizio), 'Giorno': giornoStr(l.data_ora_inizio), 'Ora': fmtOra.format(dt(l.data_ora_inizio)),
+            'Lezione': l.titolo, 'Nome': p.nome || '', 'Cognome': p.cognome || '', 'Nickname': p.nickname || '',
+            'Stato': l.annullata ? 'Lezione annullata' : (STATI[b.stato] || b.stato), 'Prenotata il': dataStr(b.created_at), _t: l.data_ora_inizio };
+        }).sort((a, b) => a._t.localeCompare(b._t)).map(({ _t, ...r }) => r);
+
+        const fLez = lessons.map(l => {
+          const conf = bookings.filter(b => b.lesson_id === l.id && b.stato === 'confermata').length;
+          return { 'Data': dataStr(l.data_ora_inizio), 'Giorno': giornoStr(l.data_ora_inizio), 'Ora': fmtOra.format(dt(l.data_ora_inizio)),
+            'Lezione': l.titolo, 'Posti': l.posti_totali ?? 'illimitati', 'Iscritti': conf,
+            'Cancellazioni': bookings.filter(b => b.lesson_id === l.id && b.stato !== 'confermata').length,
+            'Gratuita': l.consuma_lezione ? 'No' : 'Sì', 'Annullata': l.annullata ? 'Sì' : 'No' };
         });
 
-        window.addEventListener('pageshow', (event) => {
-            let hasEnteredSession = sessionStorage.getItem('hasEntered');
-            if (hasEnteredSession === 'true') {
-                if (intro) intro.classList.add('hidden');
-                playIntroAudio();
-            }
-        });
+        const fAll = A.profiles.filter(p => p.role !== 'admin').map(p => {
+          const s = saldoDi(p.id); const mie = bookings.filter(b => b.user_id === p.id);
+          return { 'Nome': p.nome || '', 'Cognome': p.cognome || '', 'Nickname': p.nickname || '', 'Email': p.email || '',
+            'Accesso': p.stato === 'active' ? 'Attivo' : 'Sospeso', 'Lezioni disponibili oggi': s.tot,
+            'Valide fino al': s.tot ? (s.scad ? dataIT(s.scad) : 'Senza scadenza') : '',
+            'Prenotazioni nel periodo': mie.filter(b => b.stato === 'confermata' && !byLesson[b.lesson_id].annullata).length,
+            'Cancellazioni tardive nel periodo': mie.filter(b => b.stato === 'cancellata_tardi').length };
+        }).sort((a, b) => (a.Cognome + a.Nome).localeCompare(b.Cognome + b.Nome));
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
+        const wb = XLSX.utils.book_new();
+        const add = (rows, name, empty) => {
+          const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ [empty]: '' }]);
+          const keys = Object.keys(rows[0] || { [empty]: '' });
+          ws['!cols'] = keys.map(k => ({ wch: Math.min(40, Math.max(k.length, ...rows.map(r => String(r[k] ?? '').length)) + 2) }));
+          XLSX.utils.book_append_sheet(wb, ws, name);
+        };
+        add(fPren, 'Prenotazioni', 'Nessuna prenotazione nel periodo');
+        add(fLez, 'Lezioni', 'Nessuna lezione nel periodo');
+        add(fAll, 'Allievi', 'Nessun allievo');
+        XLSX.writeFile(wb, `Report La Stanza Interiore ${dataIT(from).replaceAll('/', '-')} - ${dataIT(to).replaceAll('/', '-')}.xlsx`);
+        toast('Report scaricato.');
+      } catch (e) {
+        toast('Non è stato possibile creare il file. Controlla la connessione e riprova.', 'err');
+      } finally { btn.disabled = false; btn.textContent = 'Scarica report Excel'; }
+    });
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                const sessioneAttiva = running || breathRunning;
-                if (!sessioneAttiva) {
-                    if (introAudio) introAudio.pause();
-                    if (bgMusic) bgMusic.pause();
-                    if (bubbleMusic) bubbleMusic.pause();
-                }
-            }
-        });
+    $('aNavReport').addEventListener('click', (e) => { e.preventDefault(); aTab('rep'); rLoad(); });
+    $('aMyPass').addEventListener('click', aChangePassword);
+    $('aInstall').addEventListener('click', () => openInstall(false));
+    $('adminLogoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); });
+    function aTab(t) {
+      ['sezLezioni', 'sezAllievi'].forEach(id => $(id).classList.toggle('hidden', t !== 'cal'));
+      $('sezReport').classList.toggle('hidden', t !== 'rep');
+      $('aNavLezioni').classList.toggle('on', t === 'cal');
+      $('aNavReport').classList.toggle('on', t === 'rep');
+      window.scrollTo(0, 0);
+    }
+    $('aNavLezioni').addEventListener('click', (e) => { e.preventDefault(); aTab('cal'); });
 
-        function playIntroAudio() {
-            if (introAudio && !introAudio.muted) {
-                introAudio.currentTime = 0;
-                let playPromise = introAudio.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch((err) => { 
-                        console.log("Audio in attesa di interazione dell'utente."); 
-                    });
-                }
-            }
-        }
+    // =====================================================================
+    // INSTALLAZIONE SUL TELEFONO
+    // =====================================================================
+    let installPrompt = null;
+    const ua = navigator.userAgent || '';
+    const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(ua);
+    const inAppBrowser = /FBAN|FBAV|Instagram|WhatsApp|Line\/|GSA\/|; wv\)|Gmail/i.test(ua) || (isIOS && !/Safari/i.test(ua));
+    const iosOtherBrowser = isIOS && /CriOS|FxiOS|EdgiOS/i.test(ua);
+    const isInstalled = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
-        function checkAndShowIntro() {
-            let storedUser = localStorage.getItem('utente');
-            let hasEnteredSession = sessionStorage.getItem('hasEntered');
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installPrompt = e; refreshInstallCard(); });
+    window.addEventListener('appinstalled', () => { installPrompt = null; refreshInstallCard(); toast('App installata: la trovi sulla schermata Home.'); });
 
-            if (hasEnteredSession === 'true') {
-                if (intro) intro.classList.add('hidden');
-                if (storedUser && welcomeName) {
-                    welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
-                }
-                playIntroAudio();
-                return;
-            }
+    function refreshInstallCard() {
+      $('installCard').classList.toggle('hidden', isInstalled() || !(isIOS || isAndroid || installPrompt));
+    }
 
-            if (storedUser) {
-                welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
-                nameLabel.innerHTML = `Bentornato/a, <strong>${storedUser}</strong>!`;
-                inputContainer.style.display = 'none';
-                intro.classList.remove('hidden');
-            } else {
-                nameLabel.innerHTML = "Come preferisci che ti chiami?";
-                inputContainer.style.display = 'flex';
-                userNameInput.value = '';
-                intro.classList.remove('hidden');
-            }
-        }
+    const icoShare = '<svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3478f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+    const icoAdd = '<svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#715d64" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>';
+    const icoDots = '<b style="font-size:18px;letter-spacing:1px">⋮</b>';
 
-        function startBreathTextSync() {
-            if (breathCycleTimer) clearInterval(breathCycleTimer);
-            let startTime = Date.now();
-            
-            function updateText() {
-                let elapsed = (Date.now() - startTime) % 8000;
-                if (elapsed < 4000) {
-                    breathPhase.innerHTML = "Inspira";
-                } else {
-                    breathPhase.innerHTML = "Espira";
-                }
-            }
-            
-            updateText();
-            breathCycleTimer = setInterval(updateText, 100);
-        }
+    function openInstall(primoAccesso) {
+      if (isInstalled()) return toast('L\'app è già installata su questo telefono.');
+      const intro = primoAccesso
+        ? '<p class="info" style="margin-top:10px">Ultimo passo: aggiungi La Stanza Interiore alla schermata Home del tuo telefono. La aprirai con un tocco, come un\'app, e resterai sempre collegato/a.</p>'
+        : '<p class="info" style="margin-top:10px">Aggiungila alla schermata Home: la aprirai con un tocco, come un\'app.</p>';
+      let corpo;
+      if (inAppBrowser || iosOtherBrowser) {
+        const browser = isIOS ? 'Safari' : 'Chrome';
+        corpo = `<ol class="steps">
+          <li><span>Stai usando il browser interno di un'altra app, da qui non si può installare. Tocca ${isIOS ? 'l\'icona della bussola o i tre puntini' : icoDots} in alto e scegli <b>"Apri in ${browser}"</b>.</span></li>
+          <li><span>Oppure copia il link con il pulsante qui sotto e incollalo in <b>${browser}</b>.</span></li>
+        </ol>
+        <button class="btn btn-soft" id="copyAppLink">Copia il link dell'app</button>`;
+      } else if (installPrompt) {
+        corpo = `<button class="btn btn-primary" id="doInstall" style="margin-top:6px">Installa sul telefono</button>`;
+      } else if (isIOS) {
+        corpo = `<ol class="steps">
+          <li><span>Tocca il pulsante <b>Condividi</b> ${icoShare} nella barra di Safari (in basso, oppure in alto su iPad).</span></li>
+          <li><span>Scorri e tocca <b>"Aggiungi alla schermata Home"</b> ${icoAdd}.</span></li>
+          <li><span>Tocca <b>"Aggiungi"</b> in alto a destra. Fatto!</span></li>
+        </ol>`;
+      } else {
+        corpo = `<ol class="steps">
+          <li><span>Tocca i tre puntini ${icoDots} in alto a destra di Chrome.</span></li>
+          <li><span>Scegli <b>"Installa app"</b> oppure <b>"Aggiungi a schermata Home"</b>.</span></li>
+          <li><span>Conferma con <b>"Installa"</b>. Fatto!</span></li>
+        </ol>`;
+      }
+      openSheetHtml(`<div style="text-align:center"><img src="logo.png" alt="" style="width:64px;height:64px;object-fit:contain"></div>
+        <h4 class="serif" style="text-align:center">Porta la Stanza Interiore sul tuo telefono</h4>
+        ${intro}${corpo}
+        <button class="btn-link" data-aact="close" style="display:block;margin:12px auto 0">${primoAccesso ? 'Più tardi' : 'Chiudi'}</button>`);
+      const di = $('doInstall');
+      if (di) di.addEventListener('click', async () => {
+        installPrompt.prompt();
+        const { outcome } = await installPrompt.userChoice;
+        installPrompt = null;
+        closeSheet();
+        if (outcome !== 'accepted') toast('Nessun problema: puoi installarla quando vuoi dal promemoria in alto.');
+        refreshInstallCard();
+      });
+      const cl = $('copyAppLink');
+      if (cl) cl.addEventListener('click', async () => {
+        const url = location.origin + location.pathname;
+        try { await navigator.clipboard.writeText(url); toast('Link copiato: incollalo nel browser.'); }
+        catch { toast(url); }
+      });
+    }
+    $('installCard').addEventListener('click', () => openInstall(false));
 
-        function setupEventListeners() {
-            const installBtn = document.getElementById('installBtn');
-            if (installBtn) {
-                installBtn.onclick = async () => {
-                    gtag('event', 'click_installa');
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        deferredPrompt = null;
-                    } else {
-                        alert("L'applicazione è già installata o il tuo browser non supporta l'installazione diretta. Se usi iPhone, usa il tasto 'Condividi' in basso su Safari e poi seleziona 'Aggiungi alla schermata Home'.");
-                    }
-                };
-            }
+    // =====================================================================
+    // STORICO DELLE LEZIONI (per l'allievo, e per te dalla sua scheda)
+    // =====================================================================
+    function descriviMovimento(m, uid) {
+      const daScuola = m.created_by && m.created_by !== uid;
+      const nota = m.note || '';
+      switch (m.tipo_movimento) {
+        case 'assegnazione':
+          return { tit: m.variazione === 1 ? 'Lezione ricevuta' : `${m.variazione} lezioni ricevute`, sub: nota };
+        case 'prenotazione':
+          return { tit: 'Prenotazione', sub: nota.replace(' del ', ' · ') };
+        case 'cancellazione_rimborso':
+          if (nota.startsWith('Annullata: ')) return { tit: 'Lezione annullata dalla scuola', sub: 'Lezione restituita · ' + nota.slice(11).replace(' del ', ' · ') };
+          return { tit: daScuola ? 'Lezione restituita dalla scuola' : 'Cancellazione · lezione restituita', sub: nota.replace(' del ', ' · ') };
+        case 'cancellazione_no_rimborso':
+          return { tit: 'Cancellazione tardiva', sub: 'Lezione non restituita · ' + nota.replace(' del ', ' · ') };
+        case 'modifica_manuale_admin':
+          return { tit: m.variazione > 0 ? 'Lezioni aggiunte dalla scuola' : 'Lezioni tolte dalla scuola', sub: nota };
+        default:
+          return { tit: 'Movimento', sub: nota };
+      }
+    }
 
-            const scuolaLink = document.getElementById('scuolaLink');
-            if (scuolaLink) {
-                scuolaLink.onclick = () => {
-                    gtag('event', 'click_scuola');
-                };
-            }
+    async function openStorico(uid, nome) {
+      openSheetHtml('<div class="spinner" style="margin:30px auto"></div>');
+      const [h, k] = await Promise.all([
+        sb.from('lesson_history').select('tipo_movimento, variazione, note, created_by, created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(300),
+        sb.from('lesson_packages').select('lezioni_totali, lezioni_rimanenti, data_scadenza, created_at').eq('user_id', uid).order('created_at', { ascending: false }),
+      ]);
+      if (h.error) { closeSheet(); return toast('Non riesco a caricare lo storico. Riprova.', 'err'); }
+      const oggi = oggiISO();
+      const gruppi = (k.data || []).filter(g => g.lezioni_rimanenti > 0);
+      const validi = gruppi.filter(g => !g.data_scadenza || g.data_scadenza >= oggi);
+      const scaduti = gruppi.filter(g => g.data_scadenza && g.data_scadenza < oggi);
+      const tot = validi.reduce((s, g) => s + g.lezioni_rimanenti, 0);
 
-            const libroLink = document.getElementById('libroLink');
-            if (libroLink) {
-                libroLink.onclick = () => {
-                    gtag('event', 'click_libro');
-                };
-            }
+      const riepilogo = validi.length ? validi.map(g => `<div class="pkg"><div><b>${g.lezioni_rimanenti}</b> ${g.lezioni_rimanenti === 1 ? 'lezione' : 'lezioni'}
+          <div class="row-sub">${g.data_scadenza ? 'da usare entro il ' + dataIT(g.data_scadenza) : 'senza scadenza'}</div></div></div>`).join('')
+        : '<p class="muted">Nessuna lezione disponibile al momento.</p>';
+      const persi = scaduti.reduce((s, g) => s + g.lezioni_rimanenti, 0);
 
-            document.getElementById('enterBtn').onclick = () => {
-                let storedUser = localStorage.getItem('utente');
-                if (!storedUser) {
-                    const currentName = userNameInput.value.trim();
-                    if (currentName) {
-                        localStorage.setItem('utente', currentName);
-                        welcomeName.innerHTML = `La Stanza Interiore di ${currentName}`;
-                    }
-                } else {
-                    welcomeName.innerHTML = `La Stanza Interiore di ${storedUser}`;
-                }
+      let movimenti = '', meseCorr = '';
+      for (const m of (h.data || [])) {
+        const d = new Date(m.created_at);
+        const mese = cap(d.toLocaleDateString('it-IT', { timeZone: TZ, month: 'long', year: 'numeric' }));
+        if (mese !== meseCorr) { movimenti += `<div class="mese">${mese}</div>`; meseCorr = mese; }
+        const x = descriviMovimento(m, uid);
+        const cls = m.variazione > 0 ? 'piu' : m.variazione < 0 ? 'meno' : 'zero';
+        const segno = m.variazione > 0 ? '+' + m.variazione : m.variazione < 0 ? '−' + Math.abs(m.variazione) : '0';
+        movimenti += `<div class="mov"><div class="mov-ico ${cls}">${segno}</div>
+          <div class="mov-main"><div class="mov-tit">${esc(x.tit)}</div>${x.sub ? `<div class="mov-sub">${esc(x.sub)}</div>` : ''}</div>
+          <div class="mov-data">${d.toLocaleDateString('it-IT', { timeZone: TZ, day: 'numeric', month: 'short' })}</div></div>`;
+      }
+      if (!movimenti) movimenti = '<p class="muted">Ancora nessun movimento.</p>';
 
-                sessionStorage.setItem('hasEntered', 'true');
-                intro.classList.add('hidden');
-                playIntroAudio();
-            };
+      openSheetHtml(`
+        <h4 class="serif">${nome ? 'Storico di ' + esc(nome) : 'Le tue lezioni'}</h4>
+        <div class="saldo-mini"><span class="serif">${tot}</span> ${tot === 1 ? 'lezione disponibile' : 'lezioni disponibili'}</div>
+        <div style="margin-top:10px">${riepilogo}</div>
+        ${persi ? `<p class="row-sub" style="margin:4px 2px 0">${persi} ${persi === 1 ? 'lezione scaduta' : 'lezioni scadute'} senza essere usate.</p>` : ''}
+        <p class="lab" style="margin-top:18px">Storico</p>
+        ${movimenti}
+        <button class="btn-link" data-aact="close" style="display:block;margin:14px auto 0">Chiudi</button>
+      `);
+    }
+    $('saldoBtn').addEventListener('click', () => openStorico(me.id, null));
 
-            muteIntroBtn.onclick = () => {
-                if (introAudio.muted) {
-                    introAudio.muted = false;
-                    muteIntroBtn.innerHTML = "🔊";
-                    playIntroAudio();
-                } else {
-                    introAudio.muted = true;
-                    introAudio.pause();
-                    muteIntroBtn.innerHTML = "🔇";
-                }
-            };
+    // Occhio per leggere la password: si aggiunge da solo a ogni campo password, anche a quelli che compaiono dopo.
+    function pwEye(root) {
+      (root || document).querySelectorAll('input[type=password]:not([data-eye])').forEach(inp => {
+        inp.dataset.eye = '1';
+        const w = document.createElement('div'); w.className = 'pw-wrap';
+        inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'pw-eye';
+        const set = (show) => {
+          inp.type = show ? 'text' : 'password';
+          b.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>' + (show ? '<line x1="3" y1="3" x2="21" y2="21"/>' : '') + '</svg>';
+          b.setAttribute('aria-label', show ? 'Nascondi password' : 'Mostra password');
+          b.title = b.getAttribute('aria-label');
+        };
+        set(false);
+        b.addEventListener('click', () => { set(inp.type === 'password'); inp.focus(); });
+        w.appendChild(b);
+      });
+    }
+    pwEye();
+    new MutationObserver(() => pwEye()).observe(document.body, { childList: true, subtree: true });
 
-            muteBubbleMusicBtn.onclick = () => {
-                if (bubbleMusic.muted) {
-                    bubbleMusic.muted = false;
-                    muteBubbleMusicBtn.innerHTML = "🔊";
-                } else {
-                    bubbleMusic.muted = true;
-                    muteBubbleMusicBtn.innerHTML = "🔇";
-                }
-            };
-
-            startBreathBtn.onclick = () => {
-                if (breathRunning) {
-                    clearInterval(breathBubbleTimer);
-                    if (breathCycleTimer) clearInterval(breathCycleTimer);
-                    breathRunning = false;
-                    bubbleMusic.pause();
-                    startBreathBtn.innerHTML = "Riprendi";
-                    fullScreenBreathBubble.classList.remove('bubble-breathing');
-                    breathPhase.innerHTML = "In Pausa";
-                    return;
-                }
-
-                if (introAudio) introAudio.pause();
-
-                breathRunning = true;
-                gtag('event', 'allenamento_respiro_avviato');
-                startBreathBtn.innerHTML = "Pausa";
-                fullScreenBreathBubble.classList.add('bubble-breathing');
-                startBreathTextSync();
-                bubbleMusic.play().catch(() => {});
-
-                breathBubbleTimer = setInterval(() => {
-                    breathTimeLeft--;
-                    let bm = Math.floor(breathTimeLeft / 60).toString().padStart(2, '0');
-                    let bs = (breathTimeLeft % 60).toString().padStart(2, '0');
-                    breathCountdown.innerHTML = `${bm}:${bs}`;
-
-                    if (breathTimeLeft <= 0) {
-                        clearInterval(breathBubbleTimer);
-                        if (breathCycleTimer) clearInterval(breathCycleTimer);
-                        breathRunning = false;
-                        bubbleMusic.pause();
-                        fullScreenBreathBubble.classList.remove('bubble-breathing');
-                        if (gong) gong.play().catch(() => {});
-                        gtag('event', 'allenamento_respiro_completato');
-                        startBreathBtn.innerHTML = "Inizia Sessione";
-                        breathPhase.innerHTML = "Completato";
-                        breathTimeLeft = 180;
-                        breathCountdown.innerHTML = "03:00";
-                        
-                        let mins = parseFloat(localStorage.getItem('stats_minutes') || '0');
-                        let sessions = parseInt(localStorage.getItem('stats_sessions') || '0');
-                        localStorage.setItem('stats_minutes', (mins + 3).toString());
-                        localStorage.setItem('stats_sessions', (sessions + 1).toString());
-                    }
-                }, 1000);
-            };
-
-            document.querySelectorAll('.stanza-link').forEach(link => {
-                link.onclick = function(e) {
-                    sessionStorage.setItem('hasEntered', 'true');
-                    const nomeStanza = this.getAttribute('data-stanza');
-                    if (typeof gtag === 'function') {
-                        gtag('event', 'select_content', {
-                            'content_type': 'stanza_meditazione',
-                            'item_id': nomeStanza
-                        });
-                    }
-                };
-            });
-
-            document.getElementById('themeBtn').onclick = () => { body.classList.toggle('dark'); };
-
-            document.getElementById('updateNameBtn').onclick = () => {
-                const updatedName = document.getElementById('profileNameInput').value.trim();
-                if (updatedName) {
-                    localStorage.setItem('utente', updatedName);
-                    welcomeName.innerHTML = `La Stanza Interiore di ${updatedName}`;
-                    alert('Nome salvato!');
-                }
-            };
-
-            document.getElementById('saveDiaryBtn').onclick = () => {
-                const text = document.getElementById('diaryText').value.trim();
-                if (text) {
-                    let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
-                    logs.push({ 
-                        data: new Date().toLocaleDateString('it-IT') + ' - ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}), 
-                        nota: text 
-                    });
-                    localStorage.setItem('diario_logs', JSON.stringify(logs));
-                    gtag('event', 'diario_salvato');
-                    document.getElementById('diaryText').value = '';
-                    renderDiaryLogs();
-                }
-            };
-
-            document.querySelectorAll('.duration-btn').forEach(btn => {
-                btn.onclick = () => {
-                    if (running) return;
-                    document.querySelectorAll('.duration-btn').forEach(b => {
-                        b.classList.remove('active');
-                        b.classList.add('glass');
-                    });
-                    btn.classList.add('active');
-                    total = parseInt(btn.dataset.time);
-                    current = total;
-                    updateTime();
-                };
-            });
-
-            document.querySelectorAll('.music-btn').forEach(btn => {
-                btn.onclick = () => {
-                    document.querySelectorAll('.music-btn').forEach(b => { b.classList.remove('active'); });
-                    btn.classList.add('active');
-                    selectedMusic = btn.dataset.src;
-
-                    if (running) {
-                        if (selectedMusic === "none") {
-                            bgMusic.pause();
-                        } else {
-                            bgMusic.src = selectedMusic;
-                            bgMusic.loop = true;
-                            bgMusic.play().catch(() => {});
-                        }
-                    }
-                };
-            });
-
-            document.getElementById('playBtn').onclick = () => {
-                if (running) {
-                    clearInterval(timer);
-                    running = false;
-                    bgMusic.pause();
-                    document.getElementById('playBtn').innerHTML = '▶';
-                    if (breathBubble) breathBubble.classList.remove('bubble-breathing');
-                    return;
-                }
-
-                if (introAudio) introAudio.pause();
-                
-                if (selectedMusic !== "none") {
-                    bgMusic.src = selectedMusic;
-                    bgMusic.loop = true;
-                    bgMusic.play().catch(() => {});
-                }
-
-                running = true;
-                gtag('event', 'meditazione_avviata');
-                document.getElementById('playBtn').innerHTML = '❚❚';
-                status.innerHTML = 'In Sessione';
-                if (breathBubble) breathBubble.classList.add('bubble-breathing');
-
-                timer = setInterval(() => {
-                    current--;
-                    updateTime();
-                    if (current <= 0) {
-                        clearInterval(timer);
-                        running = false;
-                        bgMusic.pause();
-                        if (breathBubble) breathBubble.classList.remove('bubble-breathing');
-                        if(gong) gong.play().catch(() => {});
-                        gtag('event', 'meditazione_completata', {
-                            'durata_secondi': total,
-                            'durata_minuti': total / 60
-                        });
-                        document.getElementById('playBtn').innerHTML = '▶';
-                        status.innerHTML = 'Conclusa';
-                        
-                        let mins = parseFloat(localStorage.getItem('stats_minutes') || '0');
-                        let sessions = parseInt(localStorage.getItem('stats_sessions') || '0');
-                        localStorage.setItem('stats_minutes', (mins + (total / 60)).toString());
-                        localStorage.setItem('stats_sessions', (sessions + 1).toString());
-                    }
-                }, 1000);
-            };
-
-            document.getElementById('resetBtn').onclick = () => {
-                clearInterval(timer);
-                running = false;
-                bgMusic.pause();
-                if (breathBubble) breathBubble.classList.remove('bubble-breathing');
-                current = total;
-                updateTime();
-                document.getElementById('playBtn').innerHTML = '▶';
-                status.innerHTML = 'Pronto';
-            };
-        }
-
-        function switchTab(tabId) {
-            if (tabId !== 'respiro-allenamento' && breathRunning) {
-                clearInterval(breathBubbleTimer);
-                if (breathCycleTimer) clearInterval(breathCycleTimer);
-                breathRunning = false;
-                bubbleMusic.pause();
-                startBreathBtn.innerHTML = "Inizia Sessione";
-                fullScreenBreathBubble.classList.remove('bubble-breathing');
-                breathPhase.innerHTML = "Pronto";
-                breathTimeLeft = 180;
-                breathCountdown.innerHTML = "03:00";
-            }
-
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            const destinationTab = document.getElementById(`tab-${tabId}`);
-            if (destinationTab) destinationTab.classList.add('active');
-
-            document.querySelectorAll('.nav-icon').forEach(icon => {
-                icon.classList.remove('text-[#c0909b]', 'dark:text-[#d4a3ae]');
-                icon.classList.add('text-gray-400', 'dark:text-gray-500');
-            });
-            const activeNav = document.getElementById(`nav-${tabId}`);
-            if (activeNav) {
-                activeNav.classList.remove('text-gray-400', 'dark:text-gray-500');
-                activeNav.classList.add('text-[#c0909b]', 'dark:text-[#d4a3ae]');
-            }
-            
-            if (tabId === 'diario') { renderDiaryLogs(); }
-            if (tabId === 'profilo') {
-                const pInput = document.getElementById('profileNameInput');
-                if(pInput) pInput.value = localStorage.getItem('utente') || '';
-                renderStats();
-            }
-        }
-
-        function updateTime() {
-            if(!time) return;
-            let m = Math.floor(current / 60).toString().padStart(2, '0');
-            let s = (current % 60).toString().padStart(2, '0');
-            time.innerHTML = `${m}:${s}`;
-        }
-
-        function renderStats() {
-            const mins = localStorage.getItem('stats_minutes') || '0';
-            const sessions = localStorage.getItem('stats_sessions') || '0';
-            const tMins = document.getElementById('statTotalMinutes');
-            const tSess = document.getElementById('statSessions');
-            if(tMins) tMins.innerText = Math.round(parseFloat(mins));
-            if(tSess) tSess.innerText = sessions;
-        }
-
-        function deleteDiaryLog(originalIndex) {
-            if (confirm('Vuoi davvero eliminare questo pensiero?')) {
-                let logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
-                logs.splice(originalIndex, 1);
-                localStorage.setItem('diario_logs', JSON.stringify(logs));
-                renderDiaryLogs();
-            }
-        }
-
-        function renderDiaryLogs() {
-            const container = document.getElementById('diaryLogsContainer');
-            if (!container) return;
-            const logs = JSON.parse(localStorage.getItem('diario_logs') || '[]');
-            
-            if (logs.length === 0) {
-                container.innerHTML = '<p id="noLogsMessage" class="text-sm opacity-60 italic font-light">Nessun pensiero salvato finora. Il tuo viaggio inizia qui.</p>';
-                return;
-            }
-            
-            const logsWithIndex = logs.map((log, index) => ({ ...log, originalIndex: index }));
-            
-            container.innerHTML = logsWithIndex.slice().reverse().map(log => `
-                <div class="bg-white/40 dark:bg-white/5 border border-[#c8a7b0]/20 p-4 rounded-2xl shadow-sm text-left relative group">
-                    <div class="flex justify-between items-start gap-4 mb-1">
-                        <div class="text-[11px] uppercase tracking-wider text-[#b07d89] font-medium">${log.data}</div>
-                        <button onclick="deleteDiaryLog(${log.originalIndex})" class="text-gray-400 hover:text-rose-500 text-xs transition p-1" title="Elimina pensiero">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-                    <p class="text-sm opacity-90 font-light leading-relaxed whitespace-pre-wrap pr-4">${log.nota}</p>
-                </div>
-            `).join('');
-        }
-
-        const closeBannerBtn = document.getElementById('closeInAppBanner');
-        if (closeBannerBtn) {
-            closeBannerBtn.onclick = () => {
-                document.getElementById('inAppBanner').classList.add('hidden');
-            };
-        }
-    </script>
+    init();
+  </script>
 </body>
 </html>
