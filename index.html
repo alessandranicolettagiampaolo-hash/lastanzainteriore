@@ -476,9 +476,9 @@
     <section id="scr-app" class="hidden">
       <header class="top">
         <div class="brand">
-          <img src="logo-scuola.png" alt="Scuola di Meditazione Mindfulness Molfetta">
+          <img src="logo-scuola.png" alt="Scuola di Meditazione Molfetta">
           <div>
-            <h1 class="serif">La Stanza Interiore</h1>
+            <h1 class="serif">La tua Scuola di Meditazione</h1>
             <span class="kicker" style="font-size:8.5px">Area Allievi</span>
           </div>
         </div>
@@ -1146,10 +1146,7 @@
       // Schermata "password dimenticata": indietro torna all'accesso
       if (!$('scr-forgot').classList.contains('hidden')) { show('scr-login'); return; }
       // Arrivati dalle Stanze: il tasto indietro non riporta nelle Stanze, si resta nell'Area Allievi
-      if (DA_STANZE && !history.state) {
-        history.pushState({ area: 1 }, '');
-        toast('Sei nell\'Area Allievi. Per andare alle Stanze tocca la porticina in basso.');
-      }
+      if (DA_STANZE && !history.state) history.pushState({ area: 1 }, '');
     });
     // Se si arriva qui dalle Stanze Interiori, separiamo le due aree nella cronologia
     const DA_STANZE = (() => {
