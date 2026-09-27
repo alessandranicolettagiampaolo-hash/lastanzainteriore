@@ -194,6 +194,8 @@
     .bnav a { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #a8a0a3; font-size: 19px; padding: 2px 10px; transition: .2s; }
     .bnav a span { font-size: 10px; letter-spacing: .06em; }
     .bnav a.on { color: var(--rosa); }
+    #bottomNav { max-width: 320px; }
+    #bottomNav a { flex: 1; }
     #scr-app { padding-bottom: 90px; }
 
     /* ===== Pannello della Scuola ===== */
@@ -314,9 +316,11 @@
     .mpiu { font-size: 10px; opacity: .7; padding-left: 2px; }
     @media (max-width: 560px) { .mlez span { display: none; } .mlez { font-size: 9px; padding: 2px 0; text-align: center; text-overflow: clip; letter-spacing: -.02em; } .mcell { min-height: 64px; padding: 3px 2px; } .mgrid { gap: 3px; } }
 
-    .mlez.mia { box-shadow: inset 0 0 0 1.5px var(--verde); position: relative; }
+    .mlez.mia { box-shadow: inset 0 0 0 2px var(--verde), 0 2px 6px rgba(94,154,115,.25); font-weight: 700; position: relative; overflow: visible; }
+    .mlez.mia::after { content: ''; position: absolute; top: -4px; right: -4px; width: 11px; height: 11px; border-radius: 50%; background: var(--verde); border: 2px solid #fff; }
+    .mlez.mia.passata { opacity: .6; }
     .mlez.passata { opacity: .5; }
-    .mloto { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--verde); margin-right: 3px; vertical-align: 1px; }
+    .mloto { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #fff; margin-right: 3px; vertical-align: 1px; }
     @media (max-width: 560px) { .mloto { display: none; } }
 
     /* Tocchi comodi sul telefono */
@@ -353,7 +357,16 @@
       .cal, .panel, .mine { padding: 16px 12px; border-radius: 24px; margin-bottom: 12px; }
       .cal-head h3, .panel-head h3 { font-size: 22px; }
       .legend { font-size: 11px; gap: 10px; }
-      .grid { grid-template-columns: 44px repeat(7, minmax(88px, 1fr)); min-width: 660px; }
+      .grid { grid-template-columns: 34px repeat(7, minmax(64px, 1fr)); min-width: 520px; gap: 4px; }
+      .timeh { font-size: 10px; padding: 10px 2px 0 0; }
+      .cell { min-height: 64px; padding: 2px; border-radius: 11px; }
+      .lez { padding: 6px 5px 6px; border-radius: 10px; }
+      .lez .ora { font-size: 10.5px; }
+      .lez .tit { font-size: 10.5px; -webkit-hyphens: manual; hyphens: manual; overflow-wrap: anywhere; }
+      .lez .stato { overflow-wrap: normal; }
+      .lez .stato { font-size: 9.5px; margin-top: 3px; }
+      .lez .loto { width: 16px; height: 16px; top: 4px; right: 3px; }
+      .dayh { padding-left: 2px; padding-right: 2px; }
       .mlez { min-height: 20px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
       .mcell { min-height: 70px; }
       .sheet { padding: 20px 18px calc(24px + env(safe-area-inset-bottom)); }
@@ -603,14 +616,12 @@
   <nav id="adminNav" class="bnav hidden">
     <a href="#" id="aNavLezioni" class="on"><i class="fa-solid fa-calendar-days"></i><span>Calendario</span></a>
     <a href="#" id="aNavReport"><i class="fa-solid fa-chart-column"></i><span>Report</span></a>
-    <a href="stanze.html"><i class="fa-solid fa-spa"></i><span>Stanze</span></a>
+    <a href="stanze.html" data-eco><i class="fa-solid fa-spa"></i><span>Stanze</span></a>
   </nav>
 
   <nav id="bottomNav" class="bnav hidden">
-    <a href="#" class="on" aria-current="page"><i class="fa-solid fa-calendar-days"></i><span>Lezioni</span></a>
-    <a href="stanze.html"><i class="fa-solid fa-spa"></i><span>Stanze</span></a>
-    <a href="stanze.html#respiro-allenamento"><i class="fa-solid fa-wind"></i><span>Respiro</span></a>
-    <a href="stanze.html#diario"><i class="fa-solid fa-feather-pointed"></i><span>Diario</span></a>
+    <a href="#" class="on" aria-current="page" onclick="window.scrollTo({top:0,behavior:'smooth'});return false"><i class="fa-solid fa-calendar-days"></i><span>Area Allievi</span></a>
+    <a href="stanze.html" data-eco><i class="fa-solid fa-spa"></i><span>Stanza Interiore</span></a>
   </nav>
   <div>
   </div>
@@ -674,6 +685,16 @@
       { k: ['meditazione'],               bg: '#b7d3d8', fg: '#325861' },  // Meditazione: azzurro polvere
       { k: ['mbsr', 'crescere consapevoli'], bg: '#cfe8e0', fg: '#2f6656' }, // MBSR / Crescere Consapevoli: verde acqua
     ];
+    // Divisione in sillabe per i nomi lunghi nella vista settimana (va a capo con il trattino solo se serve)
+    const SILLABE = { meditazione: 'Medita-zione', sofrologia: 'Sofro-logia', mindfulness: 'Mindful-ness', respirazione: 'Respira-zione', rilassamento: 'Rilassa-mento', consapevolezza: 'Consape-volezza', consapevoli: 'Consape-voli' };
+    function sillabe(titolo) {
+      return esc(titolo).split(/(\s+)/).map(w => {
+        const k = SILLABE[w.toLowerCase()];
+        if (!k) return w;
+        const [a, b] = k.split('-');
+        return w.slice(0, a.length) + '&shy;' + w.slice(a.length);
+      }).join('');
+    }
     function colorFor(title) {
       const t = (title || '').toLowerCase();
       const fisso = COLORI_LEZIONI.find(c => c.k.some(k => t.includes(k)));
@@ -755,8 +776,11 @@
       setMsg('forgotMsg', '');
       $('forgotBtn').disabled = false;
       show('scr-forgot');
+      history.pushState({ forgot: 1 }, '');
     });
-    $('backToLogin').addEventListener('click', () => show('scr-login'));
+    $('backToLogin').addEventListener('click', () => {
+      if (history.state && history.state.forgot) history.back(); else show('scr-login');
+    });
 
     $('forgotForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1009,7 +1033,7 @@
       return `<button class="${cls}" data-id="${l.id}" style="background:${c.bg};color:${c.fg}">
         ${s.prenotata && !s.annullata ? loto() : ''}
         <div class="ora">${fmtOra.format(new Date(l.data_ora_inizio))}</div>
-        <div class="tit" style="${s.prenotata ? 'padding-right:18px' : ''}">${esc(l.titolo)}</div>
+        <div class="tit" style="${s.prenotata ? 'padding-right:18px' : ''}">${sillabe(l.titolo)}</div>
         <div class="stato">${stato}</div>
       </button>`;
     }
@@ -1087,13 +1111,40 @@
       const ov = $('overlay');
       ov.classList.remove('hidden');
       requestAnimationFrame(() => ov.classList.add('open'));
+      sheetInHistory();
     }
 
-    function closeSheet() {
+    // Tasto "indietro" del telefono: se c'è un riquadro aperto, lo chiude invece di cambiare pagina.
+    const H = { inStack: false, pendingBack: false, reopen: false };
+    function sheetInHistory() {
+      if (H.pendingBack) { H.reopen = true; return; }
+      if (!H.inStack) { history.pushState({ sheet: 1 }, ''); H.inStack = true; }
+    }
+    function hideOverlay() {
       const ov = $('overlay');
       ov.classList.remove('open');
-      setTimeout(() => ov.classList.add('hidden'), 250);
+      setTimeout(() => { if (!ov.classList.contains('open')) ov.classList.add('hidden'); }, 250);
     }
+    function closeSheet() {
+      hideOverlay();
+      if (H.inStack) { H.inStack = false; H.pendingBack = true; history.back(); }
+    }
+    window.addEventListener('popstate', () => {
+      if (H.pendingBack) {
+        H.pendingBack = false;
+        if (H.reopen) { H.reopen = false; history.pushState({ sheet: 1 }, ''); H.inStack = true; }
+        return;
+      }
+      if (H.inStack) { H.inStack = false; hideOverlay(); return; }
+      // Schermata "password dimenticata": indietro torna all'accesso
+      if (!$('scr-forgot').classList.contains('hidden')) show('scr-login');
+    });
+    // Passaggio tra Area Allievi e Stanza Interiore senza accumulare pagine nella cronologia
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[data-eco]');
+      if (!a) return;
+      e.preventDefault(); location.replace(a.getAttribute('href'));
+    });
     $('overlay').addEventListener('click', (e) => { if (e.target.id === 'overlay') closeSheet(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
 
@@ -1168,6 +1219,7 @@
       const ov = $('overlay');
       ov.classList.remove('hidden');
       requestAnimationFrame(() => ov.classList.add('open'));
+      sheetInHistory();
     }
 
     async function enterAdmin() {
@@ -1449,7 +1501,7 @@
           <button type="button" class="dayh ${k === oggi ? 'today' : ''}" data-goto="${k}"><b>${nomi[i]}</b><span>${d.getDate()}/${d.getMonth() + 1}</span></button>
           ${les.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="wlez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}">
             <span class="wl-ora">${fmtOra.format(new Date(l.data_ora_inizio))}</span>
-            <span class="wl-tit">${esc(l.titolo)}</span>
+            <span class="wl-tit">${sillabe(l.titolo)}</span>
             <span class="wl-posti">${postiTxt(l)} ${badgeAttesa(l.id, 11)}</span></button>`; }).join('') || '<div class="wvuoto"></div>'}
         </div>`;
       }).join('');
