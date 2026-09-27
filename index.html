@@ -616,12 +616,12 @@
   <nav id="adminNav" class="bnav hidden">
     <a href="#" id="aNavLezioni" class="on"><i class="fa-solid fa-calendar-days"></i><span>Calendario</span></a>
     <a href="#" id="aNavReport"><i class="fa-solid fa-chart-column"></i><span>Report</span></a>
-    <a href="stanze.html" data-eco><i class="fa-solid fa-spa"></i><span>Stanze</span></a>
+    <a href="stanze.html" data-eco><i class="fa-solid fa-door-open"></i><span>Stanze</span></a>
   </nav>
 
   <nav id="bottomNav" class="bnav hidden">
     <a href="#" class="on" aria-current="page" onclick="window.scrollTo({top:0,behavior:'smooth'});return false"><i class="fa-solid fa-calendar-days"></i><span>Area Allievi</span></a>
-    <a href="stanze.html" data-eco><i class="fa-solid fa-spa"></i><span>Stanza Interiore</span></a>
+    <a href="stanze.html" data-eco><i class="fa-solid fa-door-open"></i><span>Stanza Interiore</span></a>
   </nav>
   <div>
   </div>
@@ -947,6 +947,7 @@
         // vai alla settimana di quel giorno
         const d = new Date(c.dataset.goto + 'T12:00:00');
         const lun = startOfWeek(0);
+        if (!H.fromMonth) { H.monthOffset = weekOffset; H.fromMonth = true; history.pushState({ mese: 1 }, ''); }
         weekOffset = Math.floor((d - lun) / (7 * 86400000));
         sSetView('settimana');
       }));
@@ -958,7 +959,11 @@
       await loadWeek();
       if (v === 'settimana') scrollToTodayColumn();
     }
-    document.querySelectorAll('#sViews .chip').forEach(c => c.addEventListener('click', () => sSetView(c.dataset.v)));
+    document.querySelectorAll('#sViews .chip').forEach(c => c.addEventListener('click', () => {
+      // cambio vista a mano: tolgo il passaggio "mese → giorno" dalla cronologia
+      if (H.fromMonth) { H.fromMonth = false; H.pendingBack = true; history.back(); }
+      sSetView(c.dataset.v);
+    }));
 
     async function loadUpcoming() {
       const from = new Date();
@@ -1115,7 +1120,7 @@
     }
 
     // Tasto "indietro" del telefono: se c'è un riquadro aperto, lo chiude invece di cambiare pagina.
-    const H = { inStack: false, pendingBack: false, reopen: false };
+    const H = { inStack: false, pendingBack: false, reopen: false, fromMonth: false, monthOffset: 0 };
     function sheetInHistory() {
       if (H.pendingBack) { H.reopen = true; return; }
       if (!H.inStack) { history.pushState({ sheet: 1 }, ''); H.inStack = true; }
@@ -1136,9 +1141,25 @@
         return;
       }
       if (H.inStack) { H.inStack = false; hideOverlay(); return; }
+      // Dalla settimana aperta toccando un giorno del mese: indietro torna al mese
+      if (H.fromMonth) { H.fromMonth = false; weekOffset = H.monthOffset; sSetView('mese'); return; }
       // Schermata "password dimenticata": indietro torna all'accesso
-      if (!$('scr-forgot').classList.contains('hidden')) show('scr-login');
+      if (!$('scr-forgot').classList.contains('hidden')) { show('scr-login'); return; }
+      // Arrivati dalle Stanze: il tasto indietro non riporta nelle Stanze, si resta nell'Area Allievi
+      if (DA_STANZE && !history.state) {
+        history.pushState({ area: 1 }, '');
+        toast('Sei nell\'Area Allievi. Per andare alle Stanze tocca la porticina in basso.');
+      }
     });
+    // Se si arriva qui dalle Stanze Interiori, separiamo le due aree nella cronologia
+    const DA_STANZE = (() => {
+      try {
+        if (!document.referrer) return false;
+        const r = new URL(document.referrer);
+        return r.origin === location.origin && !/(\/|index(-nuovo)?\.html)$/.test(r.pathname);
+      } catch { return false; }
+    })();
+    if (DA_STANZE && !history.state) history.pushState({ area: 1 }, '');
     // Passaggio tra Area Allievi e Stanza Interiore senza accumulare pagine nella cronologia
     document.addEventListener('click', (e) => {
       const a = e.target.closest('a[data-eco]');
