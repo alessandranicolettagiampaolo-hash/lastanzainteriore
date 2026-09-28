@@ -1343,13 +1343,30 @@
 
         <div class="azioni" style="margin-top:16px">
           <button class="btn btn-soft" data-aact="storico" data-uid="${uid}">Vedi lo storico</button>
-          <button class="btn btn-soft" data-aact="link" data-uid="${uid}">Link di accesso per ${esc(p.nome || 'l’allievo')}</button>
+          <button class="btn btn-soft" data-aact="invia" data-uid="${uid}">Rimanda l’email di accesso</button>
+          <button class="btn btn-soft" type="button" id="emailToggle">Cambia email</button>
+          <form class="box hidden" id="emailForm" data-uid="${uid}">
+            <label class="mini" for="newEmail">Nuova email di ${esc(p.nome || 'allievo')}</label>
+            <input class="inp" id="newEmail" type="email" required autocomplete="off" inputmode="email" placeholder="nuova email">
+            <p class="row-sub" style="margin:8px 2px 0">La password resta la stessa. Se non si era ancora attivato/a, gli/le mando subito il benvenuto al nuovo indirizzo.</p>
+            <button class="btn btn-primary" type="submit" style="margin-top:10px">Salva nuova email</button>
+          </form>
           <button class="btn btn-soft" data-aact="stato" data-uid="${uid}">${p.stato === 'active' ? 'Sospendi accesso' : 'Riattiva accesso'}</button>
           <button class="btn-link" data-aact="close">Chiudi</button>
         </div>
       `);
       $('asOpen').addEventListener('change', e => { $('asD').disabled = e.target.checked; if (e.target.checked) $('asD').value = ''; });
       $('assignForm').addEventListener('submit', aAssign);
+      $('emailToggle').addEventListener('click', () => { $('emailForm').classList.toggle('hidden'); if (!$('emailForm').classList.contains('hidden')) $('newEmail').focus(); });
+      $('emailForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type=submit]'); btn.disabled = true;
+        const r = await sb.functions.invoke('gestione-allievi', { body: { action: 'email', user_id: uid, email: $('newEmail').value.trim() } });
+        btn.disabled = false;
+        if (r.error || !r.data) return toast('Qualcosa non ha funzionato. Riprova.', 'err');
+        toast(r.data.message, r.data.success ? 'ok' : 'err');
+        if (r.data.success) { await aLoadStudents(); aOpenStudent(uid); }
+      });
     }
 
     async function aAssign(e) {
@@ -1439,7 +1456,6 @@
         ${nuovo ? '' : 'Eventuali link inviati prima (anche via email) non funzionano più.'}</p>
         <div class="linkbox" id="linkBox">${esc(link || '')}</div>
         <div class="azioni" style="margin-top:14px">
-          <a class="btn btn-verde" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(testo)}">Invia su WhatsApp</a>
           <button class="btn btn-soft" data-aact="copy">Copia link</button>
           <button class="btn-link" data-aact="close">Fatto</button>
         </div>
@@ -1595,7 +1611,7 @@
         const attesa = A.waitlist.filter(w => w.lesson_id === l.id).length;
         const c = colorFor(l.titolo);
         const inizio = new Date(l.data_ora_inizio), fine = new Date(l.data_ora_fine);
-        const nomi = iscritti.map(b => esc(nomeCompleto(A.byId[b.user_id]))).join(', ');
+        const nomi = iscritti.map(b => { const p = A.byId[b.user_id]; return esc(nomeCompleto(p)) + (p && p.nickname ? ` (${esc(p.nickname)})` : ''); }).join(', ');
         return `<button class="alez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="border-left-color:${c.fg}">
           <div class="alez-top">
             <span class="alez-ora">${fmtOra.format(inizio)}–${fmtOra.format(fine)}</span>
@@ -1976,6 +1992,12 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
           const r = await sb.from('profiles').update({ stato: p.stato === 'active' ? 'suspended' : 'active' }).eq('id', p.id);
           res = { data: r.error ? null : { success: true, message: p.stato === 'active' ? 'Accesso sospeso.' : 'Accesso riattivato.' }, error: r.error };
           reopen = () => aOpenStudent(p.id);
+        }
+        if (act === 'invia') {
+          const r = await sb.functions.invoke('gestione-allievi', { body: { action: 'invia', user_id: b.dataset.uid } });
+          busy = false; b.disabled = false;
+          if (r.error || !r.data) return toast('Qualcosa non ha funzionato. Riprova.', 'err');
+          return toast(r.data.message, r.data.success ? 'ok' : 'err');
         }
         if (act === 'link') {
           const r = await sb.functions.invoke('gestione-allievi', { body: { action: 'link', user_id: b.dataset.uid } });
