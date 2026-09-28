@@ -367,6 +367,12 @@
       .lez .stato { font-size: 9.5px; margin-top: 3px; }
       .lez .loto { width: 16px; height: 16px; top: 4px; right: 3px; }
       .dayh { padding-left: 2px; padding-right: 2px; }
+      .wgrid { grid-template-columns: repeat(7, minmax(64px, 1fr)); min-width: 490px; gap: 4px; }
+      .wlez { padding: 6px 5px; border-radius: 9px; }
+      .wl-ora { font-size: 10.5px; }
+      .wl-tit { font-size: 10.5px; -webkit-hyphens: manual; hyphens: manual; overflow-wrap: anywhere; }
+      .wl-posti { font-size: 9.5px; }
+      .wl-posti .attesa-badge { font-size: 9.5px; padding: 0 4px 0 2px; }
       .mlez { min-height: 20px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
       .mcell { min-height: 70px; }
       .sheet { padding: 20px 18px calc(24px + env(safe-area-inset-bottom)); }
@@ -1141,6 +1147,10 @@
         return;
       }
       if (H.inStack) { H.inStack = false; hideOverlay(); return; }
+      // Pannello: dal Report indietro torna al Calendario
+      if (H.aReport) { H.aReport = false; aTab('cal'); return; }
+      // Pannello: dal giorno aperto dal mese/settimana, indietro torna alla vista di prima
+      if (H.aPrev) { const pv = H.aPrev; H.aPrev = null; A.day = pv.day; aSetView(pv.view); return; }
       // Dalla settimana aperta toccando un giorno del mese: indietro torna al mese
       if (H.fromMonth) { H.fromMonth = false; weekOffset = H.monthOffset; sSetView('mese'); return; }
       // Schermata "password dimenticata": indietro torna all'accesso
@@ -1549,6 +1559,7 @@
     function aBindCal() {
       $('aDayList').querySelectorAll('[data-lid]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); aOpenLesson(b.dataset.lid); }));
       $('aDayList').querySelectorAll('[data-goto]').forEach(c => c.addEventListener('click', () => {
+        if (!H.aPrev) { H.aPrev = { view: A.view, day: A.day }; history.pushState({ aprev: 1 }, ''); }
         A.day = offsetDi(new Date(c.dataset.goto + 'T12:00:00')); aSetView('giorno');
       }));
     }
@@ -1558,7 +1569,11 @@
       document.querySelectorAll('#aViews .chip').forEach(c => c.classList.toggle('on', c.dataset.v === v));
       aLoadDay();
     }
-    document.querySelectorAll('#aViews .chip').forEach(c => c.addEventListener('click', () => aSetView(c.dataset.v)));
+    document.querySelectorAll('#aViews .chip').forEach(c => c.addEventListener('click', () => {
+      // cambio vista a mano: tolgo il passaggio "mese/settimana → giorno" dalla cronologia
+      if (H.aPrev) { H.aPrev = null; H.pendingBack = true; history.back(); }
+      aSetView(c.dataset.v);
+    }));
 
     function aSposta(dir) {
       if (A.view === 'giorno') A.day += dir;
@@ -2102,7 +2117,11 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
       } finally { btn.disabled = false; btn.textContent = 'Scarica report Excel'; }
     });
 
-    $('aNavReport').addEventListener('click', (e) => { e.preventDefault(); aTab('rep'); rLoad(); });
+    $('aNavReport').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!H.aReport) { H.aReport = true; history.pushState({ report: 1 }, ''); }
+      aTab('rep'); rLoad();
+    });
     $('aMyPass').addEventListener('click', aChangePassword);
     $('aInstall').addEventListener('click', () => openInstall(false));
     $('adminLogoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); });
@@ -2113,7 +2132,11 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
       $('aNavReport').classList.toggle('on', t === 'rep');
       window.scrollTo(0, 0);
     }
-    $('aNavLezioni').addEventListener('click', (e) => { e.preventDefault(); aTab('cal'); });
+    $('aNavLezioni').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (H.aReport) { H.aReport = false; H.pendingBack = true; history.back(); }
+      aTab('cal');
+    });
 
     // =====================================================================
     // INSTALLAZIONE SUL TELEFONO
