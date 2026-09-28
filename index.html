@@ -194,6 +194,11 @@
     .bnav a { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #a8a0a3; font-size: 19px; padding: 2px 10px; transition: .2s; }
     .bnav a span { font-size: 10px; letter-spacing: .06em; }
     .bnav a.on { color: var(--rosa); }
+    /* Elenco allievi del pannello: si vedono circa 10 nomi, poi si scorre dentro il riquadro */
+    #aStudentList { max-height: 652px; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 2px 4px 2px 2px; margin: 0 -4px 0 -2px; }
+    #aStudentList.lunga { -webkit-mask-image: linear-gradient(#000 calc(100% - 36px), transparent); mask-image: linear-gradient(#000 calc(100% - 36px), transparent); }
+    #aStudentList.lunga.fine { -webkit-mask-image: none; mask-image: none; }
+    .scorri-hint { text-align: center; font-size: 12px; opacity: .6; margin: 6px 0 0; }
     #bottomNav { max-width: 320px; }
     #bottomNav a { flex: 1; }
     #scr-app { padding-bottom: 90px; }
@@ -590,6 +595,7 @@
         </div>
         <button class="btn btn-primary" id="aNewStudent" style="margin:12px 0 14px">+ Nuovo allievo</button>
         <div id="aStudentList"></div>
+        <p class="scorri-hint hidden" id="aScrollHint"></p>
       </div>
 
       <!-- REPORT -->
@@ -1290,6 +1296,12 @@
       const allievi = A.profiles.filter(p => p.role !== 'admin');
       $('aCount').textContent = allievi.length ? `(${allievi.length})` : '';
       const list = allievi.filter(p => matchStudente(p, q));
+      const lunga = list.length > 10;
+      $('aStudentList').classList.toggle('lunga', lunga);
+      $('aStudentList').classList.remove('fine');
+      $('aStudentList').scrollTop = 0;
+      $('aScrollHint').classList.toggle('hidden', !lunga);
+      if (lunga) $('aScrollHint').textContent = `Scorri l'elenco per vedere tutti i ${list.length} allievi`;
       if (!allievi.length) { $('aStudentList').innerHTML = '<p class="muted">Non hai ancora allievi. Crea il primo con “Nuovo allievo”.</p>'; return; }
       if (!list.length) { $('aStudentList').innerHTML = '<p class="muted">Nessun allievo trovato.</p>'; return; }
       $('aStudentList').innerHTML = list.map(p => {
@@ -1308,6 +1320,10 @@
       $('aStudentList').querySelectorAll('.row').forEach(b => b.addEventListener('click', () => aOpenStudent(b.dataset.uid)));
     }
     $('aSearch').addEventListener('input', aRenderStudents);
+    $('aStudentList').addEventListener('scroll', (e) => {
+      const el = e.target;
+      el.classList.toggle('fine', el.scrollTop + el.clientHeight >= el.scrollHeight - 4);
+    }, { passive: true });
 
     function aOpenStudent(uid) {
       const p = A.byId[uid]; if (!p) return;
