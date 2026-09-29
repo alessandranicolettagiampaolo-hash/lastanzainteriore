@@ -112,7 +112,7 @@
 
     .scroller { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; scroll-snap-type: x proximity; }
     .scroller::-webkit-scrollbar { display: none; }
-    .grid { display: grid; grid-template-columns: 50px repeat(7, minmax(96px, 1fr)); gap: 6px; min-width: 740px; }
+    .grid { display: grid; grid-template-columns: repeat(7, minmax(96px, 1fr)); gap: 6px; min-width: 690px; }
     .dayh { text-align: center; padding: 8px 4px; border-radius: 14px; background: rgba(255,255,255,.55); border: 1px solid var(--linea); scroll-snap-align: start; }
     .dayh b { display: block; font-size: 10.5px; letter-spacing: .12em; font-weight: 600; color: var(--malva); }
     .dayh span { font-size: 11px; opacity: .65; }
@@ -300,7 +300,10 @@
     .cp-row.escluso .cp-x { color: var(--verde); }
 
     .viste { margin: 0 0 12px; }
-    .wgrid { display: grid; grid-template-columns: repeat(7, minmax(92px, 1fr)); gap: 6px; min-width: 680px; }
+    .wgrid { display: grid; grid-template-columns: repeat(7, minmax(92px, 1fr)); gap: 6px; min-width: 680px; align-items: stretch; }
+    .wgrid > .dayh { border: 1px solid var(--linea); cursor: pointer; font: inherit; }
+    .wtime { font-size: 11px; font-weight: 600; opacity: .6; text-align: right; padding: 10px 4px 0 0; }
+    .wcell { display: flex; flex-direction: column; gap: 4px; min-height: 58px; border-radius: 10px; border: 1px dashed rgba(200,167,176,.22); padding: 2px; }
     .wcol { display: flex; flex-direction: column; gap: 5px; }
     .wcol .dayh { border: 1px solid var(--linea); cursor: pointer; font: inherit; }
     .wlez { display: flex; flex-direction: column; text-align: left; border: 0; border-radius: 10px; padding: 7px 8px; cursor: pointer; font: inherit; box-shadow: 0 2px 8px rgba(113,93,100,.07); }
@@ -362,7 +365,7 @@
       .cal, .panel, .mine { padding: 16px 12px; border-radius: 24px; margin-bottom: 12px; }
       .cal-head h3, .panel-head h3 { font-size: 22px; }
       .legend { font-size: 11px; gap: 10px; }
-      .grid { grid-template-columns: 34px repeat(7, minmax(64px, 1fr)); min-width: 520px; gap: 4px; }
+      .grid { grid-template-columns: repeat(7, minmax(64px, 1fr)); min-width: 484px; gap: 4px; }
       .timeh { font-size: 10px; padding: 10px 2px 0 0; }
       .cell { min-height: 64px; padding: 2px; border-radius: 11px; }
       .lez { padding: 6px 5px 6px; border-radius: 10px; }
@@ -372,7 +375,9 @@
       .lez .stato { font-size: 9.5px; margin-top: 3px; }
       .lez .loto { width: 16px; height: 16px; top: 4px; right: 3px; }
       .dayh { padding-left: 2px; padding-right: 2px; }
-      .wgrid { grid-template-columns: repeat(7, minmax(64px, 1fr)); min-width: 490px; gap: 4px; }
+      .wgrid { grid-template-columns: repeat(7, minmax(64px, 1fr)); min-width: 484px; gap: 4px; }
+      .wtime { font-size: 10px; padding: 8px 2px 0 0; }
+      .wcell { min-height: 52px; }
       .wlez { padding: 6px 5px; border-radius: 9px; }
       .wl-ora { font-size: 10.5px; }
       .wl-tit { font-size: 10.5px; -webkit-hyphens: manual; hyphens: manual; overflow-wrap: anywhere; }
@@ -1019,12 +1024,11 @@
       const orari = [...new Set(weekLessons.map(l => fmtOra.format(new Date(l.data_ora_inizio))))].sort();
       const nomi = ['LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB', 'DOM'];
 
-      let html = '<div class="grid"><div></div>';
+      let html = '<div class="grid">';
       days.forEach((d, i) => {
         html += `<div class="dayh ${keys[i] === oggi ? 'today' : ''}" data-col="${i}"><b>${nomi[i]}</b><span>${d.getDate()}/${d.getMonth() + 1}</span></div>`;
       });
       orari.forEach(ora => {
-        html += `<div class="timeh">${ora}</div>`;
         keys.forEach(k => {
           const qui = weekLessons.filter(l => dayKey(new Date(l.data_ora_inizio)) === k && fmtOra.format(new Date(l.data_ora_inizio)) === ora);
           html += `<div class="cell ${k === oggi ? 'today' : ''}">${qui.map(cardLezione).join('')}</div>`;
@@ -1554,18 +1558,24 @@
       const oggi = oggiISO();
       const giorni = [...Array(7)].map((_, i) => { const d = new Date(from); d.setDate(d.getDate() + i); return d; });
       const nomi = ['LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB', 'DOM'];
-      const col = giorni.map((d, i) => {
+      // Righe per orario: tutte le lezioni che iniziano alla stessa ora stanno sulla stessa riga
+      const oraDi = l => fmtOra.format(new Date(l.data_ora_inizio));
+      const orari = [...new Set(A.lessons.map(oraDi))].sort();
+      let h = giorni.map((d, i) => {
         const k = isoLocal(d);
-        const les = A.lessons.filter(l => dayKey(new Date(l.data_ora_inizio)) === k);
-        return `<div class="wcol">
-          <button type="button" class="dayh ${k === oggi ? 'today' : ''}" data-goto="${k}"><b>${nomi[i]}</b><span>${d.getDate()}/${d.getMonth() + 1}</span></button>
-          ${les.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="wlez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}">
-            <span class="wl-ora">${fmtOra.format(new Date(l.data_ora_inizio))}</span>
-            <span class="wl-tit">${sillabe(l.titolo)}</span>
-            <span class="wl-posti">${postiTxt(l)} ${badgeAttesa(l.id, 11)}</span></button>`; }).join('') || '<div class="wvuoto"></div>'}
-        </div>`;
+        return `<button type="button" class="dayh ${k === oggi ? 'today' : ''}" data-goto="${k}"><b>${nomi[i]}</b><span>${d.getDate()}/${d.getMonth() + 1}</span></button>`;
       }).join('');
-      $('aDayList').innerHTML = `<div class="scroller"><div class="wgrid">${col}</div></div>` +
+      for (const ora of orari) {
+        h += giorni.map(d => {
+          const k = isoLocal(d);
+          const les = A.lessons.filter(l => dayKey(new Date(l.data_ora_inizio)) === k && oraDi(l) === ora);
+          return `<div class="wcell">${les.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="wlez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}">
+            <span class="wl-ora">${ora}</span>
+            <span class="wl-tit">${sillabe(l.titolo)}</span>
+            <span class="wl-posti">${postiTxt(l)} ${badgeAttesa(l.id, 11)}</span></button>`; }).join('')}</div>`;
+        }).join('');
+      }
+      $('aDayList').innerHTML = `<div class="scroller"><div class="wgrid">${h}</div></div>` +
         (A.lessons.length ? '' : '<p class="muted" style="text-align:center;margin-top:10px">Nessuna lezione in questa settimana.</p>');
       aBindCal();
     }
