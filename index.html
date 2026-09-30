@@ -289,6 +289,9 @@
     .attesa-badge { display: inline-flex; align-items: center; gap: 2px; background: #fff3dc; color: #a2701c; border: 1px solid #f0d9a8; border-radius: 10px; padding: 1px 6px 1px 4px; font: 600 11px/1.3 'Inter', sans-serif; vertical-align: middle; white-space: nowrap; }
     .mlez.con-attesa { position: relative; overflow: visible; }
     .mlez.con-attesa::after { content: ''; position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #e0a940; border: 1.5px solid #fff; }
+    .dati-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .edit-btn { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--linea); background: #fff; color: var(--rosa-scuro); display: grid; place-items: center; cursor: pointer; margin-top: 2px; touch-action: manipulation; }
+    .edit-btn:hover { border-color: var(--rosa); }
     .round-btn.add.confirm { width: auto; border-radius: 17px; padding: 0 12px; font-size: 12.5px; font-weight: 600; }
     .round-btn.del.confirm { width: auto; border-radius: 17px; padding: 0 12px; font-size: 12.5px; font-weight: 600; background: #c9707f; border-color: #c9707f; color: #fff; }
 
@@ -1344,8 +1347,31 @@
       }).join('') || '<p class="muted">Nessuna lezione assegnata finora.</p>';
 
       openSheetHtml(`
-        <h4 class="serif">${esc(nomeCompleto(p))}</h4>
-        <div class="quando">${p.nickname ? esc(p.nickname) + ' · ' : ''}${esc(p.email || '')}</div>
+        <div id="datiView" class="dati-head">
+          <div style="min-width:0">
+            <h4 class="serif">${esc(nomeCompleto(p))}</h4>
+            <div class="quando">${p.nickname ? esc(p.nickname) + ' · ' : ''}${esc(p.email || '')}</div>
+          </div>
+          <button type="button" class="edit-btn" id="datiEdit" aria-label="Modifica i dati di ${esc(p.nome || 'allievo')}" title="Modifica i dati">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+        </div>
+        <form class="box hidden" id="datiForm" style="margin-top:6px">
+          <p class="lab">Dati dell’allievo</p>
+          <div class="two">
+            <div><label class="mini" for="edNome">Nome</label><input class="inp" id="edNome" required autocomplete="off" value="${esc(p.nome || '')}"></div>
+            <div><label class="mini" for="edCognome">Cognome</label><input class="inp" id="edCognome" required autocomplete="off" value="${esc(p.cognome || '')}"></div>
+          </div>
+          <label class="mini" for="edNick">Nickname (facoltativo)</label>
+          <input class="inp" id="edNick" autocomplete="off" value="${esc(p.nickname || '')}" placeholder="per distinguere chi ha lo stesso nome">
+          <label class="mini" for="edEmail" style="margin-top:10px">Email</label>
+          <input class="inp" id="edEmail" type="email" required autocomplete="off" inputmode="email" value="${esc(p.email || '')}">
+          <p class="row-sub" style="margin:8px 2px 0">Se cambi l’email, la password resta la stessa e al nuovo indirizzo arriva un avviso.</p>
+          <div class="two" style="margin-top:12px">
+            <button class="btn btn-soft" type="button" id="datiAnnulla">Annulla</button>
+            <button class="btn btn-primary" type="submit">Salva</button>
+          </div>
+        </form>
         <div class="saldo-mini"><span class="serif">${s.tot}</span> ${s.tot === 1 ? 'lezione disponibile' : 'lezioni disponibili'}</div>
 
         <p class="lab" style="margin-top:18px">Lezioni assegnate</p>
@@ -1364,50 +1390,34 @@
         <div class="azioni" style="margin-top:16px">
           <button class="btn btn-soft" data-aact="storico" data-uid="${uid}">Vedi lo storico</button>
           <button class="btn btn-soft" data-aact="invia" data-uid="${uid}">Rimanda l’email di accesso</button>
-          <button class="btn btn-soft" type="button" id="datiToggle">Modifica nome e nickname</button>
-          <form class="box hidden" id="datiForm">
-            <div class="two">
-              <div><label class="mini" for="edNome">Nome</label><input class="inp" id="edNome" required autocomplete="off" value="${esc(p.nome || '')}"></div>
-              <div><label class="mini" for="edCognome">Cognome</label><input class="inp" id="edCognome" required autocomplete="off" value="${esc(p.cognome || '')}"></div>
-            </div>
-            <label class="mini" for="edNick">Nickname (facoltativo)</label>
-            <input class="inp" id="edNick" autocomplete="off" value="${esc(p.nickname || '')}" placeholder="per distinguere chi ha lo stesso nome">
-            <button class="btn btn-primary" type="submit" style="margin-top:10px">Salva</button>
-          </form>
-          <button class="btn btn-soft" type="button" id="emailToggle">Cambia email</button>
-          <form class="box hidden" id="emailForm" data-uid="${uid}">
-            <label class="mini" for="newEmail">Nuova email di ${esc(p.nome || 'allievo')}</label>
-            <input class="inp" id="newEmail" type="email" required autocomplete="off" inputmode="email" placeholder="nuova email" value="${esc(p.email || '')}">
-            <p class="row-sub" style="margin:8px 2px 0">La password resta la stessa. Se non si era ancora attivato/a, gli/le mando subito il benvenuto al nuovo indirizzo.</p>
-            <button class="btn btn-primary" type="submit" style="margin-top:10px">Salva nuova email</button>
-          </form>
           <button class="btn btn-soft" data-aact="stato" data-uid="${uid}">${p.stato === 'active' ? 'Sospendi accesso' : 'Riattiva accesso'}</button>
           <button class="btn-link" data-aact="close">Chiudi</button>
         </div>
       `);
       $('asOpen').addEventListener('change', e => { $('asD').disabled = e.target.checked; if (e.target.checked) $('asD').value = ''; });
       $('assignForm').addEventListener('submit', aAssign);
-      $('datiToggle').addEventListener('click', () => { $('datiForm').classList.toggle('hidden'); if (!$('datiForm').classList.contains('hidden')) $('edNome').focus(); });
+      const apriDati = (aperto) => { $('datiForm').classList.toggle('hidden', !aperto); $('datiView').classList.toggle('hidden', aperto); if (aperto) $('edNome').focus(); };
+      $('datiEdit').addEventListener('click', () => apriDati(true));
+      $('datiAnnulla').addEventListener('click', () => apriDati(false));
       $('datiForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const nome = $('edNome').value.trim(), cognome = $('edCognome').value.trim(), nickname = $('edNick').value.trim() || null;
+        const email = $('edEmail').value.trim().toLowerCase();
         if (!nome || !cognome) return toast('Inserisci nome e cognome.', 'err');
         const btn = e.target.querySelector('button[type=submit]'); btn.disabled = true;
-        const r = await sb.from('profiles').update({ nome, cognome, nickname }).eq('id', uid);
+        let msg = 'Dati aggiornati.', ok = true;
+        if (nome !== (p.nome || '') || cognome !== (p.cognome || '') || nickname !== (p.nickname || null)) {
+          const r = await sb.from('profiles').update({ nome, cognome, nickname }).eq('id', uid);
+          if (r.error) { ok = false; msg = 'Non è stato possibile salvare. Riprova.'; }
+        }
+        if (ok && email !== (p.email || '').toLowerCase()) {
+          const r = await sb.functions.invoke('gestione-allievi', { body: { action: 'email', user_id: uid, email } });
+          if (r.error || !r.data) { ok = false; msg = 'Nome salvato, ma l’email non è stata cambiata. Riprova.'; }
+          else { ok = r.data.success; msg = r.data.message; }
+        }
         btn.disabled = false;
-        if (r.error) return toast('Non è stato possibile salvare. Riprova.', 'err');
-        toast('Dati aggiornati.');
-        await aLoadStudents(); aOpenStudent(uid);
-      });
-      $('emailToggle').addEventListener('click', () => { $('emailForm').classList.toggle('hidden'); if (!$('emailForm').classList.contains('hidden')) $('newEmail').focus(); });
-      $('emailForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type=submit]'); btn.disabled = true;
-        const r = await sb.functions.invoke('gestione-allievi', { body: { action: 'email', user_id: uid, email: $('newEmail').value.trim() } });
-        btn.disabled = false;
-        if (r.error || !r.data) return toast('Qualcosa non ha funzionato. Riprova.', 'err');
-        toast(r.data.message, r.data.success ? 'ok' : 'err');
-        if (r.data.success) { await aLoadStudents(); aOpenStudent(uid); }
+        toast(msg, ok ? 'ok' : 'err');
+        if (ok) { await aLoadStudents(); aOpenStudent(uid); }
       });
     }
 
