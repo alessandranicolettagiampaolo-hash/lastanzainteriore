@@ -1364,10 +1364,20 @@
         <div class="azioni" style="margin-top:16px">
           <button class="btn btn-soft" data-aact="storico" data-uid="${uid}">Vedi lo storico</button>
           <button class="btn btn-soft" data-aact="invia" data-uid="${uid}">Rimanda l’email di accesso</button>
+          <button class="btn btn-soft" type="button" id="datiToggle">Modifica nome e nickname</button>
+          <form class="box hidden" id="datiForm">
+            <div class="two">
+              <div><label class="mini" for="edNome">Nome</label><input class="inp" id="edNome" required autocomplete="off" value="${esc(p.nome || '')}"></div>
+              <div><label class="mini" for="edCognome">Cognome</label><input class="inp" id="edCognome" required autocomplete="off" value="${esc(p.cognome || '')}"></div>
+            </div>
+            <label class="mini" for="edNick">Nickname (facoltativo)</label>
+            <input class="inp" id="edNick" autocomplete="off" value="${esc(p.nickname || '')}" placeholder="per distinguere chi ha lo stesso nome">
+            <button class="btn btn-primary" type="submit" style="margin-top:10px">Salva</button>
+          </form>
           <button class="btn btn-soft" type="button" id="emailToggle">Cambia email</button>
           <form class="box hidden" id="emailForm" data-uid="${uid}">
             <label class="mini" for="newEmail">Nuova email di ${esc(p.nome || 'allievo')}</label>
-            <input class="inp" id="newEmail" type="email" required autocomplete="off" inputmode="email" placeholder="nuova email">
+            <input class="inp" id="newEmail" type="email" required autocomplete="off" inputmode="email" placeholder="nuova email" value="${esc(p.email || '')}">
             <p class="row-sub" style="margin:8px 2px 0">La password resta la stessa. Se non si era ancora attivato/a, gli/le mando subito il benvenuto al nuovo indirizzo.</p>
             <button class="btn btn-primary" type="submit" style="margin-top:10px">Salva nuova email</button>
           </form>
@@ -1377,6 +1387,18 @@
       `);
       $('asOpen').addEventListener('change', e => { $('asD').disabled = e.target.checked; if (e.target.checked) $('asD').value = ''; });
       $('assignForm').addEventListener('submit', aAssign);
+      $('datiToggle').addEventListener('click', () => { $('datiForm').classList.toggle('hidden'); if (!$('datiForm').classList.contains('hidden')) $('edNome').focus(); });
+      $('datiForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nome = $('edNome').value.trim(), cognome = $('edCognome').value.trim(), nickname = $('edNick').value.trim() || null;
+        if (!nome || !cognome) return toast('Inserisci nome e cognome.', 'err');
+        const btn = e.target.querySelector('button[type=submit]'); btn.disabled = true;
+        const r = await sb.from('profiles').update({ nome, cognome, nickname }).eq('id', uid);
+        btn.disabled = false;
+        if (r.error) return toast('Non è stato possibile salvare. Riprova.', 'err');
+        toast('Dati aggiornati.');
+        await aLoadStudents(); aOpenStudent(uid);
+      });
       $('emailToggle').addEventListener('click', () => { $('emailForm').classList.toggle('hidden'); if (!$('emailForm').classList.contains('hidden')) $('newEmail').focus(); });
       $('emailForm').addEventListener('submit', async (e) => {
         e.preventDefault();
