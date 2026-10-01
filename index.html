@@ -1336,15 +1336,13 @@
       const p = A.byId[uid]; if (!p) return;
       const s = saldoDi(uid);
       const oggi = oggiISO();
-      const gruppi = A.packages.filter(k => k.user_id === uid).slice().reverse();
-      const righe = gruppi.map(k => {
-        const scaduto = k.data_scadenza && k.data_scadenza < oggi;
-        return `<div class="pkg ${scaduto ? 'scaduto' : ''}">
+      // Si mostrano solo gli slot ancora validi e con lezioni da usare: quelli scaduti o esauriti spariscono da soli
+      const gruppi = A.packages.filter(k => k.user_id === uid && k.lezioni_rimanenti > 0 && (!k.data_scadenza || k.data_scadenza >= oggi)).slice().reverse();
+      const righe = gruppi.map(k => `<div class="pkg">
           <div><b>${k.lezioni_rimanenti}</b> su ${k.lezioni_totali} rimaste
-            <div class="row-sub">${k.data_scadenza ? (scaduto ? 'scadute il ' : 'valide fino al ') + dataIT(k.data_scadenza) : 'senza scadenza'} · assegnate il ${new Date(k.created_at).toLocaleDateString('it-IT')}</div></div>
+            <div class="row-sub">${k.data_scadenza ? 'valide fino al ' + dataIT(k.data_scadenza) : 'senza scadenza'} · assegnate il ${new Date(k.created_at).toLocaleDateString('it-IT')}</div></div>
           <div class="pm"><button data-aact="adj" data-pkg="${k.id}" data-d="-1" aria-label="Togli una lezione">−</button><button data-aact="adj" data-pkg="${k.id}" data-d="1" aria-label="Aggiungi una lezione">+</button></div>
-        </div>`;
-      }).join('') || '<p class="muted">Nessuna lezione assegnata finora.</p>';
+        </div>`).join('') || '<p class="muted">Nessuna lezione da usare al momento.</p>';
 
       openSheetHtml(`
         <div id="datiView" class="dati-head">
