@@ -61,6 +61,7 @@
     .btn-primary { background: var(--rosa); color: #fff; box-shadow: 0 8px 20px rgba(192,144,155,.3); }
     .btn-primary:hover { background: var(--rosa-scuro); }
     .btn-soft { background: rgba(255,255,255,.7); color: var(--testo); border: 1px solid var(--linea); }
+    .btn-danger { color: #9c4a5b; }
     .btn-verde { background: var(--verde); color: #fff; box-shadow: 0 8px 20px rgba(94,154,115,.25); }
     .btn-link { background: none; border: 0; color: var(--rosa-scuro); font: 500 13px 'Inter', sans-serif; cursor: pointer; padding: 6px; text-decoration: underline; text-underline-offset: 3px; }
 
@@ -1300,7 +1301,7 @@
 
     function aRenderStudents() {
       const q = $('aSearch').value.trim().toLowerCase();
-      const allievi = A.profiles.filter(p => p.role !== 'admin');
+      const allievi = A.profiles.filter(p => p.role !== 'admin' && p.stato !== 'eliminato');
       $('aCount').textContent = allievi.length ? `(${allievi.length})` : '';
       const list = allievi.filter(p => matchStudente(p, q));
       const lunga = list.length > 10;
@@ -1388,7 +1389,8 @@
         <div class="azioni" style="margin-top:16px">
           <button class="btn btn-soft" data-aact="storico" data-uid="${uid}">Vedi lo storico</button>
           <button class="btn btn-soft" data-aact="invia" data-uid="${uid}">Rimanda l’email di accesso</button>
-          <button class="btn btn-soft" data-aact="stato" data-uid="${uid}">${p.stato === 'active' ? 'Sospendi accesso' : 'Riattiva accesso'}</button>
+          ${p.stato === 'active' ? '' : `<button class="btn btn-soft" data-aact="stato" data-uid="${uid}">Riattiva accesso</button>`}
+          <button class="btn btn-soft btn-danger" data-aact="elimina" data-uid="${uid}">Elimina allievo</button>
           <button class="btn-link" data-aact="close">Chiudi</button>
         </div>
       `);
@@ -2030,10 +2032,10 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
         return;
       }
       // conferma per le azioni delicate
-      if ((['remove', 'cancelLesson', 'stato'].includes(act) || (act === 'enroll' && b.dataset.full === '1')) && !b.dataset.confirm) {
+      if ((['remove', 'cancelLesson', 'stato', 'elimina'].includes(act) || (act === 'enroll' && b.dataset.full === '1')) && !b.dataset.confirm) {
         b.dataset.confirm = '1';
         b.dataset.orig = b.textContent;
-        b.textContent = act === 'remove' ? 'Togli?' : act === 'enroll' ? '+1 posto?' : act === 'cancelLesson' ? 'Sì, annulla e restituisci le lezioni' : 'Confermi?';
+        b.textContent = act === 'remove' ? 'Togli?' : act === 'enroll' ? '+1 posto?' : act === 'cancelLesson' ? 'Sì, annulla e restituisci le lezioni' : act === 'elimina' ? `Sì, elimina ${A.byId[b.dataset.uid]?.nome || 'allievo'}` : 'Confermi?';
         if (act === 'remove' || act === 'enroll') b.classList.add('confirm');
         else if (!b.classList.contains('mini-btn')) b.className = 'btn btn-primary';
         return;
@@ -2048,6 +2050,14 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
           const r = await sb.from('profiles').update({ stato: p.stato === 'active' ? 'suspended' : 'active' }).eq('id', p.id);
           res = { data: r.error ? null : { success: true, message: p.stato === 'active' ? 'Accesso sospeso.' : 'Accesso riattivato.' }, error: r.error };
           reopen = () => aOpenStudent(p.id);
+        }
+        if (act === 'elimina') {
+          const r = await sb.functions.invoke('gestione-allievi', { body: { action: 'elimina', user_id: b.dataset.uid } });
+          busy = false; b.disabled = false;
+          if (r.error || !r.data) return toast('Qualcosa non ha funzionato. Riprova.', 'err');
+          toast(r.data.message, r.data.success ? 'ok' : 'err');
+          if (r.data.success) { closeSheet(); await Promise.all([aLoadStudents(), aLoadDay()]); }
+          return;
         }
         if (act === 'invia') {
           const r = await sb.functions.invoke('gestione-allievi', { body: { action: 'invia', user_id: b.dataset.uid } });
@@ -2169,10 +2179,10 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
             'Gratuita': l.consuma_lezione ? 'No' : 'Sì', 'Annullata': l.annullata ? 'Sì' : 'No' };
         });
 
-        const fAll = A.profiles.filter(p => p.role !== 'admin').map(p => {
+        const fAll = A.profiles.filter(p => p.role !== 'admin' && (p.stato !== 'eliminato' || bookings.some(x => x.user_id === p.id))).map(p => {
           const s = saldoDi(p.id); const mie = bookings.filter(b => b.user_id === p.id);
           return { 'Nome': p.nome || '', 'Cognome': p.cognome || '', 'Nickname': p.nickname || '', 'Email': p.email || '',
-            'Accesso': p.stato === 'active' ? 'Attivo' : 'Sospeso', 'Lezioni disponibili oggi': s.tot,
+            'Accesso': p.stato === 'active' ? 'Attivo' : p.stato === 'eliminato' ? 'Eliminato' : 'Sospeso', 'Lezioni disponibili oggi': s.tot,
             'Valide fino al': s.tot ? (s.scad ? dataIT(s.scad) : 'Senza scadenza') : '',
             'Prenotazioni nel periodo': mie.filter(b => b.stato === 'confermata' && !byLesson[b.lesson_id].annullata).length,
             'Cancellazioni tardive nel periodo': mie.filter(b => b.stato === 'cancellata_tardi').length };
