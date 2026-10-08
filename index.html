@@ -286,6 +286,11 @@
     .mov-tit { font-size: 14px; font-weight: 500; }
     .mov-sub { font-size: 12px; opacity: .7; margin-top: 1px; }
     .mov-data { flex: none; font-size: 11.5px; opacity: .6; text-align: right; }
+    .mov.tardiva { border-color: #e6b3bd; background: #fdf3f5; }
+    .mov-rest { display: inline-block; margin-top: 8px; border: 1px solid #b8445a; background: #fff; color: #9c3049; border-radius: 10px; padding: 7px 12px; font: 600 12.5px 'Inter', sans-serif; cursor: pointer; }
+    .mov-rest.confirm { background: #b8445a; color: #fff; }
+    .mov-rest.fatto { border: 0; background: none; padding: 0; color: #3f7353; cursor: default; }
+    .tardive-box { margin-top: 14px; background: #fbe4e7; border: 1px solid #e6b3bd; color: #8e2c40; border-radius: 12px; padding: 9px 12px; font-size: 13px; font-weight: 600; }
     .mese { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .55; margin: 14px 2px 6px; font-weight: 600; }
 
     .iscr-head { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 8px; }
@@ -2039,11 +2044,11 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
         return;
       }
       // conferma per le azioni delicate
-      if ((['remove', 'cancelLesson', 'stato', 'elimina'].includes(act) || (act === 'enroll' && b.dataset.full === '1')) && !b.dataset.confirm) {
+      if ((['remove', 'cancelLesson', 'stato', 'elimina', 'restituisci'].includes(act) || (act === 'enroll' && b.dataset.full === '1')) && !b.dataset.confirm) {
         b.dataset.confirm = '1';
         b.dataset.orig = b.textContent;
-        b.textContent = act === 'remove' ? 'Togli?' : act === 'enroll' ? '+1 posto?' : act === 'cancelLesson' ? 'Sì, annulla e restituisci le lezioni' : act === 'elimina' ? `Sì, elimina ${A.byId[b.dataset.uid]?.nome || 'allievo'}` : 'Confermi?';
-        if (act === 'remove' || act === 'enroll') b.classList.add('confirm');
+        b.textContent = act === 'remove' ? 'Togli?' : act === 'enroll' ? '+1 posto?' : act === 'cancelLesson' ? 'Sì, annulla e restituisci le lezioni' : act === 'elimina' ? `Sì, elimina ${A.byId[b.dataset.uid]?.nome || 'allievo'}` : act === 'restituisci' ? 'Sì, restituisci' : 'Confermi?';
+        if (act === 'remove' || act === 'enroll' || act === 'restituisci') b.classList.add('confirm');
         else if (!b.classList.contains('mini-btn')) b.className = 'btn btn-primary';
         return;
       }
@@ -2057,6 +2062,14 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
           const r = await sb.from('profiles').update({ stato: p.stato === 'active' ? 'suspended' : 'active' }).eq('id', p.id);
           res = { data: r.error ? null : { success: true, message: p.stato === 'active' ? 'Accesso sospeso.' : 'Accesso riattivato.' }, error: r.error };
           reopen = () => aOpenStudent(p.id);
+        }
+        if (act === 'restituisci') {
+          const r = await sb.rpc('admin_restituisci_lezione', { p_history_id: b.dataset.hid });
+          busy = false; b.disabled = false;
+          if (r.error || !r.data) return toast('Qualcosa non ha funzionato. Riprova.', 'err');
+          toast(r.data.message, r.data.success ? 'ok' : 'err');
+          if (r.data.success) { await aLoadStudents(); openStorico(b.dataset.uid, A.byId[b.dataset.uid]?.nome || ''); }
+          return;
         }
         if (act === 'elimina') {
           const r = await sb.functions.invoke('gestione-allievi', { body: { action: 'elimina', user_id: b.dataset.uid } });
@@ -2320,6 +2333,7 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
         case 'prenotazione':
           return { tit: 'Prenotazione', sub: nota.replace(' del ', ' · ') };
         case 'cancellazione_rimborso':
+          if (m.rif_id) return { tit: 'Lezione restituita dalla scuola', sub: 'Dopo cancellazione tardiva · ' + nota.replace(' del ', ' · ') };
           if (nota.startsWith('Annullata: ')) return { tit: 'Lezione annullata dalla scuola', sub: 'Lezione restituita · ' + nota.slice(11).replace(' del ', ' · ') };
           return { tit: daScuola ? 'Lezione restituita dalla scuola' : 'Cancellazione · lezione restituita', sub: nota.replace(' del ', ' · ') };
         case 'cancellazione_no_rimborso':
@@ -2334,7 +2348,7 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
     async function openStorico(uid, nome) {
       openSheetHtml('<div class="spinner" style="margin:30px auto"></div>');
       const [h, k] = await Promise.all([
-        sb.from('lesson_history').select('tipo_movimento, variazione, note, created_by, created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(300),
+        sb.from('lesson_history').select('id, tipo_movimento, variazione, note, created_by, created_at, rif_id').eq('user_id', uid).order('created_at', { ascending: false }).limit(300),
         sb.from('lesson_packages').select('lezioni_totali, lezioni_rimanenti, data_scadenza, created_at').eq('user_id', uid).order('created_at', { ascending: false }),
       ]);
       if (h.error) { closeSheet(); return toast('Non riesco a caricare lo storico. Riprova.', 'err'); }
@@ -2350,6 +2364,8 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
       const persi = scaduti.reduce((s, g) => s + g.lezioni_rimanenti, 0);
 
       let movimenti = '', meseCorr = '';
+      const vistaScuola = nome !== null; // lo storico aperto dal pannello della scuola
+      const restituite = new Map((h.data || []).filter(m => m.rif_id).map(m => [m.rif_id, m]));
       for (const m of (h.data || [])) {
         const d = new Date(m.created_at);
         const mese = cap(d.toLocaleDateString('it-IT', { timeZone: TZ, month: 'long', year: 'numeric' }));
@@ -2357,8 +2373,11 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
         const x = descriviMovimento(m, uid);
         const cls = m.variazione > 0 ? 'piu' : m.variazione < 0 ? 'meno' : 'zero';
         const segno = m.variazione > 0 ? '+' + m.variazione : m.variazione < 0 ? '−' + Math.abs(m.variazione) : '0';
-        movimenti += `<div class="mov"><div class="mov-ico ${cls}">${segno}</div>
-          <div class="mov-main"><div class="mov-tit">${esc(x.tit)}</div>${x.sub ? `<div class="mov-sub">${esc(x.sub)}</div>` : ''}</div>
+        // nel pannello della scuola: una cancellazione tardiva non ancora restituita ha il riquadro con il pulsante
+        const daRestituire = vistaScuola && m.tipo_movimento === 'cancellazione_no_rimborso' && !restituite.has(m.id);
+        const extra = daRestituire ? `<button type="button" class="mov-rest" data-aact="restituisci" data-hid="${m.id}" data-uid="${uid}">Restituisci la lezione</button>` : '';
+        movimenti += `<div class="mov ${daRestituire ? 'tardiva' : ''}"><div class="mov-ico ${cls}">${segno}</div>
+          <div class="mov-main"><div class="mov-tit">${esc(x.tit)}</div>${x.sub ? `<div class="mov-sub">${esc(x.sub)}</div>` : ''}${extra}</div>
           <div class="mov-data">${d.toLocaleDateString('it-IT', { timeZone: TZ, day: 'numeric', month: 'short' })}</div></div>`;
       }
       if (!movimenti) movimenti = '<p class="muted">Ancora nessun movimento.</p>';
