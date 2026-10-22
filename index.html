@@ -285,7 +285,8 @@
     .mov-main { flex: 1; min-width: 0; }
     .mov-tit { font-size: 14px; font-weight: 500; }
     .mov-sub { font-size: 12px; opacity: .7; margin-top: 1px; }
-    .mov-data { flex: none; font-size: 11.5px; opacity: .6; text-align: right; }
+    .mov-data { flex: none; font-size: 11.5px; text-align: right; }
+    .mov-dt { opacity: .6; }
     .tardive-avviso { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: #fbe4e7; border: 1.5px solid #d98a98; color: #8e2c40; border-radius: 18px; padding: 14px 16px; margin: 0 0 14px; font: 600 15px 'Inter', sans-serif; cursor: pointer; box-shadow: 0 6px 18px rgba(184,68,90,.12); }
     .tardive-avviso .ico { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; background: #b8445a; color: #fff; display: grid; place-items: center; font-weight: 700; }
     .tardive-avviso .vai { margin-left: auto; font-size: 12px; font-weight: 600; opacity: .8; white-space: nowrap; }
@@ -294,7 +295,9 @@
     .tard-item .row-sub { margin-top: 2px; }
     .tard-azioni { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
     .tard-azioni .mov-rest { margin-top: 0; }
+    .btn-coppia { display: inline-flex; gap: 8px; flex: none; }
     .tard-ok { border: 1px solid var(--linea); background: #fff; color: var(--testo); border-radius: 10px; padding: 7px 12px; font: 500 12.5px 'Inter', sans-serif; cursor: pointer; }
+    .mov-saldo { margin-top: 4px; font-size: 16px; font-weight: 700; color: var(--malva); white-space: nowrap; }
     .mov.tardiva { border-color: #e6b3bd; background: #fdf3f5; }
     .mov-rest { display: inline-block; margin-top: 8px; border: 1px solid #b8445a; background: #fff; color: #9c3049; border-radius: 10px; padding: 7px 12px; font: 600 12.5px 'Inter', sans-serif; cursor: pointer; }
     .mov-rest.confirm { background: #b8445a; color: #fff; }
@@ -1768,7 +1771,8 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
             <button class="round-btn del" data-aact="remove" data-bid="${b.id}" data-past="${inizio <= new Date() ? 1 : 0}" aria-label="Togli dalla lezione">×</button></div>`).join('')
           : '<p class="muted">Ancora nessun iscritto.</p>'}
         ${attesa.length ? `<p class="lab" style="margin-top:16px">Lista d’attesa</p>` + attesa.map((w, i) => `<div class="person"><span>${i + 1}. ${persona(w.user_id)}</span>
-            <button class="round-btn add" data-aact="enroll" data-uid="${w.user_id}" data-full="${liberi !== null && liberi <= 0 ? 1 : 0}" aria-label="Iscrivi alla lezione">+</button></div>`).join('') : ''}`}
+            <span class="btn-coppia"><button class="round-btn del" data-aact="unwait" data-uid="${w.user_id}" aria-label="Togli dalla lista d'attesa">×</button>
+            <button class="round-btn add" data-aact="enroll" data-uid="${w.user_id}" data-full="${liberi !== null && liberi <= 0 ? 1 : 0}" aria-label="Iscrivi alla lezione">+</button></span></div>`).join('') : ''}`}
         <div class="azioni" style="margin-top:16px">
           ${l.annullata ? '' : `<button class="btn btn-primary" data-aact="editLesson" data-lid="${lid}">Modifica lezione</button>
           <button class="btn btn-soft" data-aact="cancelLesson" data-lid="${lid}">Annulla questa lezione</button>`}
@@ -2091,11 +2095,11 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
         return;
       }
       // conferma per le azioni delicate
-      if ((['remove', 'cancelLesson', 'stato', 'elimina', 'restituisci'].includes(act) || (act === 'enroll' && b.dataset.full === '1')) && !b.dataset.confirm) {
+      if ((['remove', 'unwait', 'cancelLesson', 'stato', 'elimina', 'restituisci'].includes(act) || (act === 'enroll' && b.dataset.full === '1')) && !b.dataset.confirm) {
         b.dataset.confirm = '1';
         b.dataset.orig = b.textContent;
-        b.textContent = act === 'remove' ? 'Togli?' : act === 'enroll' ? '+1 posto?' : act === 'cancelLesson' ? 'Sì, annulla e restituisci le lezioni' : act === 'elimina' ? `Sì, elimina ${A.byId[b.dataset.uid]?.nome || 'allievo'}` : act === 'restituisci' ? 'Sì, restituisci' : 'Confermi?';
-        if (act === 'remove' || act === 'enroll' || act === 'restituisci') b.classList.add('confirm');
+        b.textContent = (act === 'remove' || act === 'unwait') ? 'Togli?' : act === 'enroll' ? '+1 posto?' : act === 'cancelLesson' ? 'Sì, annulla e restituisci le lezioni' : act === 'elimina' ? `Sì, elimina ${A.byId[b.dataset.uid]?.nome || 'allievo'}` : act === 'restituisci' ? 'Sì, restituisci' : 'Confermi?';
+        if (act === 'remove' || act === 'unwait' || act === 'enroll' || act === 'restituisci') b.classList.add('confirm');
         else if (!b.classList.contains('mini-btn')) b.className = 'btn btn-primary';
         return;
       }
@@ -2149,6 +2153,7 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
           return mostraLink(r.data.link, A.byId[b.dataset.uid]?.nome || '', false);
         }
         if (act === 'remove') { res = await sb.rpc('cancel_booking', { p_booking_id: b.dataset.bid }); reopen = () => aOpenLesson($('sheet').dataset.lid); }
+        if (act === 'unwait') { res = await sb.rpc('admin_remove_waitlist', { p_lesson_id: $('sheet').dataset.lid, p_user_id: b.dataset.uid }); reopen = () => aOpenLesson($('sheet').dataset.lid); }
         if (act === 'enroll') { res = await sb.rpc('admin_force_enroll', { p_lesson_id: $('sheet').dataset.lid, p_user_id: b.dataset.uid }); reopen = () => aOpenLesson($('sheet').dataset.lid); }
         if (act === 'cancelLesson') { res = await sb.rpc('admin_cancel_lesson', { p_lesson_id: b.dataset.lid }); reopen = () => aOpenLesson(b.dataset.lid); }
       } finally { busy = false; b.disabled = false; }
@@ -2395,6 +2400,8 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
           return { tit: daScuola ? 'Lezione restituita dalla scuola' : 'Cancellazione · lezione restituita', sub: nota.replace(' del ', ' · ') };
         case 'cancellazione_no_rimborso':
           return { tit: 'Cancellazione tardiva', sub: 'Lezione non restituita · ' + nota.replace(' del ', ' · ') };
+        case '_scadute':
+          return { tit: Math.abs(m.variazione) === 1 ? 'Lezione scaduta' : `${Math.abs(m.variazione)} lezioni scadute`, sub: 'Non usate · ' + nota };
         case 'modifica_manuale_admin':
           return { tit: m.variazione > 0 ? 'Lezioni aggiunte dalla scuola' : 'Lezioni tolte dalla scuola', sub: nota };
         default:
@@ -2423,7 +2430,16 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
       let movimenti = '', meseCorr = '';
       const vistaScuola = nome !== null; // lo storico aperto dal pannello della scuola
       const restituite = new Map((h.data || []).filter(m => m.rif_id).map(m => [m.rif_id, m]));
-      for (const m of (h.data || [])) {
+      // Saldo progressivo (nel pannello della scuola): lezioni disponibili dopo ogni movimento,
+      // contando anche le lezioni scadute senza essere usate
+      const righe = [...(h.data || [])];
+      if (vistaScuola) {
+        for (const g of scaduti) righe.push({ tipo_movimento: '_scadute', variazione: -g.lezioni_rimanenti, note: 'Valide fino al ' + dataIT(g.data_scadenza), created_at: g.data_scadenza + 'T23:59:59' });
+        righe.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        let saldo = 0;
+        for (let i = righe.length - 1; i >= 0; i--) { saldo += righe[i].variazione || 0; righe[i]._saldo = saldo; }
+      }
+      for (const m of righe) {
         const d = new Date(m.created_at);
         const mese = cap(d.toLocaleDateString('it-IT', { timeZone: TZ, month: 'long', year: 'numeric' }));
         if (mese !== meseCorr) { movimenti += `<div class="mese">${mese}</div>`; meseCorr = mese; }
@@ -2435,7 +2451,7 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
         const extra = daRestituire ? `<button type="button" class="mov-rest" data-aact="restituisci" data-hid="${m.id}" data-uid="${uid}">Restituisci la lezione</button>` : '';
         movimenti += `<div class="mov ${daRestituire ? 'tardiva' : ''}"><div class="mov-ico ${cls}">${segno}</div>
           <div class="mov-main"><div class="mov-tit">${esc(x.tit)}</div>${x.sub ? `<div class="mov-sub">${esc(x.sub)}</div>` : ''}${extra}</div>
-          <div class="mov-data">${d.toLocaleDateString('it-IT', { timeZone: TZ, day: 'numeric', month: 'short' })}</div></div>`;
+          <div class="mov-data"><span class="mov-dt">${d.toLocaleDateString('it-IT', { timeZone: TZ, day: 'numeric', month: 'short' })}</span>${m._saldo !== undefined ? `<div class="mov-saldo" title="Saldo lezioni">${m._saldo}</div>` : ''}</div></div>`;
       }
       if (!movimenti) movimenti = '<p class="muted">Ancora nessun movimento.</p>';
 
