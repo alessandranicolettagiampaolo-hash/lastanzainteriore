@@ -1401,11 +1401,21 @@
       const oggi = oggiISO();
       // Si mostrano solo gli slot ancora validi e con lezioni da usare: quelli scaduti o esauriti spariscono da soli
       const gruppi = A.packages.filter(k => k.user_id === uid && k.lezioni_rimanenti > 0 && (!k.data_scadenza || k.data_scadenza >= oggi)).slice().reverse();
-      const righe = gruppi.map(k => `<div class="pkg">
+      const righe = gruppi.map(k => `<div class="pkg-wrap"><div class="pkg">
           <div><b>${k.lezioni_rimanenti}</b> su ${k.lezioni_totali} rimaste
-            <div class="row-sub">${k.data_scadenza ? 'valide fino al ' + dataIT(k.data_scadenza) : 'senza scadenza'} · assegnate il ${new Date(k.created_at).toLocaleDateString('it-IT')}</div></div>
+            <div class="row-sub">${k.data_scadenza ? 'valide fino al ' + dataIT(k.data_scadenza) : 'senza scadenza'} · assegnate il ${new Date(k.created_at).toLocaleDateString('it-IT')}</div>
+            <button type="button" class="btn-link" style="padding:4px 0 0;font-size:12.5px" data-aact="scad" data-pkg="${k.id}">Cambia scadenza</button></div>
           <div class="pm"><button data-aact="adj" data-pkg="${k.id}" data-d="-1" aria-label="Togli una lezione">−</button><button data-aact="adj" data-pkg="${k.id}" data-d="1" aria-label="Aggiungi una lezione">+</button></div>
-        </div>`).join('') || '<p class="muted">Nessuna lezione da usare al momento.</p>';
+        </div>
+        <form class="box hidden" data-scadform="${k.id}" data-uid="${uid}" style="margin:0 0 8px">
+          <p class="lab">Nuova scadenza</p>
+          <input class="inp scD" type="date" min="${oggi}" value="${k.data_scadenza || ''}" ${k.data_scadenza ? '' : 'disabled'}>
+          <label class="check"><input type="checkbox" class="scOpen" ${k.data_scadenza ? '' : 'checked'}> Senza scadenza (abbonamento open)</label>
+          <div class="two" style="margin-top:10px">
+            <button class="btn btn-soft" type="button" data-aact="scadAnnulla" data-pkg="${k.id}">Annulla</button>
+            <button class="btn btn-primary" type="submit">Salva</button>
+          </div>
+        </form></div>`).join('') || '<p class="muted">Nessuna lezione da usare al momento.</p>';
 
       openSheetHtml(`
         <div id="datiView" class="dati-head">
@@ -1458,6 +1468,11 @@
       `);
       $('asOpen').addEventListener('change', e => { $('asD').disabled = e.target.checked; if (e.target.checked) $('asD').value = ''; });
       $('assignForm').addEventListener('submit', aAssign);
+      document.querySelectorAll('[data-scadform]').forEach(f => {
+        const chk = f.querySelector('.scOpen'), inp = f.querySelector('.scD');
+        chk.addEventListener('change', () => { inp.disabled = chk.checked; if (chk.checked) inp.value = ''; });
+        f.addEventListener('submit', aSetScadenza);
+      });
       const apriDati = (aperto) => { $('datiForm').classList.toggle('hidden', !aperto); $('datiView').classList.toggle('hidden', aperto); if (aperto) $('edNome').focus(); };
       $('datiEdit').addEventListener('click', () => apriDati(true));
       $('datiAnnulla').addEventListener('click', () => apriDati(false));
@@ -1481,6 +1496,21 @@
         toast(msg, ok ? 'ok' : 'err');
         if (ok) { await aLoadStudents(); aOpenStudent(uid); }
       });
+    }
+
+    async function aSetScadenza(e) {
+      e.preventDefault();
+      const f = e.target, pkg = f.dataset.scadform, uid = f.dataset.uid;
+      const open = f.querySelector('.scOpen').checked;
+      const d = f.querySelector('.scD').value || null;
+      if (!open && !d) return toast('Scegli una data di scadenza oppure spunta “Senza scadenza”.', 'err');
+      const btn = f.querySelector('button[type=submit]');
+      btn.disabled = true;
+      const { data, error } = await sb.rpc('admin_set_expiry', { p_package_id: pkg, p_scadenza: open ? null : d });
+      btn.disabled = false;
+      if (error || !data) return toast('Qualcosa non ha funzionato. Riprova.', 'err');
+      toast(data.message, data.success ? 'ok' : 'err');
+      if (data.success) { await aLoadStudents(); aOpenStudent(uid); }
     }
 
     async function aAssign(e) {
@@ -2087,6 +2117,11 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
       const act = b.dataset.aact;
       if (act === 'close') return closeSheet();
       if (act === 'editLesson') return aEditLesson(b.dataset.lid);
+      if (act === 'scad' || act === 'scadAnnulla') {
+        const f = document.querySelector(`[data-scadform="${b.dataset.pkg}"]`);
+        if (f) f.classList.toggle('hidden', act === 'scadAnnulla');
+        return;
+      }
       if (act === 'storico') return openStorico(b.dataset.uid, A.byId[b.dataset.uid]?.nome || '');
       if (act === 'backLesson') return aOpenLesson(b.dataset.lid);
       if (act === 'copy') {
