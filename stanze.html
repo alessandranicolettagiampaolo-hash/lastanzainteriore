@@ -61,14 +61,14 @@
         .card { transition: .4s cubic-bezier(0.16, 1, 0.3, 1); }
         .card:hover { transform: translateY(-6px); }
 
-        .music-btn.active, .duration-btn.active {
+        .music-btn.active, .duration-btn.active, .breath-tech-btn.active {
             background: #c0909b !important;
             color: white !important;
             border-color: #c0909b !important;
             box-shadow: 0 8px 20px rgba(192, 144, 155, 0.3);
         }
 
-        body.dark .music-btn.active, body.dark .duration-btn.active {
+        body.dark .music-btn.active, body.dark .duration-btn.active, body.dark .breath-tech-btn.active {
             background: #d4a3ae !important;
             color: #1d1721 !important;
             border-color: #d4a3ae !important;
@@ -142,6 +142,16 @@
         @keyframes breatheAnimation {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.4); }
+        }
+
+        .bubble-breathing-2 {
+            animation: breatheDouble 12s infinite;
+        }
+
+        @keyframes breatheDouble {
+            0% { transform: scale(1); animation-timing-function: ease-in-out; }
+            33.333% { transform: scale(1.4); animation-timing-function: ease-in-out; }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -343,6 +353,10 @@
                 <div class="max-w-xl mx-auto">
                     <p class="uppercase tracking-[0.25em] text-[10px] opacity-50 mb-1">IL RESPIRO CONSAPEVOLE</p>
                     <h3 class="serif text-2xl sm:text-3xl text-[#9b7280] mb-3">L'Essenza del Respiro</h3>
+                    <div class="flex justify-center gap-3 flex-wrap mb-4">
+                        <button class="breath-tech-btn active px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-tech="1">Equilibrato 4-4</button>
+                        <button class="breath-tech-btn glass px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm" data-tech="2">Respiro rilassante 4-8</button>
+                    </div>
                     <p id="breathInstruction" class="text-xs sm:text-sm opacity-85 font-light leading-relaxed px-2">
                         In questo spazio puoi coltivare la purezza e l'essenza del tuo respiro. 3 minuti da dedicarti intensamente per fare ritorno a te stesso: sincronizza il ritmo del tuo respiro inspirando per 4 secondi mentre la bolla si espande, ed espirando per 4 secondi mentre la bolla si riduce.
                     </p>
@@ -544,6 +558,17 @@
 
         let breathBubbleTimer;
         let breathTimeLeft = 180; 
+        let breathTech = 1;
+        const BREATH_TECH = {
+            1: {
+                anim: 'bubble-breathing', cycle: 8000, inhale: 4000,
+                text: "In questo spazio puoi coltivare la purezza e l'essenza del tuo respiro. 3 minuti da dedicarti intensamente per fare ritorno a te stesso: sincronizza il ritmo del tuo respiro inspirando per 4 secondi mentre la bolla si espande, ed espirando per 4 secondi mentre la bolla si riduce."
+            },
+            2: {
+                anim: 'bubble-breathing-2', cycle: 12000, inhale: 4000,
+                text: "In questo spazio puoi allungare l'espiro per favorire calma e rilassamento. 3 minuti da dedicarti: inspira per 4 secondi mentre la bolla si espande, poi espira lentamente per 8 secondi, il doppio, mentre la bolla si riduce."
+            }
+        };
         let breathRunning = false;
         let breathCycleTimer = null; 
         let bubbleMusic, startBreathBtn, breathCountdown, breathPhase, fullScreenBreathBubble, muteBubbleMusicBtn;
@@ -649,8 +674,9 @@
             let startTime = Date.now();
             
             function updateText() {
-                let elapsed = (Date.now() - startTime) % 8000;
-                if (elapsed < 4000) {
+                const t = BREATH_TECH[breathTech];
+                let elapsed = (Date.now() - startTime) % t.cycle;
+                if (elapsed < t.inhale) {
                     breathPhase.innerHTML = "Inspira";
                 } else {
                     breathPhase.innerHTML = "Espira";
@@ -729,6 +755,24 @@
                 }
             };
 
+            document.querySelectorAll('.breath-tech-btn').forEach(btn => {
+                btn.onclick = () => {
+                    if (breathRunning) return;
+                    breathTech = parseInt(btn.dataset.tech, 10);
+                    document.querySelectorAll('.breath-tech-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.add('glass');
+                    });
+                    btn.classList.add('active');
+                    btn.classList.remove('glass');
+                    document.getElementById('breathInstruction').innerHTML = BREATH_TECH[breathTech].text;
+                    breathTimeLeft = 180;
+                    breathCountdown.innerHTML = "03:00";
+                    breathPhase.innerHTML = "Pronto";
+                    startBreathBtn.innerHTML = "Inizia Sessione";
+                };
+            });
+
             startBreathBtn.onclick = () => {
                 if (breathRunning) {
                     clearInterval(breathBubbleTimer);
@@ -736,7 +780,7 @@
                     breathRunning = false;
                     bubbleMusic.pause();
                     startBreathBtn.innerHTML = "Riprendi";
-                    fullScreenBreathBubble.classList.remove('bubble-breathing');
+                    fullScreenBreathBubble.classList.remove('bubble-breathing', 'bubble-breathing-2');
                     breathPhase.innerHTML = "In Pausa";
                     return;
                 }
@@ -744,9 +788,9 @@
                 if (introAudio) introAudio.pause();
 
                 breathRunning = true;
-                gtag('event', 'allenamento_respiro_avviato');
+                gtag('event', 'allenamento_respiro_avviato', { tecnica: breathTech === 2 ? 'respiro_rilassante_4_8' : 'equilibrato_4_4' });
                 startBreathBtn.innerHTML = "Pausa";
-                fullScreenBreathBubble.classList.add('bubble-breathing');
+                fullScreenBreathBubble.classList.add(BREATH_TECH[breathTech].anim);
                 startBreathTextSync();
                 bubbleMusic.play().catch(() => {});
 
@@ -761,7 +805,7 @@
                         if (breathCycleTimer) clearInterval(breathCycleTimer);
                         breathRunning = false;
                         bubbleMusic.pause();
-                        fullScreenBreathBubble.classList.remove('bubble-breathing');
+                        fullScreenBreathBubble.classList.remove('bubble-breathing', 'bubble-breathing-2');
                         if (gong) gong.play().catch(() => {});
                         gtag('event', 'allenamento_respiro_completato');
                         startBreathBtn.innerHTML = "Inizia Sessione";
@@ -915,7 +959,7 @@
                 breathRunning = false;
                 bubbleMusic.pause();
                 startBreathBtn.innerHTML = "Inizia Sessione";
-                fullScreenBreathBubble.classList.remove('bubble-breathing');
+                fullScreenBreathBubble.classList.remove('bubble-breathing', 'bubble-breathing-2');
                 breathPhase.innerHTML = "Pronto";
                 breathTimeLeft = 180;
                 breathCountdown.innerHTML = "03:00";
