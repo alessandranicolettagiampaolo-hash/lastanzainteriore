@@ -732,6 +732,8 @@
       { k: ['meditazione'],               bg: '#b7d3d8', fg: '#325861' },  // Meditazione: azzurro polvere
       { k: ['mbsr', 'crescere consapevoli'], bg: '#cfe8e0', fg: '#2f6656' }, // MBSR / Crescere Consapevoli: verde acqua
     ];
+    // Eventi gratuiti (senza lezione scalata) che non hanno un colore fisso: fucsia
+    const COLORE_EVENTO = { bg: '#f6bfdc', fg: '#842158' };
     // Divisione in sillabe per i nomi lunghi nella vista settimana (va a capo con il trattino solo se serve)
     const SILLABE = { meditazione: 'Medita-zione', sofrologia: 'Sofro-logia', mindfulness: 'Mindful-ness', respirazione: 'Respira-zione', rilassamento: 'Rilassa-mento', consapevolezza: 'Consape-volezza', consapevoli: 'Consape-voli' };
     function sillabe(titolo) {
@@ -742,10 +744,11 @@
         return w.slice(0, a.length) + '&shy;' + w.slice(a.length);
       }).join('');
     }
-    function colorFor(title) {
+    function colorFor(title, libero) {
       const t = (title || '').toLowerCase();
       const fisso = COLORI_LEZIONI.find(c => c.k.some(k => t.includes(k)));
       if (fisso) return fisso;
+      if (libero) return COLORE_EVENTO;
       let h = 0;
       for (const ch of (title || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
       return PALETTE[h % PALETTE.length];
@@ -981,7 +984,7 @@
         celle += `<div class="mcell ${x.getMonth() !== primo.getMonth() ? 'fuori' : ''} ${k === oggi ? 'today' : ''}" data-goto="${k}">
           <span class="mnum">${x.getDate()}</span>
           ${vis.map(l => {
-            const st = statoLezione(l); const c = colorFor(l.titolo);
+            const st = statoLezione(l); const c = colorFor(l.titolo, l.consuma_lezione === false);
             const mia = st.prenotata && !st.annullata;
             return `<button type="button" class="mlez ${st.annullata ? 'annullata' : ''} ${mia ? 'mia' : ''} ${st.passata ? 'passata' : ''}" data-id="${l.id}" style="background:${c.bg};color:${c.fg}">${mia ? '<i class="mloto"></i>' : ''}<b>${fmtOra.format(new Date(l.data_ora_inizio))}</b><span> ${esc(l.titolo)}</span></button>`;
           }).join('')}
@@ -1071,7 +1074,7 @@
 
     function cardLezione(l) {
       const s = statoLezione(l);
-      const c = colorFor(l.titolo);
+      const c = colorFor(l.titolo, l.consuma_lezione === false);
       let stato = '';
       if (s.annullata) stato = 'Annullata';
       else if (s.prenotata) stato = 'Prenotata';
@@ -1693,7 +1696,7 @@
         h += giorni.map(d => {
           const k = isoLocal(d);
           const les = A.lessons.filter(l => dayKey(new Date(l.data_ora_inizio)) === k && oraDi(l) === ora);
-          return `<div class="wcell">${les.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="wlez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}">
+          return `<div class="wcell">${les.map(l => { const c = colorFor(l.titolo, l.consuma_lezione === false); return `<button type="button" class="wlez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}">
             <span class="wl-ora">${ora}</span>
             <span class="wl-tit">${sillabe(l.titolo)}</span>
             <span class="wl-posti">${postiTxt(l)} ${badgeAttesa(l.id, 11)}</span></button>`; }).join('')}</div>`;
@@ -1713,7 +1716,7 @@
         const vis = les.slice(0, 3);
         celle += `<div class="mcell ${x.getMonth() !== mese ? 'fuori' : ''} ${k === oggi ? 'today' : ''}" data-goto="${k}">
           <span class="mnum">${x.getDate()}</span>
-          ${vis.map(l => { const c = colorFor(l.titolo); return `<button type="button" class="mlez ${l.annullata ? 'annullata' : ''} ${A.waitlist.some(w => w.lesson_id === l.id) ? 'con-attesa' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}"><b>${fmtOra.format(new Date(l.data_ora_inizio))}</b><span> ${esc(l.titolo)}</span></button>`; }).join('')}
+          ${vis.map(l => { const c = colorFor(l.titolo, l.consuma_lezione === false); return `<button type="button" class="mlez ${l.annullata ? 'annullata' : ''} ${A.waitlist.some(w => w.lesson_id === l.id) ? 'con-attesa' : ''}" data-lid="${l.id}" style="background:${c.bg};color:${c.fg}"><b>${fmtOra.format(new Date(l.data_ora_inizio))}</b><span> ${esc(l.titolo)}</span></button>`; }).join('')}
           ${les.length > 3 ? `<span class="mpiu">+${les.length - 3}</span>` : ''}
         </div>`;
       }
@@ -1759,7 +1762,7 @@
       $('aDayList').innerHTML = A.lessons.map(l => {
         const iscritti = A.bookings.filter(b => b.lesson_id === l.id);
         const attesa = A.waitlist.filter(w => w.lesson_id === l.id).length;
-        const c = colorFor(l.titolo);
+        const c = colorFor(l.titolo, l.consuma_lezione === false);
         const inizio = new Date(l.data_ora_inizio), fine = new Date(l.data_ora_fine);
         const nomi = iscritti.map(b => { const p = A.byId[b.user_id]; return esc(nomeCompleto(p)) + (p && p.nickname ? ` (${esc(p.nickname)})` : ''); }).join(', ');
         return `<button class="alez ${l.annullata ? 'annullata' : ''}" data-lid="${l.id}" style="border-left-color:${c.fg}">
