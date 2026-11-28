@@ -46,7 +46,7 @@ self.addEventListener('push', event => {
     self.registration.showNotification(d.title || 'La Stanza Interiore', {
       body: d.body || '',
       icon: 'icona.png',
-      badge: 'icona.png',
+      badge: 'badge.png',   // iconcina della barra in alto: sagoma bianca su trasparente
       tag: d.tag || 'stanza-interiore',
       data: { url: d.url || './' },
     })

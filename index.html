@@ -2507,10 +2507,10 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
       if (sub) { salvaIscrizione(sub); return; } // già attivi: aggiorno in silenzio, nessun riquadro
       card.dataset.azione = 'attiva';
       mostraPushCard('Attiva notifiche', 'Ti avviso sul telefono prima di ogni lezione o evento', false);
-      // Chi ha già l'app sulla schermata Home: la prima volta che la apre gliela chiediamo con una schermata
+      // La prima volta che l'allievo apre l'app su questo telefono, gliela chiediamo con una schermata
       let chiesto = false;
       try { chiesto = localStorage.getItem('pushChiesto') === '1'; } catch {}
-      if (isInstalled() && Notification.permission === 'default' && !chiesto) setTimeout(chiediNotifiche, 700);
+      if (Notification.permission === 'default' && !chiesto) setTimeout(chiediNotifiche, 700);
     }
     function chiediNotifiche() {
       if ($('scr-app').classList.contains('hidden') || !$('overlay').classList.contains('hidden')) return;
