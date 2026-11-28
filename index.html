@@ -157,6 +157,8 @@
     .regol-card .t { font-size: 20px; font-weight: 500; color: var(--malva); line-height: 1.1; }
     .regol-card .s { font-size: 12px; opacity: .7; margin-top: 2px; }
     .regol-card .vai { margin-left: auto; opacity: .5; }
+    .push-card .ico { background: rgba(94,154,115,.16); color: var(--verde); }
+    .push-card.off .ico { background: rgba(192,144,155,.18); color: var(--rosa-scuro); }
     .regol h5 { margin: 18px 0 6px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa-scuro); font-weight: 600; }
     .regol h5:first-of-type { margin-top: 6px; }
     .regol p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.6; }
@@ -589,6 +591,12 @@
         <div id="mineList"></div>
       </div>
 
+      <button type="button" id="pushCard" class="regol-card push-card glass hidden">
+        <span class="ico"><i class="fa-solid fa-bell"></i></span>
+        <span><span class="t serif" style="display:block" id="pushTit">Attiva notifiche</span><span class="s" id="pushSub">Ti avviso sul telefono prima di ogni lezione o evento</span></span>
+        <span class="vai"><i class="fa-solid fa-chevron-right"></i></span>
+      </button>
+
       <button type="button" class="regol-card glass" id="regolBtn">
         <span class="ico"><i class="fa-solid fa-scroll"></i></span>
         <span><span class="t serif" style="display:block">Regolamento</span><span class="s">Abbonamenti e lezione di prova</span></span>
@@ -912,6 +920,7 @@
     });
 
     $('logoutBtn').addEventListener('click', async () => {
+      await togliPushQuestoTelefono();
       await sb.auth.signOut();
     });
 
@@ -942,6 +951,7 @@
       $('helloName').textContent = `Ciao, ${profile.nome || ''}`.trim();
       show('scr-app');
       refreshInstallCard();
+      aggiornaPush();
       await refreshAll(true);
     }
 
@@ -2455,6 +2465,106 @@ ${liberi !== null && liberi <= 0 ? '<p class="row-sub" style="margin:0 2px 8px">
       });
     }
     $('installCard').addEventListener('click', () => openInstall(false));
+
+
+    // =====================================================================
+    // PROMEMORIA SUL TELEFONO (notifiche push, 2 ore e 15 minuti prima della lezione)
+    // =====================================================================
+    const VAPID_PUBLIC = 'BFMbJP9yUkP8XiKr9IaKcwwyNArLLdICV_xSKcZcVh9mxrF4QcVjM3nt6d6otWWXjjrXHCM3AC_uBD_fX0vjvqA';
+    const pushSupportato = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    function chiaveVapid(b64) {
+      const pad = '='.repeat((4 - b64.length % 4) % 4);
+      const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+      return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+    }
+    async function iscrizioneAttuale() {
+      try { const reg = await navigator.serviceWorker.ready; return await reg.pushManager.getSubscription(); } catch { return null; }
+    }
+    async function salvaIscrizione(sub) {
+      const j = sub.toJSON();
+      const { data, error } = await sb.rpc('save_push_subscription', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+      return !error && data && data.success;
+    }
+    function mostraPushCard(tit, sub, attivo) {
+      $('pushTit').textContent = tit; $('pushSub').textContent = sub;
+      $('pushCard').classList.toggle('off', !attivo);
+      $('pushCard').classList.remove('hidden');
+    }
+    async function aggiornaPush() {
+      const card = $('pushCard');
+      card.classList.add('hidden');
+      if (!pushSupportato()) {
+        // su iPhone le notifiche funzionano solo con l'app aggiunta alla schermata Home
+        if (isIOS && !isInstalled()) { card.dataset.azione = 'installa'; mostraPushCard('Ricevi i promemoria', 'Aggiungi prima l\'app alla schermata Home', false); }
+        return;
+      }
+      if (Notification.permission === 'denied') {
+        card.dataset.azione = 'bloccate';
+        mostraPushCard('Promemoria bloccati', 'Tocca qui per sapere come riattivarli', false);
+        return;
+      }
+      const sub = Notification.permission === 'granted' ? await iscrizioneAttuale() : null;
+      if (sub) { salvaIscrizione(sub); return; } // già attivi: aggiorno in silenzio, nessun riquadro
+      card.dataset.azione = 'attiva';
+      mostraPushCard('Attiva notifiche', 'Ti avviso sul telefono prima di ogni lezione o evento', false);
+      // Chi ha già l'app sulla schermata Home: la prima volta che la apre gliela chiediamo con una schermata
+      let chiesto = false;
+      try { chiesto = localStorage.getItem('pushChiesto') === '1'; } catch {}
+      if (isInstalled() && Notification.permission === 'default' && !chiesto) setTimeout(chiediNotifiche, 700);
+    }
+    function chiediNotifiche() {
+      if ($('scr-app').classList.contains('hidden') || !$('overlay').classList.contains('hidden')) return;
+      try { localStorage.setItem('pushChiesto', '1'); } catch {}
+      openSheetHtml(`<div style="text-align:center;margin-top:4px"><span style="display:inline-flex;width:64px;height:64px;border-radius:50%;background:rgba(94,154,115,.16);color:var(--verde);align-items:center;justify-content:center;font-size:28px"><i class="fa-solid fa-bell"></i></span></div>
+        <h4 class="serif" style="text-align:center;margin-top:10px">Vuoi ricevere i promemoria sulle lezioni?</h4>
+        <p class="info" style="margin-top:10px;text-align:center">Ti mando una notifica sul telefono <b>2 ore e 15 minuti prima</b> di ogni lezione o evento a cui sei iscritto/a.
+        Così, se non puoi venire, hai ancora un quarto d'ora per cancellare e riavere la lezione.</p>
+        <button class="btn btn-primary" id="pushSi" style="margin-top:6px">Attiva notifiche</button>
+        <button class="btn-link" data-aact="close" style="display:block;margin:10px auto 0">Più tardi</button>
+        <p class="nota-regola">Puoi attivarle quando vuoi dal pulsante “Attiva notifiche” nella tua Area Allievi.</p>`);
+      $('pushSi').addEventListener('click', () => { closeSheet(); attivaPush(); });
+    }
+    async function attivaPush() {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') { aggiornaPush(); return toast('Senza il permesso alle notifiche non posso mandarti i promemoria. Puoi attivarle quando vuoi.', 'err'); }
+      $('pushTit').textContent = 'Un momento…';
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chiaveVapid(VAPID_PUBLIC) });
+        if (!(await salvaIscrizione(sub))) throw new Error('salvataggio');
+        $('pushCard').classList.add('hidden');
+        toast('Notifiche attive: ti avviso 2 ore e 15 minuti prima di ogni lezione o evento.');
+        sb.functions.invoke('invia-promemoria', { body: { prova: true } }).catch(() => {});
+      } catch (e) {
+        aggiornaPush();
+        toast('Non è stato possibile attivare i promemoria. Riprova tra poco.', 'err');
+      }
+    }
+    async function togliPushQuestoTelefono() {
+      if (!pushSupportato()) return;
+      try {
+        const sub = await iscrizioneAttuale();
+        if (!sub) return;
+        await sb.rpc('remove_push_subscription', { p_endpoint: sub.endpoint });
+        await sub.unsubscribe();
+      } catch {}
+    }
+    $('pushCard').addEventListener('click', () => {
+      const a = $('pushCard').dataset.azione;
+      if (a === 'installa') return openInstall(false);
+      if (a === 'bloccate') {
+        return openSheetHtml(`<h4 class="serif">Riattivare i promemoria</h4>
+          <p class="info" style="margin-top:10px">Le notifiche per La Stanza Interiore sono state bloccate su questo telefono. Per riattivarle:</p>
+          <ol class="steps">
+            ${isIOS ? '<li><span>Apri <b>Impostazioni</b> → <b>Notifiche</b>, cerca <b>La Stanza Interiore</b> e attiva <b>Consenti notifiche</b>.</span></li>'
+                    : '<li><span>Tieni premuta l\'icona dell\'app, tocca <b>Info app</b> → <b>Notifiche</b> e attivale. Se usi il sito in Chrome: lucchetto accanto all\'indirizzo → <b>Notifiche</b> → <b>Consenti</b>.</span></li>'}
+            <li><span>Torna qui e riapri l'app.</span></li>
+          </ol>
+          <button class="btn-link" data-aact="close" style="display:block;margin:12px auto 0">Chiudi</button>`);
+      }
+      attivaPush();
+    });
 
     // =====================================================================
     // STORICO DELLE LEZIONI (per l'allievo, e per te dalla sua scheda)

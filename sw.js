@@ -37,3 +37,32 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+// ===== Promemoria delle lezioni (notifiche push) =====
+self.addEventListener('push', event => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data && event.data.text() }; }
+  event.waitUntil(
+    self.registration.showNotification(d.title || 'La Stanza Interiore', {
+      body: d.body || '',
+      icon: 'icona.png',
+      badge: 'icona.png',
+      tag: d.tag || 'stanza-interiore',
+      data: { url: d.url || './' },
+    })
+  );
+});
+
+// Toccando la notifica si apre l'app (o si torna alla finestra già aperta)
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || './';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) {
+        if ('focus' in c) { c.navigate(url).catch(() => {}); return c.focus(); }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
